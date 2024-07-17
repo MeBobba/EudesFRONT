@@ -11,6 +11,7 @@ module.exports = {
         util: require.resolve('util'),
         assert: require.resolve('assert'),
         buffer: require.resolve('buffer'),
+        vm: require.resolve('vm-browserify'), // Ajout du polyfill pour 'vm'
       },
     },
     plugins: [

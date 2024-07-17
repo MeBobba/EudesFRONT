@@ -40,13 +40,27 @@ export default {
             this.isDarkMode = !this.isDarkMode;
             document.documentElement.classList.toggle('dark', this.isDarkMode);
         },
-        logout() {
-            localStorage.removeItem('token');
-            this.$router.push('/login');
+        async logout() {
+            try {
+                const token = localStorage.getItem('token');
+                await fetch('http://localhost:3000/logout', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-access-token': token
+                    }
+                });
+                localStorage.removeItem('token');
+                this.$router.push('/login');
+            } catch (error) {
+                console.error('Logout error:', error);
+                // Handle error (show message, etc.)
+            }
         }
     }
 }
 </script>
+
 
 <style scoped>
 /* Ajoutez des styles personnalisés ici si nécessaire */

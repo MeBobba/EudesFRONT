@@ -24,6 +24,7 @@
     "register-service-worker": "^1.7.2",
     "stream-browserify": "^3.0.0",
     "util": "^0.12.5",
+    "vm-browserify": "^1.1.2",
     "vue": "^3.2.13",
     "vue-router": "^4.4.0"
   },
