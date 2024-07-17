@@ -1,0 +1,45 @@
+import { createRouter, createWebHistory } from 'vue-router';
+import UserLogin from '../views/UserLogin.vue';
+import UserRegister from '../views/UserRegister.vue';
+import UserDashboard from '../views/UserDashboard.vue';
+import AppError404 from '../views/AppError404.vue';
+import AppError500 from '../views/AppError500.vue';
+import AppError from '../views/AppError.vue';
+
+const routes = [
+    { path: '/', redirect: '/login' },
+    { path: '/login', component: UserLogin, meta: { guest: true } },
+    { path: '/register', component: UserRegister, meta: { guest: true } },
+    { path: '/dashboard', component: UserDashboard, meta: { requiresAuth: true } },
+    { path: '/404', component: AppError404 },
+    { path: '/500', component: AppError500 },
+    { path: '/error/:statusCode/:message', component: AppError, props: true },
+    { path: '/:catchAll(.*)', redirect: '/404' }
+];
+
+const router = createRouter({
+    history: createWebHistory(),
+    routes
+});
+
+router.beforeEach((to, from, next) => {
+    const isAuthenticated = !!localStorage.getItem('token');
+
+    if (to.matched.some(record => record.meta.requiresAuth)) {
+        if (!isAuthenticated) {
+            next('/login');
+        } else {
+            next();
+        }
+    } else if (to.matched.some(record => record.meta.guest)) {
+        if (isAuthenticated) {
+            next('/dashboard');
+        } else {
+            next();
+        }
+    } else {
+        next();
+    }
+});
+
+export default router;
