@@ -245,23 +245,22 @@ export default {
         async enable2FA() {
             try {
                 const token = localStorage.getItem('token');
-                const response = await axios.post(`${process.env.VUE_APP_API_URL || 'http://localhost:3000'}/enable-2fa`, {}, {
+                const { data } = await axios.post(`${process.env.VUE_APP_API_URL || 'http://localhost:3000'}/enable-2fa`, {}, {
                     headers: {
                         'x-access-token': token
                     }
                 });
-                this.qrCodeURL = response.data.dataURL;
-                this.secret = response.data.secret; // Store the secret for later use
+                this.qrCodeURL = data.dataURL;
+                this.secret = data.secret; // Store the secret for later use
             } catch (error) {
                 console.error('Error enabling 2FA:', error);
                 alert('Failed to enable 2FA');
             }
         },
-
         async verify2FA() {
             try {
                 const token = localStorage.getItem('token');
-                const response = await axios.post(`${process.env.VUE_APP_API_URL || 'http://localhost:3000'}/verify-2fa`, { token: this.verificationToken }, {
+                await axios.post(`${process.env.VUE_APP_API_URL || 'http://localhost:3000'}/verify-2fa`, { token: this.verificationToken }, {
                     headers: {
                         'x-access-token': token
                     }
