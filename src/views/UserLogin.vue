@@ -11,8 +11,7 @@
                         <input v-model="password" type="password" placeholder="Password" required
                             class="w-full p-3 border border-gray-300 rounded focus:outline-none focus:border-green-300">
                         <button type="submit"
-                            class="w-full bg-green-500 text-white p-3 rounded hover:bg-green-600">Login
-                        </button>
+                            class="w-full bg-green-500 text-white p-3 rounded hover:bg-green-600">Login</button>
                         <div class="mt-6 text-center">
                             <p class="text-gray-600">Don't have an account?</p>
                             <router-link to="/register" class="text-blue-500 hover:underline">Register</router-link>
@@ -25,9 +24,7 @@
                     <img src="@/assets/images/logreg/filler_ad.png" alt="Login Image"
                         class="w-full h-full object-cover md:rounded-r-lg cursor-pointer" @click="handlePwaButtonClick">
                     <div class="absolute inset-0 flex items-center justify-center">
-                        <!-- Place a transparent overlay to capture click events -->
                         <div class="absolute inset-0 bg-transparent"></div>
-                        <!-- Content placed over the image for accessibility -->
                         <div class="absolute inset-0 flex items-center justify-center">
                             <div class="text-center">
                                 <button :disabled="isPwaInstalled()" @click="handlePwaButtonClick"
@@ -45,7 +42,7 @@
 
 <script>
 import axios from 'axios';
-
+import crypto from 'crypto-browserify';
 import backgroundImage from '@/assets/images/skeleton/bg.png'; // Replace with the actual image file
 
 export default {
@@ -67,27 +64,28 @@ export default {
     methods: {
         async login() {
             try {
+                const machineId = crypto.createHash('sha256').update(navigator.userAgent + Date.now().toString()).digest('hex');
                 const response = await axios.post('http://localhost:3000/login', {
                     username: this.username,
-                    password: this.password
+                    password: this.password,
+                    machine_id: machineId
                 });
 
                 localStorage.setItem('token', response.data.token);
                 this.$router.push('/dashboard');
             } catch (error) {
-                this.errorMessage = error.response ? error.response.data : 'Login failed';
+                if (error.response && error.response.status === 403 && error.response.data === 'User is banned') {
+                    this.errorMessage = 'Your account has been banned.';
+                } else {
+                    this.errorMessage = error.response ? error.response.data : 'Login failed';
+                }
             }
         },
         handlePwaButtonClick() {
             if (window.matchMedia('(display-mode: standalone)').matches) {
-                // PWA already installed and running in standalone mode
                 console.log('PWA is already installed.');
-                // Optionally, add logic to open specific PWA route if needed
             } else {
-                // PWA not installed, prompt user to install
                 console.log('Prompt user to install the PWA.');
-                // You can add your own logic here to prompt the user to install the PWA
-                // For example, show an install banner or redirect to PWA installation page
             }
         },
         isPwaInstalled() {
@@ -137,14 +135,11 @@ export default {
     opacity: 0.75;
 }
 
-/* Remove pointer events from overlay to allow click through */
 .bg-transparent {
     pointer-events: none;
 }
 
-/* Styling to make the image interactive */
 .w-full.h-full.object-cover.md\:rounded-r-lg {
     cursor: pointer;
-    /* Add pointer cursor to indicate interactivity */
 }
 </style>

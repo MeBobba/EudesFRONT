@@ -13,7 +13,7 @@
                             <div class="flex items-center">
                                 <input v-model="username" @input="checkUsername" type="text" placeholder="Username"
                                     required
-                                    class="w-full p-3 border border-gray-300 rounded focus:outline-none focus:border-red-300">
+                                    class="input-field w-full p-3 border border-gray-300 rounded focus:outline-none focus:border-red-300">
                                 <button type="button" @click="generateUsername"
                                     class="bg-blue-500 text-white p-3 rounded ml-2 hover:bg-blue-600">Generate</button>
                             </div>
@@ -27,12 +27,12 @@
                         </h2>
                         <form class="space-y-4">
                             <input v-model="password" type="password" placeholder="Password" required
-                                class="w-full p-3 border border-gray-300 rounded focus:outline-none focus:border-red-300">
+                                class="input-field w-full p-3 border border-gray-300 rounded focus:outline-none focus:border-red-300">
                             <input v-model="confirmPassword" type="password" placeholder="Confirm Password" required
-                                class="w-full p-3 border border-gray-300 rounded focus:outline-none focus:border-red-300">
+                                class="input-field w-full p-3 border border-gray-300 rounded focus:outline-none focus:border-red-300">
                             <p v-if="passwordError" class="text-red-500 text-sm">{{ passwordError }}</p>
                             <input v-model="mail" @input="checkEmail" type="email" placeholder="Email" required
-                                class="w-full p-3 border border-gray-300 rounded focus:outline-none focus:border-red-300">
+                                class="input-field w-full p-3 border border-gray-300 rounded focus:outline-none focus:border-red-300">
                             <p v-if="emailError" class="text-red-500 text-sm">{{ emailError }}</p>
                             <button type="button" @click="nextStep" :disabled="!canProceedToStep3"
                                 class="w-full bg-red-500 text-white p-3 rounded hover:bg-red-600 disabled:opacity-50">Next</button>
@@ -47,7 +47,7 @@
                             <label class="block">
                                 {{ robotQuestion.question }}
                                 <input v-model="antiRobotAnswer" type="text" placeholder="Answer" required
-                                    class="w-full p-3 border border-gray-300 rounded focus:outline-none focus:border-red-300">
+                                    class="input-field w-full p-3 border border-gray-300 rounded focus:outline-none focus:border-red-300">
                             </label>
                             <button type="submit" :disabled="parseInt(antiRobotAnswer) !== robotQuestion.answer"
                                 class="w-full bg-red-500 text-white p-3 rounded hover:bg-red-600 disabled:opacity-50">Register</button>
@@ -68,6 +68,7 @@
 
 <script>
 import axios from 'axios';
+import crypto from 'crypto-browserify';
 import backgroundImage from '@/assets/images/skeleton/bg.png'; // Replace with the actual image file
 
 export default {
@@ -161,10 +162,12 @@ export default {
         },
         async register() {
             try {
+                const machineId = crypto.createHash('sha256').update(navigator.userAgent + Date.now().toString()).digest('hex');
                 const response = await axios.post('http://localhost:3000/register', {
                     username: this.username,
                     password: this.password,
-                    mail: this.mail
+                    mail: this.mail,
+                    machine_id: machineId
                 });
                 localStorage.setItem('token', response.data.token);
                 this.$router.push('/dashboard');
@@ -228,21 +231,17 @@ export default {
     opacity: 0.75;
 }
 
-/* Ajout des styles pour fixer la hauteur des messages d'erreur et des champs */
-form .text-red-500 {
-    min-height: 1.5rem;
-    /* Fixe une hauteur minimale pour les messages d'erreur */
-}
-
-form input {
+.input-field {
     box-sizing: border-box;
+    height: 2.5rem;
+    padding: 0.5rem;
+    font-size: 1rem;
     transition: none;
     /* Supprime les transitions qui pourraient causer des décalages */
 }
 
-form input,
 form .text-red-500 {
-    height: 2.5rem;
-    /* Assure une hauteur fixe pour les champs de saisie et les messages d'erreur */
+    min-height: 1.5rem;
+    /* Fixe une hauteur minimale pour les messages d'erreur */
 }
 </style>

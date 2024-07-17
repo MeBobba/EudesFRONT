@@ -1,4 +1,3 @@
-<!-- UserDashboard.vue -->
 <template>
     <div class="min-h-screen bg-gray-100">
         <AppHeader :headerImage="headerImage" />
@@ -18,14 +17,14 @@
 
 <script>
 import axios from 'axios';
-import AppHeader from '../components/AppHeader.vue'; // Update import to use new component name
+import AppHeader from '../components/AppHeader.vue';
 import UserCard from '../components/UserCard.vue';
 import ErrorMessage from '../components/ErrorMessage.vue';
 
 export default {
     name: 'UserDashboard',
     components: {
-        AppHeader, // Update component registration
+        AppHeader,
         UserCard,
         ErrorMessage
     },
@@ -39,17 +38,45 @@ export default {
         };
     },
     async created() {
-        try {
-            const token = localStorage.getItem('token');
-            const response = await axios.get('http://localhost:3000/dashboard', {
-                headers: { 'x-access-token': token }
-            });
-            this.user = response.data;
-            this.isLoading = false;
-        } catch (error) {
-            console.error('Failed to fetch user data:', error);
-            this.error = true;
-            this.errorMessage = 'Failed to fetch user data. Please try again later.';
+        await this.fetchUserData();
+        this.checkBanInterval = setInterval(this.checkIfBanned, 5000); // Vérifier toutes les 5 secondes
+    },
+    beforeUnmount() {
+        clearInterval(this.checkBanInterval);
+    },
+    methods: {
+        async fetchUserData() {
+            try {
+                const token = localStorage.getItem('token');
+                const response = await axios.get('http://localhost:3000/dashboard', {
+                    headers: { 'x-access-token': token }
+                });
+                this.user = response.data;
+                this.isLoading = false;
+            } catch (error) {
+                console.error('Failed to fetch user data:', error);
+                this.error = true;
+                this.errorMessage = 'Failed to fetch user data. Please try again later.';
+            }
+        },
+        async checkIfBanned() {
+            try {
+                console.log('Checking if user is banned...');
+                const token = localStorage.getItem('token');
+                await axios.get('http://localhost:3000/check-ban', {
+                    headers: { 'x-access-token': token }
+                });
+                console.log('User is not banned.');
+            } catch (error) {
+                if (error.response && error.response.status === 403) {
+                    // L'utilisateur est banni
+                    console.log('User is banned.');
+                    localStorage.removeItem('token');
+                    this.$router.push('/login');
+                } else {
+                    console.error('Failed to check ban status:', error);
+                }
+            }
         }
     }
 };
