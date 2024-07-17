@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router';
 import UserLogin from '../views/UserLogin.vue';
 import UserRegister from '../views/UserRegister.vue';
 import UserDashboard from '../views/UserDashboard.vue';
+import AppSettings from '../views/AppSettings.vue';
 import AppError404 from '../views/AppError404.vue';
 import AppError500 from '../views/AppError500.vue';
 import AppError from '../views/AppError.vue';
@@ -11,6 +12,7 @@ const routes = [
     { path: '/login', component: UserLogin, meta: { guest: true } },
     { path: '/register', component: UserRegister, meta: { guest: true } },
     { path: '/dashboard', component: UserDashboard, meta: { requiresAuth: true } },
+    { path: '/settings', component: AppSettings, meta: { requiresAuth: true } },
     { path: '/404', component: AppError404 },
     { path: '/500', component: AppError500 },
     { path: '/error/:statusCode/:message', component: AppError, props: true },

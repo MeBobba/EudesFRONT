@@ -9,7 +9,7 @@
                 <div class="w-full md:w-1/2 p-8">
                     <div v-if="step === 1">
                         <h2 class="text-3xl font-bold mb-6 text-center text-gray-800">Step 1: Account Information</h2>
-                        <form class="space-y-4">
+                        <form class="space-y-4" @submit.prevent="nextStep">
                             <div class="flex items-center">
                                 <input v-model="username" @input="checkUsername" type="text" placeholder="Username"
                                     required
@@ -18,14 +18,14 @@
                                     class="bg-blue-500 text-white p-3 rounded ml-2 hover:bg-blue-600">Generate</button>
                             </div>
                             <p v-if="usernameError" class="text-red-500 text-sm">{{ usernameError }}</p>
-                            <button type="button" @click="nextStep" :disabled="!canProceedToStep2"
+                            <button type="submit" :disabled="!canProceedToStep2"
                                 class="w-full bg-red-500 text-white p-3 rounded hover:bg-red-600 disabled:opacity-50">Next</button>
                         </form>
                     </div>
                     <div v-if="step === 2">
                         <h2 class="text-3xl font-bold mb-6 text-center text-gray-800">Step 2: Confidential Information
                         </h2>
-                        <form class="space-y-4">
+                        <form class="space-y-4" @submit.prevent="nextStep">
                             <input v-model="password" type="password" placeholder="Password" required
                                 class="input-field w-full p-3 border border-gray-300 rounded focus:outline-none focus:border-red-300">
                             <input v-model="confirmPassword" type="password" placeholder="Confirm Password" required
@@ -34,7 +34,7 @@
                             <input v-model="mail" @input="checkEmail" type="email" placeholder="Email" required
                                 class="input-field w-full p-3 border border-gray-300 rounded focus:outline-none focus:border-red-300">
                             <p v-if="emailError" class="text-red-500 text-sm">{{ emailError }}</p>
-                            <button type="button" @click="nextStep" :disabled="!canProceedToStep3"
+                            <button type="submit" :disabled="!canProceedToStep3"
                                 class="w-full bg-red-500 text-white p-3 rounded hover:bg-red-600 disabled:opacity-50">Next</button>
                             <button type="button" @click="previousStep"
                                 class="w-full bg-gray-500 text-white p-3 rounded hover:bg-gray-600">Back</button>
@@ -69,7 +69,7 @@
 <script>
 import axios from 'axios';
 import crypto from 'crypto-browserify';
-import backgroundImage from '@/assets/images/skeleton/bg.png'; // Replace with the actual image file
+import backgroundImage from '@/assets/images/skeleton/bg.png';
 
 export default {
     name: 'UserRegister',
@@ -104,11 +104,11 @@ export default {
         async checkUsername() {
             if (this.username.length > 3) {
                 try {
-                    const response = await axios.post('http://localhost:3000/check-username', { username: this.username });
+                    const response = await axios.post(`${process.env.VUE_APP_API_URL}/check-username`, { username: this.username });
                     this.usernameError = response.data.exists ? 'Username already exists' : '';
                     this.canProceedToStep2 = !response.data.exists && this.username;
                 } catch (error) {
-                    console.error('Error checking username:', error);
+                    this.usernameError = 'Error checking username';
                 }
             } else {
                 this.usernameError = 'Username must be at least 4 characters long';
@@ -119,11 +119,11 @@ export default {
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             if (emailRegex.test(this.mail)) {
                 try {
-                    const response = await axios.post('http://localhost:3000/check-email', { email: this.mail });
+                    const response = await axios.post(`${process.env.VUE_APP_API_URL}/check-email`, { email: this.mail });
                     this.emailError = response.data.exists ? 'Email already exists' : '';
                     this.canProceedToStep3 = !response.data.exists && this.password && this.mail && this.password === this.confirmPassword;
                 } catch (error) {
-                    console.error('Error checking email:', error);
+                    this.emailError = 'Error checking email';
                 }
             } else {
                 this.emailError = 'Invalid email format';
@@ -154,16 +154,16 @@ export default {
         },
         async getAntiRobotQuestion() {
             try {
-                const response = await axios.get('http://localhost:3000/anti-robot-question');
+                const response = await axios.get(`${process.env.VUE_APP_API_URL}/anti-robot-question`);
                 this.robotQuestion = response.data;
             } catch (error) {
-                console.error('Error fetching anti-robot question:', error);
+                this.errorMessage = 'Error fetching anti-robot question';
             }
         },
         async register() {
             try {
                 const machineId = crypto.createHash('sha256').update(navigator.userAgent + Date.now().toString()).digest('hex');
-                const response = await axios.post('http://localhost:3000/register', {
+                const response = await axios.post(`${process.env.VUE_APP_API_URL}/register`, {
                     username: this.username,
                     password: this.password,
                     mail: this.mail,
@@ -237,11 +237,9 @@ export default {
     padding: 0.5rem;
     font-size: 1rem;
     transition: none;
-    /* Supprime les transitions qui pourraient causer des décalages */
 }
 
 form .text-red-500 {
     min-height: 1.5rem;
-    /* Fixe une hauteur minimale pour les messages d'erreur */
 }
 </style>

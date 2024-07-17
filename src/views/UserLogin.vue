@@ -10,6 +10,10 @@
                             class="w-full p-3 border border-gray-300 rounded focus:outline-none focus:border-green-300">
                         <input v-model="password" type="password" placeholder="Password" required
                             class="w-full p-3 border border-gray-300 rounded focus:outline-none focus:border-green-300">
+                        <div v-if="is2FAEnabled" class="relative">
+                            <input v-model="token2fa" type="text" placeholder="2FA Token" required
+                                class="w-full p-3 border border-gray-300 rounded focus:outline-none focus:border-green-300">
+                        </div>
                         <button type="submit"
                             class="w-full bg-green-500 text-white p-3 rounded hover:bg-green-600">Login</button>
                         <div class="mt-6 text-center">
@@ -51,6 +55,8 @@ export default {
         return {
             username: '',
             password: '',
+            token2fa: '',
+            is2FAEnabled: false,
             errorMessage: ''
         };
     },
@@ -62,12 +68,23 @@ export default {
         }
     },
     methods: {
+        async check2FA() {
+            try {
+                const response = await axios.get('http://localhost:3000/check-2fa', {
+                    params: { username: this.username }
+                });
+                this.is2FAEnabled = response.data.is2FAEnabled;
+            } catch (error) {
+                console.error('Error checking 2FA status:', error);
+            }
+        },
         async login() {
             try {
                 const machineId = crypto.createHash('sha256').update(navigator.userAgent + Date.now().toString()).digest('hex');
                 const response = await axios.post('http://localhost:3000/login', {
                     username: this.username,
                     password: this.password,
+                    token2fa: this.token2fa,
                     machine_id: machineId
                 });
 
@@ -90,6 +107,11 @@ export default {
         },
         isPwaInstalled() {
             return window.matchMedia('(display-mode: standalone)').matches;
+        }
+    },
+    watch: {
+        username() {
+            this.check2FA();
         }
     },
     beforeCreate() {
