@@ -17,7 +17,7 @@
                                     <p class="text-gray-600">{{ formatDate(post.created_at) }}</p>
                                 </div>
                             </div>
-                            <button v-if="post.user_id === user.id" @click="deletePost(post.id)" class="text-red-500">
+                            <button v-if="canDeletePost(post)" @click="deletePost(post.id)" class="text-red-500">
                                 <fa-icon icon="trash-alt" />
                             </button>
                         </div>
@@ -372,6 +372,9 @@ export default {
                 return `https://www.dailymotion.com/embed/video/${dailymotionMatch[1] || dailymotionMatch[2]}`;
             }
             return '';
+        },
+        canDeletePost(post) {
+            return this.user.rank >= 5 || post.user_id === this.user.id;
         }
     }
 };
