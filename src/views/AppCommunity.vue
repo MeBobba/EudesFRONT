@@ -114,7 +114,7 @@
             </div>
         </div>
     </div>
-    <AppFooter :logoImage="logoImage"/>
+    <AppFooter :logoImage="logoImage" />
 </template>
 
 <script>
@@ -232,22 +232,30 @@ export default {
                     throw new Error('No token found');
                 }
                 const apiUrl = process.env.VUE_APP_API_URL || 'http://localhost:3000';
-                await axios.post(`${apiUrl}/posts`, {
+                const response = await axios.post(`${apiUrl}/posts`, {
                     content: this.newPostContent,
                     video: this.newPostVideo,
                     visibility: this.postVisibility
                 }, {
                     headers: { 'x-access-token': token }
                 });
+
+                // Ajouter le nouveau post à la liste des posts
+                const newPost = response.data;
+                newPost.likesCount = 0;
+                newPost.commentsCount = 0;
+                newPost.comments = [];
+                this.posts.unshift(newPost);
+
                 this.newPostContent = '';
                 this.newPostVideo = '';
                 this.postVisibility = 'public';
-                this.page = 1;
-                this.posts = [];
-                this.noMorePosts = false;
-                await this.fetchPublicPosts();
             } catch (error) {
-                console.error('Error creating post:', error);
+                if (error.response && error.response.status === 429) {
+                    alert('Please wait 15 seconds before posting again.');
+                } else {
+                    console.error('Error creating post:', error);
+                }
             }
         },
         async addComment(post) {
@@ -297,13 +305,18 @@ export default {
                     throw new Error('No token found');
                 }
                 const apiUrl = process.env.VUE_APP_API_URL || 'http://localhost:3000';
-                await axios.delete(`${apiUrl}/posts/${postId}`, {
+                const response = await axios.delete(`${apiUrl}/posts/${postId}`, {
                     headers: { 'x-access-token': token }
                 });
-                // Remove the post from the list
-                this.posts = this.posts.filter(post => post.id !== postId);
+                if (response.status === 200) {
+                    // Remove the post from the list
+                    this.posts = this.posts.filter(post => post.id !== postId);
+                } else {
+                    throw new Error('Failed to delete post');
+                }
             } catch (error) {
-                console.error('Error deleting post:', error);
+                console.error('Error deleting post:', error); // Log the error
+                alert('Failed to delete post. Please try again later.');
             }
         },
         async toggleLike(post) {

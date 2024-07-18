@@ -47,8 +47,7 @@
                                     <p class="text-gray-600">{{ formatDate(post.created_at) }}</p>
                                 </div>
                             </div>
-                            <button v-if="post.user_id === user.id || user.rank >= 5" @click="deletePost(post.id)"
-                                class="text-red-500">
+                            <button v-if="canDeletePost(post)" @click="deletePost(post.id)" class="text-red-500">
                                 <fa-icon icon="trash-alt" />
                             </button>
                         </div>
@@ -68,6 +67,7 @@
                                 <span class="ml-2">{{ post.commentsCount }}</span>
                             </button>
                         </div>
+
                         <transition name="slide-fade">
                             <div v-show="post.showComments" class="mt-4">
                                 <h4 class="font-semibold mb-2">Comments</h4>
@@ -82,8 +82,8 @@
                                             <p>{{ comment.content }}</p>
                                         </div>
                                     </div>
-                                    <button v-if="comment.user_id === user.id || user.rank >= 5"
-                                        @click="deleteComment(comment.id)" class="text-red-500">
+                                    <button v-if="canDeleteComment(comment)" @click="deleteComment(comment.id)"
+                                        class="text-red-500">
                                         <fa-icon icon="trash-alt" />
                                     </button>
                                 </div>
@@ -269,6 +269,10 @@ export default {
                     this.noMorePosts = true;
                 } else {
                     const newPosts = response.data.filter(post => !this.posts.some(p => p.id === post.id));
+                    newPosts.forEach(post => {
+                        post.likesCount = post.likesCount || 0;
+                        post.commentsCount = post.commentsCount || 0;
+                    });
                     this.posts = [...this.posts, ...newPosts];
                     this.page++;
                 }
@@ -302,14 +306,22 @@ export default {
                     headers: { 'x-access-token': token }
                 });
 
+                // Ajouter le nouveau post à la liste des posts
                 const newPost = response.data;
+                newPost.likesCount = 0;
+                newPost.commentsCount = 0;
+                newPost.comments = [];
                 this.posts.unshift(newPost);
 
                 this.newPostContent = '';
                 this.newPostVideo = '';
                 this.postVisibility = 'public';
             } catch (error) {
-                console.error('Error creating post:', error);
+                if (error.response && error.response.status === 429) {
+                    alert('Please wait 15 seconds before posting again.');
+                } else {
+                    console.error('Error creating post:', error);
+                }
             }
         },
         async addComment(post) {
@@ -330,7 +342,7 @@ export default {
                     post.comments = [];
                 }
                 post.comments.push(newComment);
-                post.commentsCount++;
+                post.commentsCount = post.commentsCount + 1 || 1;
                 post.newComment = '';
             } catch (error) {
                 console.error('Error adding comment:', error);
@@ -372,7 +384,7 @@ export default {
                     throw new Error('Failed to delete post');
                 }
             } catch (error) {
-                console.error('Error deleting post:', error);
+                console.error('Error deleting post:', error); // Log the error
                 alert('Failed to delete post. Please try again later.');
             }
         },
@@ -401,6 +413,12 @@ export default {
             } catch (error) {
                 console.error('Error liking post:', error);
             }
+        },
+        canDeletePost(post) {
+            return this.user.rank >= 5 || post.user_id === this.user.id;
+        },
+        canDeleteComment(comment) {
+            return this.user.rank >= 5 || comment.user_id === this.user.id;
         },
         toggleComments(post) {
             post.showComments = !post.showComments;
