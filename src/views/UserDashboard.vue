@@ -47,7 +47,8 @@
                                     <p class="text-gray-600">{{ formatDate(post.created_at) }}</p>
                                 </div>
                             </div>
-                            <button v-if="post.user_id === user.id" @click="deletePost(post.id)" class="text-red-500">
+                            <button v-if="post.user_id === user.id || user.rank >= 5" @click="deletePost(post.id)"
+                                class="text-red-500">
                                 <fa-icon icon="trash-alt" />
                             </button>
                         </div>
@@ -81,8 +82,8 @@
                                             <p>{{ comment.content }}</p>
                                         </div>
                                     </div>
-                                    <button v-if="comment.user_id === user.id" @click="deleteComment(comment.id)"
-                                        class="text-red-500">
+                                    <button v-if="comment.user_id === user.id || user.rank >= 5"
+                                        @click="deleteComment(comment.id)" class="text-red-500">
                                         <fa-icon icon="trash-alt" />
                                     </button>
                                 </div>
@@ -287,20 +288,20 @@ export default {
                     throw new Error('No token found');
                 }
                 const apiUrl = process.env.VUE_APP_API_URL || 'http://localhost:3000';
-                await axios.post(`${apiUrl}/posts`, {
+                const response = await axios.post(`${apiUrl}/posts`, {
                     content: this.newPostContent,
                     video: this.newPostVideo,
                     visibility: this.postVisibility
                 }, {
                     headers: { 'x-access-token': token }
                 });
+
+                const newPost = response.data;
+                this.posts.unshift(newPost);
+
                 this.newPostContent = '';
                 this.newPostVideo = '';
                 this.postVisibility = 'public';
-                this.page = 1;
-                this.posts = [];
-                this.noMorePosts = false;
-                await this.fetchPosts();
             } catch (error) {
                 console.error('Error creating post:', error);
             }
@@ -428,3 +429,12 @@ export default {
     }
 };
 </script>
+
+<style scoped>
+.emoji-picker-container {
+    top: 100%;
+    /* Position it just below the button */
+    right: 0;
+    /* Align it to the right of the button */
+}
+</style>
