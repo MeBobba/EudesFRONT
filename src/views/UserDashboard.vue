@@ -23,62 +23,65 @@
                     </div>
 
                     <!-- User Posts -->
-                    <div v-if="posts.length === 0" class="text-center">No posts available</div>
-                    <div v-else>
-                        <div v-for="post in posts" :key="post.id"
-                            class="mb-8 p-4 bg-white dark:bg-gray-800 rounded-lg shadow-md">
-                            <div class="flex items-center mb-4">
+                    <div v-for="post in posts" :key="post.id"
+                        class="mb-8 p-4 bg-white dark:bg-gray-800 rounded-lg shadow-md">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center">
                                 <img :src="`http://www.habbo.com/habbo-imaging/avatarimage?figure=${post.look}&direction=3&head_direction=3&gesture=nor&action=null&size=m&headonly=1&img_format=gif`"
-                                    class="w-12 h-12 rounded-full" alt="User Profile">
+                                    class="rounded-full border-2 border-blue-500 p-1 bg-white" alt="User Profile">
                                 <div class="ml-4">
                                     <h3 class="font-semibold">{{ post.username }}</h3>
                                     <p class="text-gray-600">{{ formatDate(post.created_at) }}</p>
                                 </div>
                             </div>
-                            <p class="mb-4">{{ post.content }}</p>
-                            <img v-if="post.image" :src="post.image" alt="Post Image"
-                                class="w-full h-48 object-cover rounded-lg mb-4">
-                            <div class="flex items-center">
-                                <button @click="toggleLike(post)" class="mr-4 like-button">
-                                    <fa-icon :icon="['fas', 'heart']"
-                                        :class="{ 'text-red-500': post.userLike, 'text-gray-500': !post.userLike }" />
-                                    <span>{{ post.likesCount }}</span>
-                                </button>
-                                <fa-icon @click="post.showComments = !post.showComments" icon="comment"
-                                    class="ml-4 text-gray-500 cursor-pointer" /><span class="ml-1">{{ post.commentsCount
-                                    }}</span>
-                                <button @click="deletePost(post)"
-                                    class="ml-auto bg-red-500 text-white p-1 rounded">Delete Post</button>
-                            </div>
-                            <transition name="slide">
-                                <div v-if="post.showComments" class="mt-4">
-                                    <h4 class="font-semibold mb-2">Comments</h4>
-                                    <div v-for="comment in post.comments" :key="comment.id"
-                                        class="mb-2 flex items-center justify-between">
-                                        <div class="flex items-center">
-                                            <img :src="`http://www.habbo.com/habbo-imaging/avatarimage?figure=${comment.look}&direction=3&head_direction=3&gesture=nor&action=null&size=s&headonly=1&img_format=gif`"
-                                                class="rounded-full border-2 border-blue-500 p-1 bg-white"
-                                                alt="User Profile">
-                                            <div class="ml-2">
-                                                <p class="font-semibold">{{ comment.username }}</p>
-                                                <p>{{ comment.content }}</p>
-                                            </div>
-                                        </div>
-                                        <button @click="deleteComment(post, comment)"
-                                            class="bg-red-500 text-white p-1 rounded">Delete</button>
-                                    </div>
-                                    <textarea v-model="post.newComment" placeholder="Add a comment..."
-                                        class="w-full p-2 border border-gray-300 rounded-lg"></textarea>
-                                    <button @click="addComment(post)"
-                                        class="mt-2 bg-blue-500 text-white p-2 rounded-lg">Comment</button>
-                                </div>
-                            </transition>
+                            <button v-if="post.user_id === user.id" @click="deletePost(post.id)" class="text-red-500">
+                                <fa-icon icon="trash-alt" />
+                            </button>
                         </div>
+                        <p class="mb-4">{{ post.content }}</p>
+                        <img v-if="post.image" :src="post.image" alt="Post Image"
+                            class="w-full h-48 object-cover rounded-lg mb-4">
+                        <div class="flex items-center">
+                            <button @click="toggleLike(post)" class="mr-4 like-button">
+                                <fa-icon :icon="['fas', 'heart']"
+                                    :class="{ 'text-red-500': post.userLike, 'text-gray-500': !post.userLike }" />
+                                <span>{{ post.likesCount }}</span>
+                            </button>
+                            <button @click="toggleComments(post)" class="flex items-center">
+                                <fa-icon icon="comment" class="text-gray-500" /><span class="ml-1">{{ post.commentsCount
+                                    }}</span>
+                            </button>
+                        </div>
+                        <transition name="slide-fade">
+                            <div v-show="post.showComments" class="mt-4">
+                                <h4 class="font-semibold mb-2">Comments</h4>
+                                <div v-for="comment in post.comments" :key="comment.id"
+                                    class="mb-2 flex justify-between">
+                                    <div class="flex items-center">
+                                        <img :src="`http://www.habbo.com/habbo-imaging/avatarimage?figure=${comment.look}&direction=3&head_direction=3&gesture=nor&action=null&size=s&headonly=1&img_format=gif`"
+                                            class="rounded-full border-2 border-blue-500 p-1 bg-white"
+                                            alt="User Profile">
+                                        <div class="ml-2">
+                                            <p class="font-semibold">{{ comment.username }}</p>
+                                            <p>{{ comment.content }}</p>
+                                        </div>
+                                    </div>
+                                    <button v-if="comment.user_id === user.id" @click="deleteComment(comment.id)"
+                                        class="text-red-500">
+                                        <fa-icon icon="trash-alt" />
+                                    </button>
+                                </div>
+                                <textarea v-model="post.newComment" placeholder="Add a comment..."
+                                    class="w-full p-2 border border-gray-300 rounded-lg"></textarea>
+                                <button @click="addComment(post)"
+                                    class="mt-2 bg-blue-500 text-white p-2 rounded-lg">Comment</button>
+                            </div>
+                        </transition>
                     </div>
                     <div v-if="loading" class="text-center mt-4">
                         <span>Loading...</span>
                     </div>
-                    <div v-else-if="noMorePosts" class="text-center mt-4">
+                    <div v-if="!loading && noMorePosts" class="text-center mt-4">
                         <span>No more posts</span>
                     </div>
                 </div>
@@ -122,9 +125,9 @@ import UserProfile from '../components/UserProfile.vue';
 import ErrorMessage from '../components/ErrorMessage.vue';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { library } from '@fortawesome/fontawesome-svg-core';
-import { faHeart, faComment } from '@fortawesome/free-solid-svg-icons';
+import { faHeart, faComment, faTrashAlt } from '@fortawesome/free-solid-svg-icons';
 
-library.add(faHeart, faComment);
+library.add(faHeart, faComment, faTrashAlt);
 
 export default {
     name: 'UserDashboard',
@@ -143,9 +146,9 @@ export default {
             newPostContent: '',
             postVisibility: 'public',
             headerImage: require('@/assets/images/skeleton/logo.gif'), // Replace with your own image
-            suggestions: [],
-            photos: [],
-            posts: [],
+            suggestions: [], // Add suggestions data
+            photos: [], // Add photos data
+            posts: [], // Add posts data
             isDarkMode: false,
             page: 1,
             limit: 10,
@@ -156,26 +159,14 @@ export default {
     async created() {
         await this.fetchUserData();
         await this.fetchPosts();
-        window.addEventListener('scroll', this.handleScroll);
         this.checkBanInterval = setInterval(this.checkIfBanned, 5000);
+        window.addEventListener('scroll', this.handleScroll);
     },
     beforeUnmount() {
-        window.removeEventListener('scroll', this.handleScroll);
         clearInterval(this.checkBanInterval);
+        window.removeEventListener('scroll', this.handleScroll);
     },
     methods: {
-        toggleDarkMode() {
-            this.isDarkMode = !this.isDarkMode;
-            document.documentElement.classList.toggle('dark', this.isDarkMode);
-        },
-        logout() {
-            localStorage.removeItem('token');
-            this.$router.push('/login');
-        },
-        formatDate(dateString) {
-            const options = { year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric' };
-            return new Date(dateString).toLocaleDateString(undefined, options);
-        },
         async fetchUserData() {
             try {
                 const token = localStorage.getItem('token');
@@ -199,7 +190,7 @@ export default {
             }
         },
         async fetchPosts() {
-            if (this.loading || this.noMorePosts) return;
+            if (this.loading) return;
             this.loading = true;
             try {
                 const token = localStorage.getItem('token');
@@ -211,12 +202,13 @@ export default {
                     headers: { 'x-access-token': token },
                     params: { page: this.page, limit: this.limit }
                 });
-                const newPosts = response.data.filter(post => !this.posts.some(existingPost => existingPost.id === post.id));
-                if (newPosts.length < this.limit) {
+                if (response.data.length === 0) {
                     this.noMorePosts = true;
+                } else {
+                    const newPosts = response.data.filter(post => !this.posts.some(p => p.id === post.id));
+                    this.posts = [...this.posts, ...newPosts];
+                    this.page++;
                 }
-                this.posts = [...this.posts, ...newPosts];
-                this.page++;
                 this.loading = false;
             } catch (error) {
                 this.error = true;
@@ -228,7 +220,7 @@ export default {
         },
         handleScroll() {
             const bottomOfWindow = window.innerHeight + window.scrollY >= document.documentElement.offsetHeight;
-            if (bottomOfWindow && !this.loading) {
+            if (bottomOfWindow && !this.loading && !this.noMorePosts) {
                 this.fetchPosts();
             }
         },
@@ -276,55 +268,81 @@ export default {
                 console.error('Error adding comment:', error);
             }
         },
-        async deletePost(post) {
+        async deleteComment(commentId) {
             try {
                 const token = localStorage.getItem('token');
                 if (!token) {
                     throw new Error('No token found');
                 }
                 const apiUrl = process.env.VUE_APP_API_URL || 'http://localhost:3000';
-                await axios.delete(`${apiUrl}/posts/${post.id}`, {
+                await axios.delete(`${apiUrl}/comments/${commentId}`, {
                     headers: { 'x-access-token': token }
                 });
-                this.posts = this.posts.filter(p => p.id !== post.id);
-            } catch (error) {
-                console.error('Error deleting post:', error);
-            }
-        },
-        async deleteComment(post, comment) {
-            try {
-                const token = localStorage.getItem('token');
-                if (!token) {
-                    throw new Error('No token found');
-                }
-                const apiUrl = process.env.VUE_APP_API_URL || 'http://localhost:3000';
-                await axios.delete(`${apiUrl}/comments/${comment.id}`, {
-                    headers: { 'x-access-token': token }
+                // Remove the comment from the post
+                this.posts = this.posts.map(post => {
+                    post.comments = post.comments.filter(comment => comment.id !== commentId);
+                    return post;
                 });
-                post.comments = post.comments.filter(c => c.id !== comment.id);
-                post.commentsCount--;
             } catch (error) {
                 console.error('Error deleting comment:', error);
             }
         },
-        async checkIfBanned() {
+        async deletePost(postId) {
             try {
                 const token = localStorage.getItem('token');
                 if (!token) {
                     throw new Error('No token found');
                 }
                 const apiUrl = process.env.VUE_APP_API_URL || 'http://localhost:3000';
-                await axios.get(`${apiUrl}/check-ban`, {
+                await axios.delete(`${apiUrl}/posts/${postId}`, {
                     headers: { 'x-access-token': token }
                 });
+                // Remove the post from the list
+                this.posts = this.posts.filter(post => post.id !== postId);
             } catch (error) {
-                if (error.response && error.response.status === 403) {
-                    localStorage.removeItem('token');
-                    this.$router.push('/login');
-                } else {
-                    console.error('Failed to check ban status:', error);
-                }
+                console.error('Error deleting post:', error);
             }
+        },
+        async toggleLike(post) {
+            try {
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    throw new Error('No token found');
+                }
+                const apiUrl = process.env.VUE_APP_API_URL || 'http://localhost:3000';
+                await axios.post(`${apiUrl}/likes`, {
+                    postId: post.id,
+                    isLike: post.userLike !== true
+                }, {
+                    headers: { 'x-access-token': token }
+                });
+                post.userLike = post.userLike !== true ? true : null;
+                post.likesCount += post.userLike ? 1 : -1;
+                const likeIcon = this.$el.querySelector(`#post-${post.id} .fa-heart`);
+                if (likeIcon) {
+                    likeIcon.classList.add('animate-like');
+                    setTimeout(() => {
+                        likeIcon.classList.remove('animate-like');
+                    }, 500);
+                }
+            } catch (error) {
+                console.error('Error liking post:', error);
+            }
+        },
+        toggleComments(post) {
+            post.showComments = !post.showComments;
+        },
+        toggleDarkMode() {
+            this.isDarkMode = !this.isDarkMode;
+            document.documentElement.classList.toggle('dark', this.isDarkMode);
+        },
+        logout() {
+            localStorage.removeItem('token');
+            this.$router.push('/login');
+        },
+        formatDate(dateString) {
+            const options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+            return new Date(dateString).toLocaleDateString(undefined, options);
         }
     }
 };
@@ -349,14 +367,20 @@ export default {
     }
 }
 
-.slide-enter-active,
-.slide-leave-active {
-    transition: max-height 0.5s ease;
+.slide-fade-enter-active {
+    transition: all 0.3s ease;
 }
 
-.slide-enter,
-.slide-leave-to {
-    max-height: 0;
-    overflow: hidden;
+.slide-fade-leave-active {
+    transition: all 0.3s ease;
+}
+
+.slide-fade-enter,
+.slide-fade-leave-to
+
+/* .slide-fade-leave-active in <2.1.8 */
+    {
+    transform: translateY(10px);
+    opacity: 0;
 }
 </style>
