@@ -16,10 +16,17 @@
                 <!-- Regular Menu - Desktop -->
                 <nav class="hidden sm:flex sm:items-center sm:space-x-4 w-full">
                     <ul class="flex justify-center space-x-4 w-full"> <!-- Utilisation de w-full -->
-                        <li><router-link to="/" class="nav-link">Home</router-link></li>
-                        <li><router-link to="/community" class="nav-link">Community</router-link></li>
-                        <li><router-link to="/staff" class="nav-link">Staff</router-link></li>
-                        <li><router-link to="/news" class="nav-link">News</router-link></li>
+                        <li><router-link to="/" class="nav-link" active-class="active"
+                                exact-active-class="exact-active">Home</router-link></li>
+                        <li><router-link to="/community" class="nav-link" active-class="active"
+                                exact-active-class="exact-active">Community</router-link>
+                        </li>
+                        <li><router-link to="/games" class="nav-link" active-class="active"
+                                exact-active-class="exact-active">Games</router-link></li>
+                        <li><router-link to="/staff" class="nav-link" active-class="active"
+                                exact-active-class="exact-active">Staff</router-link></li>
+                        <li><router-link to="/news" class="nav-link" active-class="active"
+                                exact-active-class="exact-active">News</router-link></li>
                     </ul>
                     <div class="relative flex space-x-4 ml-auto"> <!-- Flex pour aligner les boutons -->
                         <input type="text" v-model="searchQuery" @input="searchUsers" placeholder="Search..."
@@ -70,12 +77,16 @@
                         </ul>
                     </div>
                     <ul class="space-y-2 w-full">
-                        <li><router-link to="/" class="block px-4 py-2 rounded-lg nav-link">Home</router-link></li>
-                        <li><router-link to="/community"
-                                class="block px-4 py-2 rounded-lg nav-link">Community</router-link></li>
-                        <li><router-link to="/staff" class="block px-4 py-2 rounded-lg nav-link">Staff</router-link>
-                        </li>
-                        <li><router-link to="/news" class="block px-4 py-2 rounded-lg nav-link">News</router-link></li>
+                        <li><router-link to="/" class="block px-4 py-2 rounded-lg nav-link" active-class="active"
+                                exact-active-class="exact-active">Home</router-link></li>
+                        <li><router-link to="/community" class="block px-4 py-2 rounded-lg nav-link"
+                                active-class="active" exact-active-class="exact-active">Community</router-link></li>
+                        <li><router-link to="/games" class="block px-4 py-2 rounded-lg nav-link" active-class="active"
+                                exact-active-class="exact-active">Games</router-link></li>
+                        <li><router-link to="/staff" class="block px-4 py-2 rounded-lg nav-link" active-class="active"
+                                exact-active-class="exact-active">Staff</router-link></li>
+                        <li><router-link to="/news" class="block px-4 py-2 rounded-lg nav-link" active-class="active"
+                                exact-active-class="exact-active">News</router-link></li>
                     </ul>
 
                     <div class="flex space-x-4 mt-4">
@@ -199,5 +210,10 @@ export default {
 
 .logout-btn {
     @apply bg-red-500 text-white hover:bg-red-400;
+}
+
+/* Style for active menu link */
+.router-link-active {
+    @apply text-blue-500 font-bold;
 }
 </style>

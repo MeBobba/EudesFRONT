@@ -395,15 +395,16 @@ export default {
                     throw new Error('No token found');
                 }
                 const apiUrl = process.env.VUE_APP_API_URL || 'http://localhost:3000';
-                await axios.post(`${apiUrl}/likes`, {
+                const response = await axios.post(`${apiUrl}/likes`, {
                     postId: post.id,
-                    isLike: post.userLike !== true
+                    isLike: !post.userLike // toggle the like status
                 }, {
                     headers: { 'x-access-token': token }
                 });
-                post.userLike = post.userLike !== true ? true : null;
-                post.likesCount += post.userLike ? 1 : -1;
-                const likeIcon = this.$refs[`post-${post.id}`][0].querySelector('.fa-heart');
+                const data = response.data;
+                post.userLike = data.userLike;
+                post.likesCount = data.likesCount;
+                const likeIcon = this.$el.querySelector(`#post-${post.id} .fa-heart`);
                 if (likeIcon) {
                     likeIcon.classList.add('animate-like');
                     setTimeout(() => {
@@ -463,10 +464,43 @@ export default {
 </script>
 
 <style scoped>
+.like-button .fa-heart.animate-like {
+    animation: like-animation 0.5s;
+}
+
+@keyframes like-animation {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.5);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
 .emoji-picker-container {
-    top: 100%;
-    /* Position it just below the button */
     right: 0;
-    /* Align it to the right of the button */
+    bottom: 40px;
+}
+
+.slide-fade-enter-active {
+    transition: all 0.3s ease;
+}
+
+.slide-fade-leave-active {
+    transition: all 0.3s ease;
+}
+
+.slide-fade-enter,
+.slide-fade-leave-to
+
+/* .slide-fade-leave-active in <2.1.8 */
+    {
+    transform: translateY(10px);
+    opacity: 0;
 }
 </style>

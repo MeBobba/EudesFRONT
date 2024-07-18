@@ -326,14 +326,15 @@ export default {
                     throw new Error('No token found');
                 }
                 const apiUrl = process.env.VUE_APP_API_URL || 'http://localhost:3000';
-                await axios.post(`${apiUrl}/likes`, {
+                const response = await axios.post(`${apiUrl}/likes`, {
                     postId: post.id,
-                    isLike: post.userLike !== true
+                    isLike: !post.userLike // toggle the like status
                 }, {
                     headers: { 'x-access-token': token }
                 });
-                post.userLike = post.userLike !== true ? true : null;
-                post.likesCount += post.userLike ? 1 : -1;
+                const data = response.data;
+                post.userLike = data.userLike;
+                post.likesCount = data.likesCount;
                 const likeIcon = this.$el.querySelector(`#post-${post.id} .fa-heart`);
                 if (likeIcon) {
                     likeIcon.classList.add('animate-like');
