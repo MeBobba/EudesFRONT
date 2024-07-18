@@ -27,7 +27,10 @@
                     </div>
                 </div>
             </div>
-            <button class="px-4 py-2 bg-blue-500 text-white rounded-lg relative">Follow</button>
+            <router-link to="/settings"
+                class="px-4 py-2 bg-blue-500 text-white rounded-lg relative">Settings</router-link>
+            <router-link to="/client"
+                class="ml-5 px-4 py-2 bg-green-500 text-white rounded-lg relative">Play Now</router-link>
         </div>
         <div class="relative mt-4">
             <p class="text-gray-300">{{ user.motto }}</p>

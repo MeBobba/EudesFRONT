@@ -1,11 +1,11 @@
 <template>
     <header :class="{ 'bg-gray-900 text-white': isDarkMode, 'bg-white text-black': !isDarkMode }" class="shadow">
         <div class="container mx-auto py-4 px-6 flex justify-between items-center">
-            <img :src="headerImage" alt="Header Image" class="h-10">
+            <router-link to="/" class="hover:text-gray-900"> <img :src="headerImage"
+                    alt="Header Image"></router-link>
             <nav>
                 <ul class="flex space-x-4">
                     <li><router-link to="/" class="hover:text-gray-900">Home</router-link></li>
-                    <li><router-link to="/settings" class="hover:text-gray-900">Settings</router-link></li>
                     <li><router-link to="/community" class="hover:text-gray-900">Community</router-link></li>
                     <li><router-link to="/staff" class="hover:text-gray-900">Staff</router-link></li>
                     <li><router-link to="/news" class="hover:text-gray-900">News</router-link></li>

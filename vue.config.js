@@ -11,7 +11,7 @@ module.exports = {
         util: require.resolve('util'),
         assert: require.resolve('assert'),
         buffer: require.resolve('buffer'),
-        vm: require.resolve('vm-browserify'), // Ajout du polyfill pour 'vm'
+        vm: require.resolve('vm-browserify')
       },
     },
     plugins: [
@@ -19,6 +19,11 @@ module.exports = {
         process: 'process/browser',
         Buffer: ['buffer', 'Buffer'],
       }),
+      new webpack.DefinePlugin({
+        '__VUE_PROD_DEVTOOLS__': JSON.stringify(false),
+        '__VUE_OPTIONS_API__': JSON.stringify(true),
+        '__VUE_PROD_HYDRATION_MISMATCH_DETAILS__': JSON.stringify(false) // Ajout du flag ici
+      })
     ],
   },
   pwa: {

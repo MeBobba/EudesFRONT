@@ -68,16 +68,6 @@ export default {
         }
     },
     methods: {
-        async check2FA() {
-            try {
-                const response = await axios.get('http://localhost:3000/check-2fa', {
-                    params: { username: this.username }
-                });
-                this.is2FAEnabled = response.data.is2FAEnabled;
-            } catch (error) {
-                console.error('Error checking 2FA status:', error);
-            }
-        },
         async login() {
             try {
                 const machineId = crypto.createHash('sha256').update(navigator.userAgent + Date.now().toString()).digest('hex');
@@ -96,6 +86,16 @@ export default {
                 } else {
                     this.errorMessage = error.response ? error.response.data : 'Login failed';
                 }
+            }
+        },
+        async check2FA() {
+            try {
+                const response = await axios.get('http://localhost:3000/check-2fa', {
+                    params: { username: this.username }
+                });
+                this.is2FAEnabled = response.data.is2FAEnabled;
+            } catch (error) {
+                console.error('Error checking 2FA status:', error);
             }
         },
         handlePwaButtonClick() {
