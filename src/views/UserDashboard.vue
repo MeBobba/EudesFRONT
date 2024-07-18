@@ -1,6 +1,7 @@
 <template>
     <div :class="{ 'bg-gray-900 text-white': isDarkMode, 'bg-gray-100 text-black': !isDarkMode }" class="min-h-screen">
-        <AppHeader :logoImage="logoImage" :headerImage="headerImage" @toggleDarkMode="toggleDarkMode" @logout="logout" />
+        <AppHeader :logoImage="logoImage" :headerImage="headerImage" @toggleDarkMode="toggleDarkMode"
+            @logout="logout" />
         <div class="container mx-auto px-4 py-8 mt-4">
             <UserProfile v-if="!isLoading && !error" :user="user" :isDarkMode="isDarkMode" />
             <ErrorMessage v-if="error" :message="errorMessage" />
@@ -59,11 +60,11 @@
                             <button @click="toggleLike(post)" class="mr-4 like-button">
                                 <fa-icon :icon="['fas', 'heart']"
                                     :class="{ 'text-red-500': post.userLike, 'text-gray-500': !post.userLike }" />
-                                <span>{{ post.likesCount }}</span>
+                                <span class="ml-2">{{ post.likesCount }}</span>
                             </button>
                             <button @click="toggleComments(post)" class="flex items-center">
                                 <fa-icon icon="comment" class="text-gray-500" />
-                                <span class="ml-1">{{ post.commentsCount }}</span>
+                                <span class="ml-2">{{ post.commentsCount }}</span>
                             </button>
                         </div>
                         <transition name="slide-fade">

@@ -30,11 +30,11 @@
                             <button @click="toggleLike(post)" class="mr-4 like-button">
                                 <fa-icon :icon="['fas', 'heart']"
                                     :class="{ 'text-red-500': post.userLike, 'text-gray-500': !post.userLike }" />
-                                <span>{{ post.likesCount }}</span>
+                                <span class="ml-2">{{ post.likesCount }}</span>
                             </button>
                             <button @click="toggleComments(post)" class="flex items-center">
                                 <fa-icon icon="comment" class="text-gray-500" />
-                                <span class="ml-1">{{ post.commentsCount }}</span>
+                                <span class="ml-2">{{ post.commentsCount }}</span>
                             </button>
                         </div>
                         <transition name="slide-fade">
