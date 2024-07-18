@@ -6,19 +6,35 @@
             <!-- Add your content here -->
         </div>
     </div>
+    <AppFooter :logoImage="logoImage" />
 </template>
 
 <script>
 import AppHeader from '../components/AppHeader.vue';
+import AppFooter from '../components/AppFooter.vue';
 
 export default {
     components: {
-        AppHeader
+        AppHeader,
+        AppFooter
     },
     data() {
         return {
-            headerImage: require('@/assets/images/skeleton/logo.gif'), // Replace with your own image
-            isDarkMode: false
+            headerImage: require('@/assets/images/skeleton/header.png'),
+            logoImage: require('@/assets/images/skeleton/logo.gif'), // Replace with your own image
+            isDarkMode: false,
+            posts: [],
+            user: {},
+            error: false,
+            errorMessage: '',
+            page: 1,
+            limit: 10,
+            loading: false,
+            noMorePosts: false,
+            newPostContent: '',
+            newPostVideo: '',
+            postVisibility: 'public',
+            showEmojiPicker: false
         };
     },
     methods: {

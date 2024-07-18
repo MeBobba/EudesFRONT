@@ -5,37 +5,70 @@
         </div>
         <header :class="{ 'bg-gray-900 text-white': isDarkMode, 'bg-white text-black': !isDarkMode }"
             class="shadow sticky top-0 z-50">
-            <div class="container mx-auto py-4 px-6 flex justify-between items-center">
-                <router-link to="/" class="hover:text-gray-900">
+            <div
+                class="container mx-auto py-4 px-4 sm:px-6 md:px-8 lg:px-10 xl:px-12 flex justify-between items-center">
+
+                <!-- Logo - Hidden on mobile menu -->
+                <router-link to="/" class="hover:text-gray-900 hidden sm:block">
                     <img :src="logoImage" alt="Logo">
                 </router-link>
-                <nav class="flex-1 text-center">
-                    <ul class="flex justify-center space-x-8">
+
+                <!-- Regular Menu - Desktop -->
+                <nav class="hidden sm:flex sm:items-center sm:space-x-4 w-full">
+                    <ul class="flex justify-center space-x-4 w-full"> <!-- Utilisation de w-full -->
                         <li><router-link to="/" class="nav-link">Home</router-link></li>
                         <li><router-link to="/community" class="nav-link">Community</router-link></li>
                         <li><router-link to="/staff" class="nav-link">Staff</router-link></li>
                         <li><router-link to="/news" class="nav-link">News</router-link></li>
                     </ul>
-                </nav>
-                <div class="relative flex space-x-4">
                     <input type="text" v-model="searchQuery" @input="searchUsers" placeholder="Search..."
-                        class="p-2 border rounded-lg">
-                    <div v-if="searchResults.length"
-                        class="absolute top-full mt-2 right-0 w-auto bg-white shadow-lg rounded-lg z-10"
-                        :style="{ width: '200px' }">
-                        <ul>
-                            <li v-for="result in searchResults" :key="result.id" class="p-2 border-b hover:bg-gray-200">
-                                <router-link :to="`/dashboard/${result.id}`" @click="clearSearch">{{ result.username
-                                    }}</router-link>
-                            </li>
-                        </ul>
+                        class="p-2 sm:px-3 md:px-4 border rounded-lg">
+                    <div class="flex space-x-4 ml-auto"> <!-- Flex pour aligner les boutons -->
+                        <button @click="toggleDarkMode" class="toggle-dark-mode-btn">
+                            <fa-icon :icon="isDarkMode ? 'sun' : 'moon'" />
+                        </button>
+                        <button @click="logout" class="logout-btn">Logout</button>
                     </div>
+                </nav>
 
-                    <button @click="toggleDarkMode" class="toggle-dark-mode-btn">
-                        <fa-icon :icon="isDarkMode ? 'sun' : 'moon'" />
-                    </button>
-                    <button @click="logout" class="logout-btn">Logout</button>
+                <!-- Open/Close menu button for mobile -->
+                <button v-if="!isMenuOpen" @click="toggleMenu" class="block sm:hidden">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4 6h16M4 12h16m-7 6h7"></path>
+                    </svg>
+                </button>
+                <button v-if="isMenuOpen" @click="toggleMenu" class="absolute top-0 right-0 mt-4 mr-4 block sm:hidden">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
+                        </path>
+                    </svg>
+                </button>
+
+                <!-- Responsive Menu - Mobile -->
+                <div class="sm:hidden w-full" :class="{ 'block': isMenuOpen, 'hidden': !isMenuOpen }">
+                    <input type="text" v-model="searchQuery" @input="searchUsers" placeholder="Search..."
+                        class="p-2 sm:px-3 md:px-4 border rounded-lg mt-10 mb-4 w-full">
+
+                    <ul class="space-y-2 w-full">
+                        <li><router-link to="/" class="block px-4 py-2 rounded-lg nav-link">Home</router-link></li>
+                        <li><router-link to="/community"
+                                class="block px-4 py-2 rounded-lg nav-link">Community</router-link></li>
+                        <li><router-link to="/staff" class="block px-4 py-2 rounded-lg nav-link">Staff</router-link>
+                        </li>
+                        <li><router-link to="/news" class="block px-4 py-2 rounded-lg nav-link">News</router-link></li>
+                    </ul>
+
+                    <div class="flex space-x-4 mt-4">
+                        <button @click="toggleDarkMode" class="toggle-dark-mode-btn w-full">
+                            <fa-icon :icon="isDarkMode ? 'sun' : 'moon'" />
+                        </button>
+                        <button @click="logout" class="logout-btn w-full">Logout</button>
+                    </div>
                 </div>
+
             </div>
         </header>
     </div>
@@ -67,7 +100,8 @@ export default {
         return {
             isDarkMode: false,
             searchQuery: '',
-            searchResults: []
+            searchResults: [],
+            isMenuOpen: false
         };
     },
     methods: {
@@ -92,7 +126,6 @@ export default {
                 console.error('Error searching users:', error);
             }
         },
-
         clearSearch() {
             this.searchQuery = '';
             this.searchResults = [];
@@ -111,6 +144,9 @@ export default {
             } catch (error) {
                 console.error('Logout error:', error);
             }
+        },
+        toggleMenu() {
+            this.isMenuOpen = !this.isMenuOpen;
         }
     }
 };
