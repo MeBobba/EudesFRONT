@@ -1,7 +1,6 @@
 <template>
     <div :class="{ 'bg-gray-900 text-white': isDarkMode, 'bg-gray-100 text-black': !isDarkMode }" class="min-h-screen">
-        <AppHeader :headerImage="headerImage" @toggleDarkMode="toggleDarkMode" @logout="logout"
-            :isDarkMode="isDarkMode" />
+        <AppHeader :headerImage="headerImage" @toggleDarkMode="toggleDarkMode" @logout="logout" />
         <div class="container mx-auto px-4 py-8 mt-4">
             <UserProfile v-if="!isLoading && !error" :user="user" :isDarkMode="isDarkMode" />
             <ErrorMessage v-if="error" :message="errorMessage" />
@@ -12,25 +11,75 @@
                     <!-- Post Input -->
                     <div :class="{ 'bg-gray-800 text-white': isDarkMode, 'bg-white text-black': !isDarkMode }"
                         class="p-4 rounded-lg shadow-md mb-8">
-                        <textarea v-model="newPost" class="w-full p-4 border border-gray-300 rounded-lg"
+                        <textarea v-model="newPostContent" class="w-full p-4 border border-gray-300 rounded-lg"
                             placeholder="What's on your mind?"></textarea>
-                        <button @click="postTweet" class="mt-4 bg-blue-500 text-white p-2 rounded-lg">Post</button>
+                        <div class="mt-4 flex items-center">
+                            <select v-model="postVisibility" class="border border-gray-300 rounded-lg p-2 mr-4">
+                                <option value="public">Public</option>
+                                <option value="friends">Friends</option>
+                            </select>
+                            <button @click="createPost" class="bg-blue-500 text-white p-2 rounded-lg">Post</button>
+                        </div>
                     </div>
 
                     <!-- User Posts -->
-                    <div :class="{ 'bg-gray-800 text-white': isDarkMode, 'bg-white text-black': !isDarkMode }"
-                        class="p-4 rounded-lg shadow-md">
-                        <h2 class="text-2xl font-bold mb-4">Posts</h2>
-                        <div class="grid grid-cols-3 gap-4">
-                            <div v-for="post in user.posts" :key="post.id" class="relative">
-                                <img :src="post.image" alt="Post Image" class="w-full h-48 object-cover rounded-lg">
-                                <div
-                                    class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
-                                    <fa-icon :icon="['fas', 'heart']" class="text-white mr-2" />
-                                    <span class="text-white">{{ post.likes }}</span>
+                    <div v-if="posts.length === 0" class="text-center">No posts available</div>
+                    <div v-else>
+                        <div v-for="post in posts" :key="post.id"
+                            class="mb-8 p-4 bg-white dark:bg-gray-800 rounded-lg shadow-md">
+                            <div class="flex items-center mb-4">
+                                <img :src="`http://www.habbo.com/habbo-imaging/avatarimage?figure=${post.look}&direction=3&head_direction=3&gesture=nor&action=null&size=m&headonly=1&img_format=gif`"
+                                    class="w-12 h-12 rounded-full" alt="User Profile">
+                                <div class="ml-4">
+                                    <h3 class="font-semibold">{{ post.username }}</h3>
+                                    <p class="text-gray-600">{{ formatDate(post.created_at) }}</p>
                                 </div>
                             </div>
+                            <p class="mb-4">{{ post.content }}</p>
+                            <img v-if="post.image" :src="post.image" alt="Post Image"
+                                class="w-full h-48 object-cover rounded-lg mb-4">
+                            <div class="flex items-center">
+                                <button @click="toggleLike(post)" class="mr-4 like-button">
+                                    <fa-icon :icon="['fas', 'heart']"
+                                        :class="{ 'text-red-500': post.userLike, 'text-gray-500': !post.userLike }" />
+                                    <span>{{ post.likesCount }}</span>
+                                </button>
+                                <fa-icon @click="post.showComments = !post.showComments" icon="comment"
+                                    class="ml-4 text-gray-500 cursor-pointer" /><span class="ml-1">{{ post.commentsCount
+                                    }}</span>
+                                <button @click="deletePost(post)"
+                                    class="ml-auto bg-red-500 text-white p-1 rounded">Delete Post</button>
+                            </div>
+                            <transition name="slide">
+                                <div v-if="post.showComments" class="mt-4">
+                                    <h4 class="font-semibold mb-2">Comments</h4>
+                                    <div v-for="comment in post.comments" :key="comment.id"
+                                        class="mb-2 flex items-center justify-between">
+                                        <div class="flex items-center">
+                                            <img :src="`http://www.habbo.com/habbo-imaging/avatarimage?figure=${comment.look}&direction=3&head_direction=3&gesture=nor&action=null&size=s&headonly=1&img_format=gif`"
+                                                class="rounded-full border-2 border-blue-500 p-1 bg-white"
+                                                alt="User Profile">
+                                            <div class="ml-2">
+                                                <p class="font-semibold">{{ comment.username }}</p>
+                                                <p>{{ comment.content }}</p>
+                                            </div>
+                                        </div>
+                                        <button @click="deleteComment(post, comment)"
+                                            class="bg-red-500 text-white p-1 rounded">Delete</button>
+                                    </div>
+                                    <textarea v-model="post.newComment" placeholder="Add a comment..."
+                                        class="w-full p-2 border border-gray-300 rounded-lg"></textarea>
+                                    <button @click="addComment(post)"
+                                        class="mt-2 bg-blue-500 text-white p-2 rounded-lg">Comment</button>
+                                </div>
+                            </transition>
                         </div>
+                    </div>
+                    <div v-if="loading" class="text-center mt-4">
+                        <span>Loading...</span>
+                    </div>
+                    <div v-else-if="noMorePosts" class="text-center mt-4">
+                        <span>No more posts</span>
                     </div>
                 </div>
 
@@ -41,8 +90,8 @@
                         class="p-4 rounded-lg shadow-md mb-8">
                         <h2 class="text-2xl font-bold mb-4">Suggestions For You</h2>
                         <div v-for="suggestion in suggestions" :key="suggestion.id" class="flex items-center mb-4">
-                            <img :src="suggestion.profileImage" class="w-12 h-12 rounded-full border-2 border-gray-300"
-                                alt="Suggestion Profile">
+                            <img :src="`http://www.habbo.com/habbo-imaging/avatarimage?figure=${suggestion.look}&direction=3&head_direction=3&gesture=nor&action=null&size=s&headonly=1&img_format=gif`"
+                                class="w-12 h-12 rounded-full border-2 border-gray-300" alt="Suggestion Profile">
                             <div class="ml-4">
                                 <h3 class="font-semibold">{{ suggestion.username }}</h3>
                                 <button class="mt-1 bg-blue-500 text-white p-1 rounded-lg">Follow</button>
@@ -73,9 +122,9 @@ import UserProfile from '../components/UserProfile.vue';
 import ErrorMessage from '../components/ErrorMessage.vue';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { library } from '@fortawesome/fontawesome-svg-core';
-import { faHeart } from '@fortawesome/free-solid-svg-icons';
+import { faHeart, faComment } from '@fortawesome/free-solid-svg-icons';
 
-library.add(faHeart);
+library.add(faHeart, faComment);
 
 export default {
     name: 'UserDashboard',
@@ -91,21 +140,42 @@ export default {
             isLoading: true,
             error: false,
             errorMessage: '',
-            newPost: '',
+            newPostContent: '',
+            postVisibility: 'public',
             headerImage: require('@/assets/images/skeleton/logo.gif'), // Replace with your own image
-            suggestions: [], // Add suggestions data
-            photos: [], // Add photos data
-            isDarkMode: false
+            suggestions: [],
+            photos: [],
+            posts: [],
+            isDarkMode: false,
+            page: 1,
+            limit: 10,
+            loading: false,
+            noMorePosts: false
         };
     },
     async created() {
         await this.fetchUserData();
+        await this.fetchPosts();
+        window.addEventListener('scroll', this.handleScroll);
         this.checkBanInterval = setInterval(this.checkIfBanned, 5000);
     },
     beforeUnmount() {
+        window.removeEventListener('scroll', this.handleScroll);
         clearInterval(this.checkBanInterval);
     },
     methods: {
+        toggleDarkMode() {
+            this.isDarkMode = !this.isDarkMode;
+            document.documentElement.classList.toggle('dark', this.isDarkMode);
+        },
+        logout() {
+            localStorage.removeItem('token');
+            this.$router.push('/login');
+        },
+        formatDate(dateString) {
+            const options = { year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric' };
+            return new Date(dateString).toLocaleDateString(undefined, options);
+        },
         async fetchUserData() {
             try {
                 const token = localStorage.getItem('token');
@@ -128,6 +198,115 @@ export default {
                 this.isLoading = false;
             }
         },
+        async fetchPosts() {
+            if (this.loading || this.noMorePosts) return;
+            this.loading = true;
+            try {
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    throw new Error('No token found');
+                }
+                const apiUrl = process.env.VUE_APP_API_URL || 'http://localhost:3000';
+                const response = await axios.get(`${apiUrl}/posts`, {
+                    headers: { 'x-access-token': token },
+                    params: { page: this.page, limit: this.limit }
+                });
+                const newPosts = response.data.filter(post => !this.posts.some(existingPost => existingPost.id === post.id));
+                if (newPosts.length < this.limit) {
+                    this.noMorePosts = true;
+                }
+                this.posts = [...this.posts, ...newPosts];
+                this.page++;
+                this.loading = false;
+            } catch (error) {
+                this.error = true;
+                this.errorMessage = error.response
+                    ? error.response.data || 'Failed to fetch posts. Please try again later.'
+                    : 'Failed to fetch posts. Please check your network connection.';
+                this.loading = false;
+            }
+        },
+        handleScroll() {
+            const bottomOfWindow = window.innerHeight + window.scrollY >= document.documentElement.offsetHeight;
+            if (bottomOfWindow && !this.loading) {
+                this.fetchPosts();
+            }
+        },
+        async createPost() {
+            try {
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    throw new Error('No token found');
+                }
+                const apiUrl = process.env.VUE_APP_API_URL || 'http://localhost:3000';
+                await axios.post(`${apiUrl}/posts`, {
+                    content: this.newPostContent,
+                    visibility: this.postVisibility
+                }, {
+                    headers: { 'x-access-token': token }
+                });
+                this.newPostContent = '';
+                this.postVisibility = 'public';
+                this.page = 1;
+                this.posts = [];
+                this.noMorePosts = false;
+                await this.fetchPosts();
+            } catch (error) {
+                console.error('Error creating post:', error);
+            }
+        },
+        async addComment(post) {
+            try {
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    throw new Error('No token found');
+                }
+                const apiUrl = process.env.VUE_APP_API_URL || 'http://localhost:3000';
+                const response = await axios.post(`${apiUrl}/comments`, {
+                    postId: post.id,
+                    content: post.newComment
+                }, {
+                    headers: { 'x-access-token': token }
+                });
+                const newComment = response.data;
+                post.comments.push(newComment);
+                post.commentsCount++;
+                post.newComment = '';
+            } catch (error) {
+                console.error('Error adding comment:', error);
+            }
+        },
+        async deletePost(post) {
+            try {
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    throw new Error('No token found');
+                }
+                const apiUrl = process.env.VUE_APP_API_URL || 'http://localhost:3000';
+                await axios.delete(`${apiUrl}/posts/${post.id}`, {
+                    headers: { 'x-access-token': token }
+                });
+                this.posts = this.posts.filter(p => p.id !== post.id);
+            } catch (error) {
+                console.error('Error deleting post:', error);
+            }
+        },
+        async deleteComment(post, comment) {
+            try {
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    throw new Error('No token found');
+                }
+                const apiUrl = process.env.VUE_APP_API_URL || 'http://localhost:3000';
+                await axios.delete(`${apiUrl}/comments/${comment.id}`, {
+                    headers: { 'x-access-token': token }
+                });
+                post.comments = post.comments.filter(c => c.id !== comment.id);
+                post.commentsCount--;
+            } catch (error) {
+                console.error('Error deleting comment:', error);
+            }
+        },
         async checkIfBanned() {
             try {
                 const token = localStorage.getItem('token');
@@ -146,22 +325,38 @@ export default {
                     console.error('Failed to check ban status:', error);
                 }
             }
-        },
-        async postTweet() {
-            // Implement the functionality to post a tweet
-        },
-        toggleDarkMode() {
-            this.isDarkMode = !this.isDarkMode;
-            document.documentElement.classList.toggle('dark', this.isDarkMode);
-        },
-        logout() {
-            localStorage.removeItem('token');
-            this.$router.push('/login');
         }
     }
 };
 </script>
 
 <style scoped>
-/* Add Tailwind or custom styles as needed */
+.like-button .fa-heart.animate-like {
+    animation: like-animation 0.5s;
+}
+
+@keyframes like-animation {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.5);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+.slide-enter-active,
+.slide-leave-active {
+    transition: max-height 0.5s ease;
+}
+
+.slide-enter,
+.slide-leave-to {
+    max-height: 0;
+    overflow: hidden;
+}
 </style>
