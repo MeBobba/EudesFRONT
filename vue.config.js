@@ -27,7 +27,7 @@ module.exports = {
     ],
   },
   pwa: {
-    name: 'MeBobba', // Assurez-vous que le nom est correctement défini ici
+    name: 'EudesCMS', // Assurez-vous que le nom est correctement défini ici
     themeColor: '#ffffff',
     msTileColor: '#ffffff',
     appleMobileWebAppCapable: 'yes',
