@@ -13,6 +13,10 @@
                         class="p-4 rounded-lg shadow-md mb-8">
                         <textarea v-model="newPostContent" class="w-full p-4 border border-gray-300 rounded-lg"
                             placeholder="What's on your mind?"></textarea>
+                        <div class="mt-2">
+                            <input v-model="newPostVideo" type="text"
+                                class="w-full p-2 border border-gray-300 rounded-lg" placeholder="Video URL">
+                        </div>
                         <div class="mt-4 flex items-center">
                             <select v-model="postVisibility" class="border border-gray-300 rounded-lg p-2 mr-4">
                                 <option value="public">Public</option>
@@ -20,10 +24,18 @@
                             </select>
                             <button @click="createPost" class="bg-blue-500 text-white p-2 rounded-lg">Post</button>
                         </div>
+                        <div class="relative mt-2">
+                            <button @click="toggleEmojiPicker" class="absolute right-0 bottom-0 p-2">
+                                <fa-icon icon="smile" />
+                            </button>
+                            <div v-if="showEmojiPicker" class="absolute z-10 emoji-picker-container">
+                                <emoji-picker @emoji-click="addEmoji"></emoji-picker>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- User Posts -->
-                    <div v-for="post in posts" :key="post.id"
+                    <div :key="post.id" v-for="post in posts"
                         class="mb-8 p-4 bg-white dark:bg-gray-800 rounded-lg shadow-md">
                         <div class="flex items-center justify-between mb-4">
                             <div class="flex items-center">
@@ -41,6 +53,8 @@
                         <p class="mb-4">{{ post.content }}</p>
                         <img v-if="post.image" :src="post.image" alt="Post Image"
                             class="w-full h-48 object-cover rounded-lg mb-4">
+                        <iframe v-if="post.video" :src="getVideoEmbedUrl(post.video)" frameborder="0" allowfullscreen
+                            class="w-full h-48 mb-4"></iframe>
                         <div class="flex items-center">
                             <button @click="toggleLike(post)" class="mr-4 like-button">
                                 <fa-icon :icon="['fas', 'heart']"
@@ -48,8 +62,8 @@
                                 <span>{{ post.likesCount }}</span>
                             </button>
                             <button @click="toggleComments(post)" class="flex items-center">
-                                <fa-icon icon="comment" class="text-gray-500" /><span class="ml-1">{{ post.commentsCount
-                                    }}</span>
+                                <fa-icon icon="comment" class="text-gray-500" />
+                                <span class="ml-1">{{ post.commentsCount }}</span>
                             </button>
                         </div>
                         <transition name="slide-fade">
@@ -125,9 +139,10 @@ import UserProfile from '../components/UserProfile.vue';
 import ErrorMessage from '../components/ErrorMessage.vue';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { library } from '@fortawesome/fontawesome-svg-core';
-import { faHeart, faComment, faTrashAlt } from '@fortawesome/free-solid-svg-icons';
+import { faHeart, faComment, faTrashAlt, faSmile } from '@fortawesome/free-solid-svg-icons';
+import 'emoji-picker-element';
 
-library.add(faHeart, faComment, faTrashAlt);
+library.add(faHeart, faComment, faTrashAlt, faSmile);
 
 export default {
     name: 'UserDashboard',
@@ -135,7 +150,8 @@ export default {
         AppHeader,
         UserProfile,
         ErrorMessage,
-        'fa-icon': FontAwesomeIcon
+        'fa-icon': FontAwesomeIcon,
+        EmojiPicker: 'emoji-picker'
     },
     data() {
         return {
@@ -144,6 +160,7 @@ export default {
             error: false,
             errorMessage: '',
             newPostContent: '',
+            newPostVideo: '',
             postVisibility: 'public',
             headerImage: require('@/assets/images/skeleton/logo.gif'), // Replace with your own image
             suggestions: [], // Add suggestions data
@@ -153,7 +170,8 @@ export default {
             page: 1,
             limit: 10,
             loading: false,
-            noMorePosts: false
+            noMorePosts: false,
+            showEmojiPicker: false
         };
     },
     async created() {
@@ -233,11 +251,13 @@ export default {
                 const apiUrl = process.env.VUE_APP_API_URL || 'http://localhost:3000';
                 await axios.post(`${apiUrl}/posts`, {
                     content: this.newPostContent,
+                    video: this.newPostVideo,
                     visibility: this.postVisibility
                 }, {
                     headers: { 'x-access-token': token }
                 });
                 this.newPostContent = '';
+                this.newPostVideo = '';
                 this.postVisibility = 'public';
                 this.page = 1;
                 this.posts = [];
@@ -332,6 +352,14 @@ export default {
         toggleComments(post) {
             post.showComments = !post.showComments;
         },
+        toggleEmojiPicker() {
+            this.showEmojiPicker = !this.showEmojiPicker;
+        },
+        addEmoji(event) {
+            if (event.detail && event.detail.unicode) {
+                this.newPostContent += event.detail.unicode;
+            }
+        },
         toggleDarkMode() {
             this.isDarkMode = !this.isDarkMode;
             document.documentElement.classList.toggle('dark', this.isDarkMode);
@@ -343,6 +371,21 @@ export default {
         formatDate(dateString) {
             const options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
             return new Date(dateString).toLocaleDateString(undefined, options);
+        },
+        getVideoEmbedUrl(url) {
+            const youtubeMatch = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|v\/|.*?v=))([^?&]+)/);
+            if (youtubeMatch) {
+                return `https://www.youtube.com/embed/${youtubeMatch[1]}`;
+            }
+            const vimeoMatch = url.match(/(?:vimeo\.com\/(?:.*#|.*\/videos\/|.*\/)?)([0-9]+)/);
+            if (vimeoMatch) {
+                return `https://player.vimeo.com/video/${vimeoMatch[1]}`;
+            }
+            const dailymotionMatch = url.match(/(?:dailymotion\.com\/(?:video|hub)\/([^_]+)|dai\.ly\/([^_]+))/);
+            if (dailymotionMatch) {
+                return `https://www.dailymotion.com/embed/video/${dailymotionMatch[1] || dailymotionMatch[2]}`;
+            }
+            return '';
         }
     }
 };
@@ -365,6 +408,11 @@ export default {
     100% {
         transform: scale(1);
     }
+}
+
+.emoji-picker-container {
+    right: 0;
+    bottom: 40px;
 }
 
 .slide-fade-enter-active {
