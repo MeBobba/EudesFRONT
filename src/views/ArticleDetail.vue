@@ -188,7 +188,7 @@ export default {
                 if (!token) {
                     throw new Error('No token found');
                 }
-                await axios.delete(`http://localhost:3000/comments/${commentId}`, {
+                await axios.delete(`http://localhost:3000/article-comments/${commentId}`, {
                     headers: { 'x-access-token': token }
                 });
                 // Remove the comment from the article
@@ -198,6 +198,7 @@ export default {
                 console.error('Error deleting comment:', error);
             }
         },
+
         async toggleLike(article) {
             try {
                 const token = localStorage.getItem('token');
