@@ -1,6 +1,6 @@
 <template>
     <div :class="{ 'bg-gray-900 text-white': isDarkMode, 'bg-gray-100 text-black': !isDarkMode }" class="min-h-screen">
-        <AppHeader :headerImage="headerImage" @toggleDarkMode="toggleDarkMode" @logout="logout" />
+        <AppHeader :logoImage="logoImage" :headerImage="headerImage" @toggleDarkMode="toggleDarkMode" @logout="logout" />
         <div class="container mx-auto px-4 py-8 mt-4">
             <UserProfile v-if="!isLoading && !error" :user="user" :isDarkMode="isDarkMode" />
             <ErrorMessage v-if="error" :message="errorMessage" />
@@ -162,7 +162,8 @@ export default {
             newPostContent: '',
             newPostVideo: '',
             postVisibility: 'public',
-            headerImage: require('@/assets/images/skeleton/logo.gif'), // Replace with your own image
+            headerImage: require('@/assets/images/skeleton/header.png'),
+            logoImage: require('@/assets/images/skeleton/logo.gif'), // Replace with your own image
             suggestions: [], // Add suggestions data
             photos: [], // Add photos data
             posts: [], // Add posts data
