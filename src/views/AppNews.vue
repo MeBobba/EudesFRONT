@@ -3,7 +3,6 @@
         <AppHeader :logoImage="logoImage" :headerImage="headerImage" @toggleDarkMode="toggleDarkMode"
             @logout="logout" />
         <div class="container mx-auto px-4 py-8">
-            <h1 class="text-4xl font-bold mb-4">News Page</h1>
             <div class="mb-6">
                 <input v-model="searchQuery" @input="filterArticles" type="text" placeholder="Search news..."
                     class="w-full p-4 border border-gray-300 rounded-lg" />
