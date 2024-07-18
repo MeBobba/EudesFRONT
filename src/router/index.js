@@ -3,6 +3,9 @@ import UserLogin from '../views/UserLogin.vue';
 import UserRegister from '../views/UserRegister.vue';
 import UserDashboard from '../views/UserDashboard.vue';
 import AppSettings from '../views/AppSettings.vue';
+import AppCommunity from '../views/AppCommunity.vue';
+import AppStaff from '../views/AppStaff.vue';
+import AppNews from '../views/AppNews.vue';
 import AppError404 from '../views/AppError404.vue';
 import AppError500 from '../views/AppError500.vue';
 import AppError from '../views/AppError.vue';
@@ -13,6 +16,9 @@ const routes = [
     { path: '/register', component: UserRegister, meta: { guest: true } },
     { path: '/dashboard', component: UserDashboard, meta: { requiresAuth: true } },
     { path: '/settings', component: AppSettings, meta: { requiresAuth: true } },
+    { path: '/community', component: AppCommunity, meta: { requiresAuth: true } },
+    { path: '/staff', component: AppStaff, meta: { requiresAuth: true } },
+    { path: '/news', component: AppNews, meta: { requiresAuth: true } },
     { path: '/404', component: AppError404 },
     { path: '/500', component: AppError500 },
     { path: '/error/:statusCode/:message', component: AppError, props: true },
