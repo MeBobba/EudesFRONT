@@ -9,6 +9,7 @@ import AppNews from '../views/AppNews.vue';
 import AppError404 from '../views/AppError404.vue';
 import AppError500 from '../views/AppError500.vue';
 import AppError from '../views/AppError.vue';
+import ArticleDetail from '../views/ArticleDetail.vue';
 
 const routes = [
     { path: '/', redirect: '/login' },
@@ -24,6 +25,7 @@ const routes = [
     { path: '/404', component: AppError404 },
     { path: '/500', component: AppError500 },
     { path: '/error/:statusCode/:message', component: AppError, props: true },
+    { path: '/articles/:id', name: 'ArticleDetail', component: ArticleDetail, meta: { requiresAuth: true } },
     { path: '/:catchAll(.*)', redirect: '/404' }
 ];
 
