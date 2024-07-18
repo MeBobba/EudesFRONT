@@ -27,9 +27,9 @@
                     </div>
                 </div>
             </div>
-            <router-link to="/settings"
+            <router-link v-if="isCurrentUser" to="/settings"
                 class="px-4 py-2 bg-blue-500 text-white rounded-lg relative">Settings</router-link>
-            <router-link to="/client"
+            <router-link v-if="isCurrentUser" to="/client"
                 class="ml-5 px-4 py-2 bg-green-500 text-white rounded-lg relative">Play Now</router-link>
         </div>
         <div class="relative mt-4">
@@ -53,6 +53,7 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { faHeart } from '@fortawesome/free-solid-svg-icons'
 import backgroundImage from '@/assets/images/skeleton/topbg.png'
+import axios from 'axios'
 
 library.add(faHeart)
 
@@ -61,10 +62,6 @@ export default {
         'fa-icon': FontAwesomeIcon
     },
     props: {
-        user: {
-            type: Object,
-            required: true
-        },
         isDarkMode: {
             type: Boolean,
             required: true
@@ -72,7 +69,30 @@ export default {
     },
     data() {
         return {
-            backgroundImage
+            user: {},
+            backgroundImage,
+            isCurrentUser: false
+        }
+    },
+    async created() {
+        const userId = this.$route.params.userId || 'me';
+        const currentUserId = localStorage.getItem('userId');
+        this.isCurrentUser = userId === currentUserId || userId === 'me';
+        await this.fetchUserProfile(userId);
+    },
+    methods: {
+        async fetchUserProfile(userId) {
+            try {
+                const token = localStorage.getItem('token');
+                const apiUrl = process.env.VUE_APP_API_URL || 'http://localhost:3000';
+                const url = userId === 'me' || !userId ? `${apiUrl}/profile/me` : `${apiUrl}/profile/${userId}`;
+                const response = await axios.get(url, {
+                    headers: { 'x-access-token': token }
+                });
+                this.user = response.data;
+            } catch (error) {
+                console.error('Error fetching user profile:', error);
+            }
         }
     }
 }

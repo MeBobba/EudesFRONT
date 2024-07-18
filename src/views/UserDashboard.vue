@@ -11,7 +11,7 @@
                 <div class="w-full lg:w-2/3 lg:pr-8">
                     <!-- Post Input -->
                     <div :class="{ 'bg-gray-800 text-white': isDarkMode, 'bg-white text-black': !isDarkMode }"
-                        class="p-4 rounded-lg shadow-md mb-8">
+                        class="p-4 rounded-lg shadow-md mb-8" v-if="isCurrentUser">
                         <textarea v-model="newPostContent" class="w-full p-4 border border-gray-300 rounded-lg"
                             placeholder="What's on your mind?"></textarea>
                         <div class="mt-2">
@@ -176,13 +176,15 @@ export default {
             limit: 10,
             loading: false,
             noMorePosts: false,
-            showEmojiPicker: false
+            showEmojiPicker: false,
+            isCurrentUser: true, // Add flag to determine if viewing current user
         };
     },
     async created() {
-        await this.fetchUserData();
-        await this.fetchPosts();
-        await this.fetchUserPhotos(); // Fetch user photos
+        const userId = this.$route.params.userId || 'me';
+        await this.fetchUserData(userId);
+        await this.fetchPosts(userId);
+        await this.fetchUserPhotos(userId);
         this.checkBanInterval = setInterval(this.checkIfBanned, 5000);
         window.addEventListener('scroll', this.handleScroll);
     },
@@ -190,19 +192,33 @@ export default {
         clearInterval(this.checkBanInterval);
         window.removeEventListener('scroll', this.handleScroll);
     },
+    watch: {
+        '$route.params.userId': {
+            handler(newUserId) {
+                const userId = newUserId || 'me';
+                this.fetchUserData(userId);
+                this.fetchPosts(userId);
+                this.fetchUserPhotos(userId);
+            },
+            immediate: true
+        }
+    },
     methods: {
-        async fetchUserData() {
+        async fetchUserData(userId) {
+            this.isLoading = true;
+            this.error = false;
             try {
                 const token = localStorage.getItem('token');
                 if (!token) {
                     throw new Error('No token found');
                 }
                 const apiUrl = process.env.VUE_APP_API_URL || 'http://localhost:3000';
-                const response = await axios.get(`${apiUrl}/dashboard`, {
+                const url = userId === 'me' || !userId ? `${apiUrl}/profile/me` : `${apiUrl}/profile/${userId}`;
+                const response = await axios.get(url, {
                     headers: { 'x-access-token': token }
                 });
                 this.user = response.data;
-                this.suggestions = response.data.suggestions; // Assume suggestions are part of the response
+                this.isCurrentUser = userId === 'me' || userId == localStorage.getItem('userId');
                 this.isLoading = false;
             } catch (error) {
                 this.error = true;
@@ -212,14 +228,15 @@ export default {
                 this.isLoading = false;
             }
         },
-        async fetchUserPhotos() {
+        async fetchUserPhotos(userId) {
             try {
                 const token = localStorage.getItem('token');
                 if (!token) {
                     throw new Error('No token found');
                 }
                 const apiUrl = process.env.VUE_APP_API_URL || 'http://localhost:3000';
-                const response = await axios.get(`${apiUrl}/user-photos`, {
+                const url = userId === 'me' ? `${apiUrl}/user-photos/me` : `${apiUrl}/user-photos/${userId}`;
+                const response = await axios.get(url, {
                     headers: { 'x-access-token': token }
                 });
                 this.photos = response.data;
@@ -227,7 +244,7 @@ export default {
                 console.error('Error fetching user photos:', error);
             }
         },
-        async fetchPosts() {
+        async fetchPosts(userId) {
             if (this.loading) return;
             this.loading = true;
             try {
@@ -236,7 +253,8 @@ export default {
                     throw new Error('No token found');
                 }
                 const apiUrl = process.env.VUE_APP_API_URL || 'http://localhost:3000';
-                const response = await axios.get(`${apiUrl}/posts`, {
+                const url = userId === 'me' ? `${apiUrl}/posts/me` : `${apiUrl}/posts/${userId}`;
+                const response = await axios.get(url, {
                     headers: { 'x-access-token': token },
                     params: { page: this.page, limit: this.limit }
                 });
@@ -410,45 +428,3 @@ export default {
     }
 };
 </script>
-
-<style scoped>
-.like-button .fa-heart.animate-like {
-    animation: like-animation 0.5s;
-}
-
-@keyframes like-animation {
-    0% {
-        transform: scale(1);
-    }
-
-    50% {
-        transform: scale(1.5);
-    }
-
-    100% {
-        transform: scale(1);
-    }
-}
-
-.emoji-picker-container {
-    right: 0;
-    bottom: 40px;
-}
-
-.slide-fade-enter-active {
-    transition: all 0.3s ease;
-}
-
-.slide-fade-leave-active {
-    transition: all 0.3s ease;
-}
-
-.slide-fade-enter,
-.slide-fade-leave-to
-
-/* .slide-fade-leave-active in <2.1.8 */
-    {
-    transform: translateY(10px);
-    opacity: 0;
-}
-</style>

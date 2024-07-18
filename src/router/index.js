@@ -19,6 +19,8 @@ const routes = [
     { path: '/community', component: AppCommunity, meta: { requiresAuth: true } },
     { path: '/staff', component: AppStaff, meta: { requiresAuth: true } },
     { path: '/news', component: AppNews, meta: { requiresAuth: true } },
+    { path: '/dashboard/:userId', component: UserDashboard, meta: { requiresAuth: true } },
+    { path: '/dashboard', redirect: `/dashboard/me` },
     { path: '/404', component: AppError404 },
     { path: '/500', component: AppError500 },
     { path: '/error/:statusCode/:message', component: AppError, props: true },

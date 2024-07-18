@@ -17,7 +17,20 @@
                         <li><router-link to="/news" class="nav-link">News</router-link></li>
                     </ul>
                 </nav>
-                <div class="flex space-x-4">
+                <div class="relative flex space-x-4">
+                    <input type="text" v-model="searchQuery" @input="searchUsers" placeholder="Search..."
+                        class="p-2 border rounded-lg">
+                    <div v-if="searchResults.length"
+                        class="absolute top-full mt-2 right-0 w-auto bg-white shadow-lg rounded-lg z-10"
+                        :style="{ width: '200px' }">
+                        <ul>
+                            <li v-for="result in searchResults" :key="result.id" class="p-2 border-b hover:bg-gray-200">
+                                <router-link :to="`/dashboard/${result.id}`" @click="clearSearch">{{ result.username
+                                    }}</router-link>
+                            </li>
+                        </ul>
+                    </div>
+
                     <button @click="toggleDarkMode" class="toggle-dark-mode-btn">
                         <fa-icon :icon="isDarkMode ? 'sun' : 'moon'" />
                     </button>
@@ -32,6 +45,7 @@
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { faSun, faMoon } from '@fortawesome/free-solid-svg-icons';
+import axios from 'axios';
 
 library.add(faSun, faMoon);
 
@@ -51,7 +65,9 @@ export default {
     },
     data() {
         return {
-            isDarkMode: false
+            isDarkMode: false,
+            searchQuery: '',
+            searchResults: []
         };
     },
     methods: {
@@ -59,11 +75,32 @@ export default {
             this.isDarkMode = !this.isDarkMode;
             document.documentElement.classList.toggle('dark', this.isDarkMode);
         },
+        async searchUsers() {
+            if (this.searchQuery.trim() === '') {
+                this.searchResults = [];
+                return;
+            }
+            try {
+                const token = localStorage.getItem('token');
+                const apiUrl = process.env.VUE_APP_API_URL || 'http://localhost:3000';
+                const response = await axios.get(`${apiUrl}/search-users`, {
+                    params: { query: this.searchQuery },
+                    headers: { 'x-access-token': token }
+                });
+                this.searchResults = response.data;
+            } catch (error) {
+                console.error('Error searching users:', error);
+            }
+        },
+
+        clearSearch() {
+            this.searchQuery = '';
+            this.searchResults = [];
+        },
         async logout() {
             try {
                 const token = localStorage.getItem('token');
-                await fetch('http://localhost:3000/logout', {
-                    method: 'POST',
+                await axios.post(`${process.env.VUE_APP_API_URL || 'http://localhost:3000'}/logout`, {}, {
                     headers: {
                         'Content-Type': 'application/json',
                         'x-access-token': token
@@ -73,11 +110,10 @@ export default {
                 this.$router.push('/login');
             } catch (error) {
                 console.error('Logout error:', error);
-                // Handle error (show message, etc.)
             }
         }
     }
-}
+};
 </script>
 
 <style scoped>
