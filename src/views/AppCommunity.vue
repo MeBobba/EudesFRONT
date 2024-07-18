@@ -1,6 +1,7 @@
 <template>
     <div :class="{ 'bg-gray-900 text-white': isDarkMode, 'bg-gray-100 text-black': !isDarkMode }" class="min-h-screen">
-        <AppHeader :headerImage="headerImage" @toggleDarkMode="toggleDarkMode" @logout="logout" />
+        <AppHeader :logoImage="logoImage" :headerImage="headerImage" @toggleDarkMode="toggleDarkMode"
+            @logout="logout" />
         <div class="container mx-auto px-4 py-8 flex flex-col lg:flex-row">
             <div class="w-full lg:w-2/3 lg:pr-8">
                 <div v-if="error" class="text-red-500">{{ errorMessage }}</div>
@@ -71,6 +72,7 @@
                 </div>
             </div>
             <div class="w-full lg:w-1/3 lg:pl-8">
+                <!-- Card 1: What's on your mind? -->
                 <div :class="{ 'bg-gray-800 text-white': isDarkMode, 'bg-white text-black': !isDarkMode }"
                     class="p-4 rounded-lg shadow-md mb-8">
                     <div class="mb-4">
@@ -91,28 +93,34 @@
                             <button @click="toggleEmojiPicker" class="absolute right-0 bottom-0 p-2">
                                 <fa-icon icon="smile" />
                             </button>
-                            <div v-if="showEmojiPicker" class="absolute z-10">
+                            <div v-if="showEmojiPicker" class="absolute z-10 emoji-picker-container">
                                 <emoji-picker @emoji-click="addEmoji"></emoji-picker>
                             </div>
                         </div>
                     </div>
-                    <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md mb-8">
-                        <h2 class="text-2xl font-bold mb-4">Example Card 1</h2>
-                        <p>Content goes here...</p>
-                    </div>
-                    <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md mb-8">
-                        <h2 class="text-2xl font-bold mb-4">Example Card 2</h2>
-                        <p>Content goes here...</p>
-                    </div>
+                </div>
+                <!-- Card 2: Example Card 1 -->
+                <div :class="{ 'bg-gray-800 text-white': isDarkMode, 'bg-white text-black': !isDarkMode }"
+                    class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md mb-8">
+                    <h2 class="text-2xl font-bold mb-4">Example Card 1</h2>
+                    <p>Content goes here...</p>
+                </div>
+                <!-- Card 3: Example Card 2 -->
+                <div :class="{ 'bg-gray-800 text-white': isDarkMode, 'bg-white text-black': !isDarkMode }"
+                    class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md mb-8">
+                    <h2 class="text-2xl font-bold mb-4">Example Card 2</h2>
+                    <p>Content goes here...</p>
                 </div>
             </div>
         </div>
     </div>
+    <AppFooter :logoImage="logoImage"/>
 </template>
 
 <script>
 import axios from 'axios';
 import AppHeader from '../components/AppHeader.vue';
+import AppFooter from '../components/AppFooter.vue';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { faHeart, faComment, faTrashAlt, faSmile } from '@fortawesome/free-solid-svg-icons';
@@ -124,12 +132,14 @@ export default {
     name: 'AppCommunity',
     components: {
         AppHeader,
+        AppFooter,
         'fa-icon': FontAwesomeIcon,
         EmojiPicker: 'emoji-picker'
     },
     data() {
         return {
-            headerImage: require('@/assets/images/skeleton/logo.gif'), // Replace with your own image
+            headerImage: require('@/assets/images/skeleton/header.png'),
+            logoImage: require('@/assets/images/skeleton/logo.gif'), // Replace with your own image
             isDarkMode: false,
             posts: [],
             user: {},
@@ -329,7 +339,7 @@ export default {
             this.showEmojiPicker = !this.showEmojiPicker;
         },
         addEmoji(event) {
-            this.newPostContent += event.emoji.unicode;
+            this.newPostContent += event.detail.unicode;
         },
         formatDate(dateString) {
             const options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
@@ -371,6 +381,11 @@ export default {
     100% {
         transform: scale(1);
     }
+}
+
+.emoji-picker-container {
+    right: 0;
+    bottom: 40px;
 }
 
 .slide-fade-enter-active {
