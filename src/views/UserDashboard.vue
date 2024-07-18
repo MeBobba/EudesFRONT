@@ -36,7 +36,7 @@
                     </div>
 
                     <!-- User Posts -->
-                    <div :key="post.id" v-for="post in posts"
+                    <div v-for="post in posts" :key="post.id" :ref="`post-${post.id}`"
                         class="mb-8 p-4 bg-white dark:bg-gray-800 rounded-lg shadow-md">
                         <div class="flex items-center justify-between mb-4">
                             <div class="flex items-center">
@@ -196,6 +196,7 @@ export default {
     watch: {
         '$route.params.userId': {
             handler(newUserId) {
+                this.resetPosts();
                 const userId = newUserId || 'me';
                 this.fetchUserData(userId);
                 this.fetchPosts(userId);
@@ -205,6 +206,11 @@ export default {
         }
     },
     methods: {
+        resetPosts() {
+            this.posts = [];
+            this.page = 1;
+            this.noMorePosts = false;
+        },
         async fetchUserData(userId) {
             this.isLoading = true;
             this.error = false;
@@ -254,7 +260,7 @@ export default {
                     throw new Error('No token found');
                 }
                 const apiUrl = process.env.VUE_APP_API_URL || 'http://localhost:3000';
-                const url = userId === 'me' ? `${apiUrl}/posts/me` : `${apiUrl}/posts/${userId}`;
+                const url = `${apiUrl}/posts/${userId}`;
                 const response = await axios.get(url, {
                     headers: { 'x-access-token': token },
                     params: { page: this.page, limit: this.limit }
@@ -320,6 +326,9 @@ export default {
                     headers: { 'x-access-token': token }
                 });
                 const newComment = response.data;
+                if (!post.comments) {
+                    post.comments = [];
+                }
                 post.comments.push(newComment);
                 post.commentsCount++;
                 post.newComment = '';
@@ -353,13 +362,18 @@ export default {
                     throw new Error('No token found');
                 }
                 const apiUrl = process.env.VUE_APP_API_URL || 'http://localhost:3000';
-                await axios.delete(`${apiUrl}/posts/${postId}`, {
+                const response = await axios.delete(`${apiUrl}/posts/${postId}`, {
                     headers: { 'x-access-token': token }
                 });
-                // Remove the post from the list
-                this.posts = this.posts.filter(post => post.id !== postId);
+                if (response.status === 200) {
+                    // Remove the post from the list
+                    this.posts = this.posts.filter(post => post.id !== postId);
+                } else {
+                    throw new Error('Failed to delete post');
+                }
             } catch (error) {
                 console.error('Error deleting post:', error);
+                alert('Failed to delete post. Please try again later.');
             }
         },
         async toggleLike(post) {
@@ -377,7 +391,7 @@ export default {
                 });
                 post.userLike = post.userLike !== true ? true : null;
                 post.likesCount += post.userLike ? 1 : -1;
-                const likeIcon = this.$el.querySelector(`#post-${post.id} .fa-heart`);
+                const likeIcon = this.$refs[`post-${post.id}`][0].querySelector('.fa-heart');
                 if (likeIcon) {
                     likeIcon.classList.add('animate-like');
                     setTimeout(() => {

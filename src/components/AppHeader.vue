@@ -21,9 +21,19 @@
                         <li><router-link to="/staff" class="nav-link">Staff</router-link></li>
                         <li><router-link to="/news" class="nav-link">News</router-link></li>
                     </ul>
-                    <input type="text" v-model="searchQuery" @input="searchUsers" placeholder="Search..."
-                        class="p-2 sm:px-3 md:px-4 border rounded-lg">
-                    <div class="flex space-x-4 ml-auto"> <!-- Flex pour aligner les boutons -->
+                    <div class="relative flex space-x-4 ml-auto"> <!-- Flex pour aligner les boutons -->
+                        <input type="text" v-model="searchQuery" @input="searchUsers" placeholder="Search..."
+                            class="p-2 sm:px-3 md:px-4 border rounded-lg">
+                        <div v-if="searchResults.length"
+                            class="absolute top-full left-0 mt-1 w-full bg-white shadow-lg rounded-lg z-10">
+                            <ul>
+                                <li v-for="result in searchResults" :key="result.id"
+                                    class="p-2 border-b hover:bg-gray-200">
+                                    <router-link :to="`/dashboard/${result.id}`" @click="clearSearch">{{ result.username
+                                        }}</router-link>
+                                </li>
+                            </ul>
+                        </div>
                         <button @click="toggleDarkMode" class="toggle-dark-mode-btn">
                             <fa-icon :icon="isDarkMode ? 'sun' : 'moon'" />
                         </button>
@@ -51,7 +61,14 @@
                 <div class="sm:hidden w-full" :class="{ 'block': isMenuOpen, 'hidden': !isMenuOpen }">
                     <input type="text" v-model="searchQuery" @input="searchUsers" placeholder="Search..."
                         class="p-2 sm:px-3 md:px-4 border rounded-lg mt-10 mb-4 w-full">
-
+                    <div v-if="searchResults.length" class="relative w-full">
+                        <ul class="absolute top-full left-0 mt-1 w-full bg-white shadow-lg rounded-lg z-10">
+                            <li v-for="result in searchResults" :key="result.id" class="p-2 border-b hover:bg-gray-200">
+                                <router-link :to="`/dashboard/${result.id}`" @click="clearSearch">{{ result.username
+                                    }}</router-link>
+                            </li>
+                        </ul>
+                    </div>
                     <ul class="space-y-2 w-full">
                         <li><router-link to="/" class="block px-4 py-2 rounded-lg nav-link">Home</router-link></li>
                         <li><router-link to="/community"

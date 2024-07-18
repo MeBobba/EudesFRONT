@@ -1,6 +1,7 @@
 <template>
     <div :class="{ 'bg-gray-900 text-white': isDarkMode, 'bg-gray-100 text-black': !isDarkMode }" class="min-h-screen">
-        <AppHeader :headerImage="headerImage" @toggleDarkMode="toggleDarkMode" @logout="logout" />
+        <AppHeader :logoImage="logoImage" :headerImage="headerImage" @toggleDarkMode="toggleDarkMode"
+            @logout="logout" />
         <div class="container mx-auto px-4 py-8">
             <h1 class="text-4xl font-bold mb-4">Staff Page</h1>
             <!-- Add your content here -->
