@@ -41,7 +41,7 @@
                         <div class="flex items-center justify-between mb-4">
                             <div class="flex items-center">
                                 <img :src="`http://www.habbo.com/habbo-imaging/avatarimage?figure=${post.look}&direction=3&head_direction=3&gesture=nor&action=null&size=m&headonly=1&img_format=gif`"
-                                    class="rounded-full border-2 border-blue-500 p-1 bg-white" alt="User Profile">
+                                    class="rounded-full border-2 border-blue-500 bg-white" alt="User Profile">
                                 <div class="ml-4">
                                     <h3 class="font-semibold">{{ post.username }}</h3>
                                     <p class="text-gray-600">{{ formatDate(post.created_at) }}</p>
@@ -123,7 +123,7 @@
                         <h2 class="text-2xl font-bold mb-4">Photos</h2>
                         <div class="grid grid-cols-3 gap-2">
                             <div v-for="photo in photos" :key="photo.id">
-                                <img :src="photo.image" alt="Photo" class="w-full h-24 object-cover rounded-lg">
+                                <img :src="photo.url" alt="Photo" class="w-full h-24 object-cover rounded-lg">
                             </div>
                         </div>
                     </div>
@@ -131,11 +131,13 @@
             </div>
         </div>
     </div>
+    <AppFooter :logoImage="logoImage" />
 </template>
 
 <script>
 import axios from 'axios';
 import AppHeader from '../components/AppHeader.vue';
+import AppFooter from '../components/AppFooter.vue';
 import UserProfile from '../components/UserProfile.vue';
 import ErrorMessage from '../components/ErrorMessage.vue';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
@@ -149,6 +151,7 @@ export default {
     name: 'UserDashboard',
     components: {
         AppHeader,
+        AppFooter,
         UserProfile,
         ErrorMessage,
         'fa-icon': FontAwesomeIcon,
@@ -179,6 +182,7 @@ export default {
     async created() {
         await this.fetchUserData();
         await this.fetchPosts();
+        await this.fetchUserPhotos(); // Fetch user photos
         this.checkBanInterval = setInterval(this.checkIfBanned, 5000);
         window.addEventListener('scroll', this.handleScroll);
     },
@@ -199,7 +203,6 @@ export default {
                 });
                 this.user = response.data;
                 this.suggestions = response.data.suggestions; // Assume suggestions are part of the response
-                this.photos = response.data.photos; // Assume photos are part of the response
                 this.isLoading = false;
             } catch (error) {
                 this.error = true;
@@ -207,6 +210,21 @@ export default {
                     ? error.response.data || 'Failed to fetch user data. Please try again later.'
                     : 'Failed to fetch user data. Please check your network connection.';
                 this.isLoading = false;
+            }
+        },
+        async fetchUserPhotos() {
+            try {
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    throw new Error('No token found');
+                }
+                const apiUrl = process.env.VUE_APP_API_URL || 'http://localhost:3000';
+                const response = await axios.get(`${apiUrl}/user-photos`, {
+                    headers: { 'x-access-token': token }
+                });
+                this.photos = response.data;
+            } catch (error) {
+                console.error('Error fetching user photos:', error);
             }
         },
         async fetchPosts() {

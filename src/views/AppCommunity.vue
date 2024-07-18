@@ -11,7 +11,7 @@
                         <div class="flex items-center justify-between mb-4">
                             <div class="flex items-center">
                                 <img :src="`http://www.habbo.com/habbo-imaging/avatarimage?figure=${post.look}&direction=3&head_direction=3&gesture=nor&action=null&size=m&headonly=1&img_format=gif`"
-                                    class="rounded-full border-2 border-blue-500 p-1 bg-white" alt="User Profile">
+                                    class="rounded-full border-2 border-blue-500 bg-white" alt="User Profile">
                                 <div class="ml-4">
                                     <h3 class="font-semibold">{{ post.username }}</h3>
                                     <p class="text-gray-600">{{ formatDate(post.created_at) }}</p>
