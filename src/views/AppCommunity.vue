@@ -289,15 +289,20 @@ export default {
                 await axios.delete(`${apiUrl}/comments/${commentId}`, {
                     headers: { 'x-access-token': token }
                 });
-                // Remove the comment from the post
+                // Remove the comment from the post and update commentsCount
                 this.posts = this.posts.map(post => {
-                    post.comments = post.comments.filter(comment => comment.id !== commentId);
+                    const updatedComments = post.comments.filter(c => c.id !== commentId);
+                    if (updatedComments.length !== post.comments.length) {
+                        post.comments = updatedComments;
+                        post.commentsCount = updatedComments.length;
+                    }
                     return post;
                 });
             } catch (error) {
                 console.error('Error deleting comment:', error);
             }
         },
+
         async deletePost(postId) {
             try {
                 const token = localStorage.getItem('token');
@@ -403,7 +408,10 @@ export default {
 .emoji-picker-container {
     right: 0;
     bottom: 40px;
+    z-index: 1000;
+    /* Ajouter un z-index élevé pour mettre la boîte en avant */
 }
+
 
 .slide-fade-enter-active {
     transition: all 0.3s ease;

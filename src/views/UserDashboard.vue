@@ -360,7 +360,7 @@ export default {
                 });
                 // Remove the comment from the post
                 this.posts = this.posts.map(post => {
-                    post.comments = post.comments.filter(comment => comment.id !== commentId);
+                    post.comments = post.comments.filter(c => c.id !== commentId);
                     return post;
                 });
             } catch (error) {
