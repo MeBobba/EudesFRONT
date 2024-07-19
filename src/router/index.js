@@ -12,6 +12,7 @@ import AppError from '../views/AppError.vue';
 import ArticleDetail from '../views/ArticleDetail.vue';
 import AppGames from '../views/AppGames.vue';
 import GameDetail from '../views/GameDetail.vue';
+import AppMusics from '../views/AppMusics.vue';
 
 const routes = [
     { path: '/', redirect: '/login' },
@@ -23,6 +24,7 @@ const routes = [
     { path: '/games', component: AppGames, meta: { requiresAuth: true } },
     { path: '/games/:id', name: 'GameDetail', component: GameDetail, meta: { requiresAuth: true } },
     { path: '/staff', component: AppStaff, meta: { requiresAuth: true } },
+    { path: '/musics', component: AppMusics, meta: { requiresAuth: true } },
     { path: '/news', component: AppNews, meta: { requiresAuth: true } },
     { path: '/dashboard/:userId', component: UserDashboard, meta: { requiresAuth: true } },
     { path: '/dashboard', redirect: `/dashboard/me` },

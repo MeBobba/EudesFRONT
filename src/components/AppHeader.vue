@@ -25,6 +25,8 @@
                                 exact-active-class="exact-active">Games</router-link></li>
                         <li><router-link to="/staff" class="nav-link" active-class="active"
                                 exact-active-class="exact-active">Staff</router-link></li>
+                        <li><router-link to="/musics" class="nav-link" active-class="active"
+                                exact-active-class="exact-active">Musics</router-link></li>
                         <li><router-link to="/news" class="nav-link" active-class="active"
                                 exact-active-class="exact-active">News</router-link></li>
                     </ul>
@@ -129,7 +131,8 @@ export default {
             isDarkMode: false,
             searchQuery: '',
             searchResults: [],
-            isMenuOpen: false
+            isMenuOpen: false,
+            sessionCheckInterval: null,
         };
     },
     methods: {
@@ -175,7 +178,30 @@ export default {
         },
         toggleMenu() {
             this.isMenuOpen = !this.isMenuOpen;
+        },
+        async checkSession() {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                this.logout();
+            } else {
+                try {
+                    const response = await axios.get(`${process.env.VUE_APP_API_URL || 'http://localhost:3000'}/check-session`, {
+                        headers: { 'x-access-token': token }
+                    });
+                    if (!response.data.valid) {
+                        this.logout();
+                    }
+                } catch (error) {
+                    this.logout();
+                }
+            }
         }
+    },
+    created() {
+        this.sessionCheckInterval = setInterval(this.checkSession, 60000); // Vérifier la session toutes les 60 secondes
+    },
+    beforeUnmount() {
+        clearInterval(this.sessionCheckInterval);
     }
 };
 </script>
