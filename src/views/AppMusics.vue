@@ -1,15 +1,17 @@
 <template>
-    <div :class="{ 'bg-gray-900 text-white': isDarkMode, 'bg-gray-100 text-black': !isDarkMode }" class="min-h-screen">
+    <div :class="{ 'bg-gray-900 text-white': isDarkMode, 'bg-gray-100 text-black': !isDarkMode }"
+        class="min-h-screen font-ubuntu">
         <AppHeader :logoImage="logoImage" :headerImage="headerImage" @toggleDarkMode="toggleDarkMode"
             @logout="logout" />
         <div class="container mx-auto px-4 py-8">
             <input type="text" v-model="searchQuery" @input="debouncedSearchMusic" placeholder="Search for music..."
                 class="search-bar" />
-            <section>
+            <section v-if="!searchQuery">
                 <h2 class="text-2xl font-semibold mb-4">Latest Releases</h2>
                 <div class="latest-releases grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                     <div v-for="track in latestTracks" :key="track.id" class="track-item" @click="playTrack(track)">
-                        <img :src="track.album.images[0]?.url" :alt="track.name" class="w-full h-auto rounded-lg" />
+                        <img :src="track.album.images[0]?.url || ''" :alt="track.name" class="w-full h-auto rounded-lg"
+                            v-if="track.album.images && track.album.images.length > 0" />
                         <div class="mt-2">
                             <h3 class="text-lg font-medium">{{ track.name }}</h3>
                             <p class="text-sm text-gray-500">{{ track.artists[0].name }}</p>
@@ -20,24 +22,26 @@
             <section v-if="searchResults.tracks.length || searchResults.artists.length">
                 <h2 class="text-2xl font-semibold mb-4">Search Results</h2>
                 <div class="search-results">
-                    <h3 class="text-xl font-semibold mb-2">Artists</h3>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                        <div v-for="artist in searchResults.artists" :key="artist.id" class="artist-item">
-                            <img :src="artist.images[0]?.url" :alt="artist.name" class="w-16 h-16 rounded-full" />
-                            <div class="mt-2">
-                                <h3 class="text-lg font-medium">{{ artist.name }}</h3>
-                            </div>
-                        </div>
-                    </div>
-                    <h3 class="text-xl font-semibold mt-4 mb-2">Songs</h3>
+                    <h3 class="text-xl font-semibold mb-2">Songs</h3>
                     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                         <div v-for="result in searchResults.tracks" :key="result.id" class="track-item"
                             @click="playTrack(result)">
-                            <img :src="result.album.images[0]?.url" :alt="result.name"
-                                class="w-full h-auto rounded-lg" />
+                            <img :src="result.album.images[0]?.url || ''" :alt="result.name"
+                                class="w-full h-auto rounded-lg"
+                                v-if="result.album && result.album.images && result.album.images.length > 0" />
                             <div class="mt-2">
                                 <h3 class="text-lg font-medium">{{ result.name }}</h3>
                                 <p class="text-sm text-gray-500">{{ result.artists[0].name }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <h3 class="text-xl font-semibold mt-4 mb-2">Artists</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                        <div v-for="artist in searchResults.artists" :key="artist.id" class="artist-item">
+                            <img :src="artist.images[0]?.url || ''" :alt="artist.name" class="w-16 h-16 rounded-full"
+                                v-if="artist.images && artist.images.length > 0" />
+                            <div class="mt-2">
+                                <h3 class="text-lg font-medium">{{ artist.name }}</h3>
                             </div>
                         </div>
                     </div>
@@ -45,21 +49,22 @@
             </section>
         </div>
         <div v-if="currentTrack"
-            class="music-player fixed bottom-0 left-0 right-0 bg-gray-800 text-white p-4 flex items-center justify-between rounded-t-lg shadow-lg">
-            <div class="flex items-center">
-                <img :src="currentTrack.album.images[0]?.url" alt="Album cover" class="w-16 h-16 rounded-lg" />
+            class="music-player fixed bottom-0 left-0 right-0 bg-gray-800 text-white p-4 flex flex-col sm:flex-row items-center justify-between rounded-t-lg shadow-lg">
+            <div class="flex items-center mb-4 sm:mb-0">
+                <img :src="currentTrack.album.images[0]?.url || ''" alt="Album cover" class="w-16 h-16 rounded-lg"
+                    v-if="currentTrack.album && currentTrack.album.images && currentTrack.album.images.length > 0" />
                 <div class="track-info ml-4">
                     <h3 class="text-lg font-medium">{{ currentTrack.name }}</h3>
                     <p class="text-sm text-gray-400">{{ currentTrack.artists[0].name }}</p>
                 </div>
             </div>
-            <div class="controls flex items-center flex-1 mx-4">
+            <div class="controls flex items-center flex-1 mx-4 mb-4 sm:mb-0">
                 <i class="fas fa-step-backward control-icon mx-2" @click="previousTrack"></i>
                 <i :class="[isPlaying ? 'fas fa-pause' : 'fas fa-play']" @click="togglePlayPause"
                     class="control-icon mx-2"></i>
                 <i class="fas fa-step-forward control-icon mx-2" @click="nextTrack"></i>
                 <span class="mx-2">{{ formatTime(currentTime) }}</span>
-                <input type="range" min="0" :max="duration" v-model="currentTime" @input="seek"
+                <input type="range" min="0" :max="duration" v-model="currentTime" @input="seek" @change="updateSeek"
                     class="progress-bar mx-2 flex-1" />
                 <span class="mx-2">{{ formatTime(duration) }}</span>
             </div>
@@ -73,8 +78,8 @@
         </div>
         <AppFooter :logoImage="logoImage" />
         <div v-if="showModal" class="modal fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center">
-            <div class="modal-content bg-white p-4 rounded-lg w-3/4 max-w-lg">
-                <pre class="whitespace-pre-wrap" v-html="modalContent"></pre>
+            <div class="modal-content bg-white p-4 rounded-lg w-3/4 max-w-lg max-h-screen overflow-y-auto">
+                <pre class="whitespace-pre-wrap font-ubuntu text-sm" v-html="modalContent"></pre>
                 <button @click="closeModal" class="mt-4 p-2 bg-blue-500 text-white rounded">Close</button>
             </div>
         </div>
@@ -119,7 +124,9 @@ export default {
             nextPage: 1,
             loading: false,
             noMorePosts: false,
-            lyricsTimer: null
+            lyricsTimer: null,
+            seekUpdate: false,
+            similarTracks: []
         };
     },
     computed: {
@@ -157,7 +164,7 @@ export default {
             try {
                 await this.fetchSpotifyToken();
                 const response = await this.retryRequest(
-                    'https://api.spotify.com/v1/browse/new-releases',
+                    'https://api.spotify.com/v1/browse/new-releases?limit=10',
                     {
                         headers: {
                             Authorization: `Bearer ${this.spotifyToken}`,
@@ -165,10 +172,32 @@ export default {
                     }
                 );
 
-                if (response.data && response.data.albums && response.data.albums.items) {
-                    const tracks = response.data.albums.items.map((album) => album.tracks?.items || []).flat().slice(0, 8);
-                    this.latestTracks = tracks.filter(track => track); // filter out undefined tracks
-                    this.cache[cacheKey] = this.latestTracks;
+                console.log('API Response:', response.data); // Log the entire response
+
+                if (response.data && response.data.albums && Array.isArray(response.data.albums.items)) {
+                    const albums = response.data.albums.items;
+
+                    if (albums.length > 0) {
+                        const tracks = [];
+                        for (const album of albums) {
+                            // Extraire les informations nécessaires de l'album directement
+                            if (album.artists && album.images) {
+                                tracks.push({
+                                    id: album.id,
+                                    name: album.name,
+                                    artists: album.artists,
+                                    album: { images: album.images },
+                                });
+                            }
+                        }
+
+                        this.latestTracks = tracks;
+                        console.log('Latest Tracks:', this.latestTracks); // Log the tracks array
+                        this.cache[cacheKey] = this.latestTracks;
+                    } else {
+                        console.error('No albums found in the response:', response.data);
+                        this.latestTracks = [];
+                    }
                 } else {
                     console.error('Unexpected response structure:', response.data);
                     this.latestTracks = [];
@@ -254,21 +283,26 @@ export default {
                 return false;
             }
         },
-        async playTrack(track) {
+        async playTrack(track, fromMounted = false) {
             this.currentTrack = track;
+            this.resetPlayer();
             const query = `${track.name} ${track.artists[0].name}`;
             try {
                 const response = await axios.get('https://www.googleapis.com/youtube/v3/search', {
                     params: {
                         part: 'snippet',
                         q: query,
-                        key: 'AIzaSyBDrrXAygbwfJkv7nAzeXWPTAIE3DfCRgI',
+                        key: 'AIzaSyC2RVdaBwA84zZSWxTXb8mpnAsBGKawuYM', // Replace with your new YouTube API key
                         type: 'video',
                     },
                 });
                 if (response.data && response.data.items && response.data.items.length > 0) {
                     this.youtubeVideoId = response.data.items[0].id.videoId;
-                    await this.initializePlayer();
+                    await this.initializePlayer(fromMounted);
+                    localStorage.setItem('currentTrack', JSON.stringify(track));
+                    if (!fromMounted) {
+                        localStorage.setItem('currentTime', 0); // Reset the saved time to 0
+                    }
                 } else {
                     console.error('No YouTube video found for the track:', track);
                     this.youtubeVideoId = null;
@@ -278,13 +312,13 @@ export default {
                 this.youtubeVideoId = null;
             }
         },
-        async initializePlayer() {
+        async initializePlayer(fromMounted = false) {
             await this.loadYouTubeApi();
             if (!this.player) {
                 this.player = new window.YT.Player(this.$refs.youtubePlayer, {
                     videoId: this.youtubeVideoId,
                     events: {
-                        'onReady': this.onPlayerReady,
+                        'onReady': (event) => this.onPlayerReady(event, fromMounted),
                         'onStateChange': this.onPlayerStateChange
                     }
                 });
@@ -305,7 +339,11 @@ export default {
                 window.onYouTubeIframeAPIReady = () => resolve();
             });
         },
-        onPlayerReady(event) {
+        onPlayerReady(event, fromMounted = false) {
+            const savedTime = parseFloat(localStorage.getItem('currentTime')) || 0;
+            if (savedTime && fromMounted) {
+                event.target.seekTo(savedTime, true);
+            }
             event.target.playVideo();
             this.isPlaying = true;
             this.setVolume(this.volume);
@@ -317,7 +355,51 @@ export default {
             if (event.data === window.YT.PlayerState.ENDED) {
                 this.isPlaying = false;
                 clearInterval(this.lyricsTimer);
+                this.playNextTrack();
+            } else if (event.data === window.YT.PlayerState.PLAYING) {
+                this.isPlaying = true;
+                this.duration = this.player.getDuration(); // Ensure duration is updated
+                this.updateTime();
+            } else if (event.data === window.YT.PlayerState.PAUSED) {
+                this.isPlaying = false;
             }
+        },
+        async playNextTrack() {
+            if (this.similarTracks.length === 0) {
+                await this.fetchSimilarTracks();
+            }
+            if (this.similarTracks.length > 0) {
+                const nextTrack = this.similarTracks.shift();
+                await this.playTrack(nextTrack);
+            }
+        },
+        async fetchSimilarTracks() {
+            try {
+                const response = await this.retryRequest(
+                    `https://api.spotify.com/v1/recommendations`,
+                    {
+                        headers: {
+                            Authorization: `Bearer ${this.spotifyToken}`,
+                        },
+                        params: {
+                            seed_tracks: this.currentTrack.id,
+                            limit: 10
+                        },
+                    }
+                );
+                if (response.data && response.data.tracks) {
+                    this.similarTracks = response.data.tracks;
+                } else {
+                    console.error('No similar tracks found.');
+                }
+            } catch (error) {
+                console.error('Error fetching similar tracks:', error);
+            }
+        },
+        resetPlayer() {
+            this.currentTime = 0;
+            this.duration = 0;
+            this.isPlaying = false; // Reset play/pause button state
         },
         playVideo() {
             if (this.player) {
@@ -356,11 +438,19 @@ export default {
             if (this.player) {
                 this.player.seekTo(time, true);
                 this.syncLyrics();
+                localStorage.setItem('currentTime', time);
             }
+            this.seekUpdate = true;
+        },
+        updateSeek() {
+            this.seekUpdate = false;
         },
         updateTime() {
             if (this.player && this.isPlaying) {
-                this.currentTime = this.player.getCurrentTime();
+                if (!this.seekUpdate) {
+                    this.currentTime = this.player.getCurrentTime();
+                    localStorage.setItem('currentTime', this.currentTime);
+                }
                 requestAnimationFrame(this.updateTime);
             }
         },
@@ -369,11 +459,60 @@ export default {
                 this.modalTitle = 'Lyrics';
                 this.modalContent = this.lyrics ? this.formatLyrics(this.lyrics) : 'Lyrics not available.';
                 this.showModal = true;
+                this.syncLyrics();
             });
         },
+        async fetchLyrics(track) {
+            if (!track || !track.name || !track.artists || !track.artists[0].name) return;
+
+            try {
+                const response = await axios.get('https://api.musixmatch.com/ws/1.1/matcher.lyrics.get', {
+                    params: {
+                        q_track: track.name,
+                        q_artist: track.artists[0].name,
+                        apikey: '36f47fcbf61142afa2028d7fc17f95e1'
+                    }
+                });
+                if (response.data && response.data.message && response.data.message.body && response.data.message.body.lyrics) {
+                    this.lyrics = response.data.message.body.lyrics.lyrics_body;
+                } else {
+                    console.error('No lyrics found for the track:', track);
+                    this.lyrics = 'Lyrics not available.';
+                }
+            } catch (error) {
+                console.error('Error fetching lyrics from Musixmatch:', error);
+                try {
+                    const response = await axios.get('https://api.genius.com/search', {
+                        params: {
+                            q: `${track.name} ${track.artists[0].name}`,
+                            access_token: 'Y019cPKIZWxAM-Om9bKVCX7XNB2dQ1gOHq30RHpuyvtpK5-srcAAZCuWb3uzRje4'
+                        }
+                    });
+                    if (response.data && response.data.response && response.data.response.hits.length > 0) {
+                        const songId = response.data.response.hits[0].result.id;
+                        const lyricsResponse = await axios.get(`https://api.genius.com/songs/${songId}`, {
+                            headers: { Authorization: `Bearer Y019cPKIZWxAM-Om9bKVCX7XNB2dQ1gOHq30RHpuyvtpK5-srcAAZCuWb3uzRje4` }
+                        });
+                        if (lyricsResponse.data && lyricsResponse.data.response && lyricsResponse.data.response.song) {
+                            this.lyrics = lyricsResponse.data.response.song.lyrics;
+                        } else {
+                            console.error('No lyrics found on Genius:', track);
+                            this.lyrics = 'Lyrics not available.';
+                        }
+                    } else {
+                        console.error('No lyrics found on Genius:', track);
+                        this.lyrics = 'Lyrics not available.';
+                    }
+                } catch (error) {
+                    console.error('Error fetching lyrics from Genius:', error);
+                    this.lyrics = 'Network error. Please try again later.';
+                }
+            }
+        },
         formatLyrics(lyrics) {
-            // Placeholder for formatting lyrics to sync with the music
-            return lyrics.split('\n').map((line, index) => `<span class="lyric-line" data-index="${index}">${line}</span>`).join('<br>');        },
+            return lyrics.split('\n').map((line, index) =>
+                `<span class="lyric-line" data-index="${index}" data-time="${index * 5}">${line}</span>`).join('<br>');
+        },
         showBioModal() {
             this.fetchArtistBio(this.currentTrack).then(() => {
                 this.modalTitle = 'Biography';
@@ -381,33 +520,15 @@ export default {
                 this.showModal = true;
             });
         },
-        closeModal() {
-            this.showModal = false;
-            clearInterval(this.lyricsTimer);
-        },
-        async fetchLyrics(track) {
-            if (!track || !track.name || !track.artists || !track.artists[0].name) return;
-
-            try {
-                const response = await axios.get('https://api.lyrics.ovh/v1/' + track.artists[0].name + '/' + track.name);
-                if (response.data && response.data.lyrics) {
-                    this.lyrics = response.data.lyrics;
-                } else {
-                    console.error('No lyrics found for the track:', track);
-                    this.lyrics = 'Lyrics not available.';
-                }
-            } catch (error) {
-                console.error('Error fetching lyrics:', error);
-                this.lyrics = 'Error fetching lyrics.';
-            }
-        },
         async fetchArtistBio(track) {
             if (!track || !track.artists || !track.artists[0].name) return;
 
             try {
-                const response = await axios.get(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(track.artists[0].name)}`);
-                if (response.data && response.data.extract) {
-                    this.artistBio = response.data.extract;
+                const response = await axios.get(`https://theaudiodb.com/api/v1/json/1/search.php?s=${encodeURIComponent(track.artists[0].name)}`);
+                if (response.data && response.data.artists && response.data.artists[0]) {
+                    const artist = response.data.artists[0];
+                    this.artistBio = artist.strBiographyEN;
+                    this.artistBioImages = artist.strArtistThumb;
                 } else {
                     console.error('No biography found for the artist:', track.artists[0].name);
                     this.artistBio = 'Biography not available.';
@@ -419,27 +540,32 @@ export default {
         },
         async storeTrack(trackData) {
             try {
-                await axios.post('http://localhost:8080/tracks', trackData);
-            } catch (error) {
-                if (error.response && error.response.status === 404) {
-                    console.log('API endpoint for storing track not found');
-                } else {
-                    console.error('Error storing track:', error);
+                // Check if track exists
+                const trackExists = await this.checkTrackExists(trackData.spotify_id);
+                if (!trackExists) {
+                    await axios.post('http://localhost:8080/tracks', trackData);
                 }
+            } catch (error) {
+                console.error('Error storing track:', error);
             }
         },
         async retryRequest(url, options, retries = 3, delay = 1000) {
             for (let i = 0; i < retries; i++) {
                 try {
-                    return await axios.get(url, options);
+                    const response = await axios.get(url, options);
+                    return response; // succès, on retourne la réponse
                 } catch (error) {
-                    if (i < retries - 1 && error.response && error.response.status === 429) {
-                        await new Promise((resolve) => setTimeout(resolve, delay));
+                    if (error.response && error.response.status === 429) {
+                        // Trop de requêtes, on attend et on essaie de nouveau
+                        const retryAfter = parseInt(error.response.headers['retry-after']) * 1000 || delay;
+                        console.warn(`Rate limited. Retrying after ${retryAfter}ms...`);
+                        await new Promise((resolve) => setTimeout(resolve, retryAfter));
                     } else {
-                        throw error;
+                        throw error; // autre erreur, on lance l'exception
                     }
                 }
             }
+            throw new Error('Max retries reached');
         },
         toggleDarkMode() {
             this.isDarkMode = !this.isDarkMode;
@@ -470,31 +596,53 @@ export default {
                     const lineTime = parseFloat(line.getAttribute('data-time'));
                     if (currentTime >= lineTime) {
                         line.classList.add('current-line');
+                        line.classList.remove('upcoming-line');
                     } else {
+                        line.classList.add('upcoming-line');
                         line.classList.remove('current-line');
                     }
                 });
-            }, 100);
+            }, 1000); // ajustez la fréquence de mise à jour selon vos besoins
+        },
+        closeModal() {
+            this.showModal = false;
         }
-
     },
     created() {
         this.fetchSpotifyToken().then(() => {
             this.fetchLatestTracks();
         });
         this.debouncedSearchMusic = _.debounce(() => this.searchMusic(1), 300);
+
+        const savedTrack = localStorage.getItem('currentTrack');
+        const savedTime = localStorage.getItem('currentTime');
+        if (savedTrack) {
+            this.currentTrack = JSON.parse(savedTrack);
+        }
+        if (savedTime) {
+            this.currentTime = parseFloat(savedTime);
+        }
     },
     mounted() {
         window.addEventListener('scroll', this.handleScroll);
+        if (this.currentTrack) {
+            this.playTrack(this.currentTrack, true); // Reinitialize player for the current track
+        }
     },
     beforeUnmount() {
         window.removeEventListener('scroll', this.handleScroll);
         clearInterval(this.lyricsTimer);
-    },
+    }
 };
 </script>
 
 <style scoped>
+@import url('https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap');
+
+body {
+    font-family: 'Ubuntu', sans-serif;
+}
+
 .search-bar {
     width: 100%;
     padding: 10px;
@@ -508,6 +656,10 @@ export default {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 20px;
+}
+
+.search-results>div {
+    grid-column: span 4;
 }
 
 .artist-item {
@@ -534,6 +686,7 @@ export default {
 
 .music-player {
     display: flex;
+    flex-direction: column;
     align-items: center;
     padding: 10px;
     background-color: #1c1c1c;
@@ -544,6 +697,12 @@ export default {
     right: 0;
     border-radius: 10px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+@media (min-width: 640px) {
+    .music-player {
+        flex-direction: row;
+    }
 }
 
 .track-info {
@@ -594,6 +753,16 @@ export default {
     background-color: white;
     padding: 20px;
     border-radius: 8px;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.lyric-line.current-line {
+    color: blue;
+}
+
+.lyric-line.upcoming-line {
+    color: gray;
 }
 
 .youtube-player {
@@ -602,9 +771,5 @@ export default {
 
 .volume-icon {
     transition: transform 0.2s ease-in-out;
-}
-
-.current-line {
-    color: blue;
 }
 </style>

@@ -136,10 +136,6 @@ export default {
         };
     },
     methods: {
-        toggleDarkMode() {
-            this.isDarkMode = !this.isDarkMode;
-            document.documentElement.classList.toggle('dark', this.isDarkMode);
-        },
         async searchUsers() {
             if (this.searchQuery.trim() === '') {
                 this.searchResults = [];
@@ -154,12 +150,13 @@ export default {
                 });
                 this.searchResults = response.data;
             } catch (error) {
-                console.error('Error searching users:', error);
+                if (error.response && error.response.status === 401) {
+                    // Token expiré, forcer la déconnexion
+                    this.logout();
+                } else {
+                    console.error('Error searching users:', error);
+                }
             }
-        },
-        clearSearch() {
-            this.searchQuery = '';
-            this.searchResults = [];
         },
         async logout() {
             try {
@@ -170,14 +167,12 @@ export default {
                         'x-access-token': token
                     }
                 });
-                localStorage.removeItem('token');
-                this.$router.push('/login');
             } catch (error) {
                 console.error('Logout error:', error);
+            } finally {
+                localStorage.removeItem('token');
+                this.$router.push('/login');
             }
-        },
-        toggleMenu() {
-            this.isMenuOpen = !this.isMenuOpen;
         },
         async checkSession() {
             const token = localStorage.getItem('token');
