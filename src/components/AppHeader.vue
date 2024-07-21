@@ -47,7 +47,7 @@
                             <fa-icon :icon="isDarkMode ? 'sun' : 'moon'" />
                         </button>
                         <button @click="logout" class="logout-btn">{{ $t('logout') }}</button>
-                        <select @change="changeLanguage" class="language-selector">
+                        <select v-model="selectedLanguage" @change="changeLanguage" class="language-selector">
                             <option value="en">English</option>
                             <option value="fr">Français</option>
                             <option value="it">Italiano</option>
@@ -102,7 +102,7 @@
                             <fa-icon :icon="isDarkMode ? 'sun' : 'moon'" />
                         </button>
                         <button @click="logout" class="logout-btn w-full">{{ $t('logout') }}</button>
-                        <select @change="changeLanguage" class="language-selector w-full">
+                        <select v-model="selectedLanguage" @change="changeLanguage" class="language-selector w-full">
                             <option value="en">English</option>
                             <option value="fr">Français</option>
                             <option value="it">Italiano</option>
@@ -143,6 +143,7 @@ export default {
             searchQuery: '',
             searchResults: [],
             isMenuOpen: false,
+            selectedLanguage: localStorage.getItem('locale') || 'en',
             sessionCheckInterval: null,
         };
     },
