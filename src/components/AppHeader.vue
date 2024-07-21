@@ -17,22 +17,22 @@
                 <nav class="hidden sm:flex sm:items-center sm:space-x-4 w-full">
                     <ul class="flex justify-center space-x-4 w-full"> <!-- Utilisation de w-full -->
                         <li><router-link to="/" class="nav-link" active-class="active"
-                                exact-active-class="exact-active">Home</router-link></li>
+                                exact-active-class="exact-active">{{ $t('home') }}</router-link></li>
                         <li><router-link to="/community" class="nav-link" active-class="active"
-                                exact-active-class="exact-active">Community</router-link>
+                                exact-active-class="exact-active">{{ $t('community') }}</router-link>
                         </li>
                         <li><router-link to="/games" class="nav-link" active-class="active"
-                                exact-active-class="exact-active">Games</router-link></li>
+                                exact-active-class="exact-active">{{ $t('games') }}</router-link></li>
                         <li><router-link to="/staff" class="nav-link" active-class="active"
-                                exact-active-class="exact-active">Staff</router-link></li>
+                                exact-active-class="exact-active">{{ $t('staff') }}</router-link></li>
                         <li><router-link to="/musics" class="nav-link" active-class="active"
-                                exact-active-class="exact-active">Musics</router-link></li>
+                                exact-active-class="exact-active">{{ $t('musics') }}</router-link></li>
                         <li><router-link to="/news" class="nav-link" active-class="active"
-                                exact-active-class="exact-active">News</router-link></li>
+                                exact-active-class="exact-active">{{ $t('news') }}</router-link></li>
                     </ul>
                     <div class="relative flex space-x-4 ml-auto"> <!-- Flex pour aligner les boutons -->
-                        <input type="text" v-model="searchQuery" @input="searchUsers" placeholder="Search..."
-                            class="p-2 sm:px-3 md:px-4 border rounded-lg">
+                        <input type="text" v-model="searchQuery" @input="searchUsers"
+                            :placeholder="$t('searchPlaceholder')" class="p-2 sm:px-3 md:px-4 border rounded-lg">
                         <div v-if="searchResults.length"
                             class="absolute top-full left-0 mt-1 w-full bg-white shadow-lg rounded-lg z-10">
                             <ul>
@@ -46,7 +46,12 @@
                         <button @click="toggleDarkMode" class="toggle-dark-mode-btn">
                             <fa-icon :icon="isDarkMode ? 'sun' : 'moon'" />
                         </button>
-                        <button @click="logout" class="logout-btn">Logout</button>
+                        <button @click="logout" class="logout-btn">{{ $t('logout') }}</button>
+                        <select @change="changeLanguage" class="language-selector">
+                            <option value="en">English</option>
+                            <option value="fr">Français</option>
+                            <option value="it">Italiano</option>
+                        </select>
                     </div>
                 </nav>
 
@@ -68,7 +73,7 @@
 
                 <!-- Responsive Menu - Mobile -->
                 <div class="sm:hidden w-full" :class="{ 'block': isMenuOpen, 'hidden': !isMenuOpen }">
-                    <input type="text" v-model="searchQuery" @input="searchUsers" placeholder="Search..."
+                    <input type="text" v-model="searchQuery" @input="searchUsers" :placeholder="$t('searchPlaceholder')"
                         class="p-2 sm:px-3 md:px-4 border rounded-lg mt-10 mb-4 w-full">
                     <div v-if="searchResults.length" class="relative w-full">
                         <ul class="absolute top-full left-0 mt-1 w-full bg-white shadow-lg rounded-lg z-10">
@@ -80,22 +85,28 @@
                     </div>
                     <ul class="space-y-2 w-full">
                         <li><router-link to="/" class="block px-4 py-2 rounded-lg nav-link" active-class="active"
-                                exact-active-class="exact-active">Home</router-link></li>
+                                exact-active-class="exact-active">{{ $t('home') }}</router-link></li>
                         <li><router-link to="/community" class="block px-4 py-2 rounded-lg nav-link"
-                                active-class="active" exact-active-class="exact-active">Community</router-link></li>
+                                active-class="active" exact-active-class="exact-active">{{ $t('community')
+                                }}</router-link></li>
                         <li><router-link to="/games" class="block px-4 py-2 rounded-lg nav-link" active-class="active"
-                                exact-active-class="exact-active">Games</router-link></li>
+                                exact-active-class="exact-active">{{ $t('games') }}</router-link></li>
                         <li><router-link to="/staff" class="block px-4 py-2 rounded-lg nav-link" active-class="active"
-                                exact-active-class="exact-active">Staff</router-link></li>
+                                exact-active-class="exact-active">{{ $t('staff') }}</router-link></li>
                         <li><router-link to="/news" class="block px-4 py-2 rounded-lg nav-link" active-class="active"
-                                exact-active-class="exact-active">News</router-link></li>
+                                exact-active-class="exact-active">{{ $t('news') }}</router-link></li>
                     </ul>
 
                     <div class="flex space-x-4 mt-4">
                         <button @click="toggleDarkMode" class="toggle-dark-mode-btn w-full">
                             <fa-icon :icon="isDarkMode ? 'sun' : 'moon'" />
                         </button>
-                        <button @click="logout" class="logout-btn w-full">Logout</button>
+                        <button @click="logout" class="logout-btn w-full">{{ $t('logout') }}</button>
+                        <select @change="changeLanguage" class="language-selector w-full">
+                            <option value="en">English</option>
+                            <option value="fr">Français</option>
+                            <option value="it">Italiano</option>
+                        </select>
                     </div>
                 </div>
 
@@ -190,6 +201,11 @@ export default {
                     this.logout();
                 }
             }
+        },
+        changeLanguage(event) {
+            const newLocale = event.target.value;
+            this.$i18n.locale = newLocale;
+            localStorage.setItem('locale', newLocale);
         }
     },
     created() {
@@ -236,5 +252,9 @@ export default {
 /* Style for active menu link */
 .router-link-active {
     @apply text-blue-500 font-bold;
+}
+
+.language-selector {
+    @apply border px-2 py-1 rounded-lg;
 }
 </style>
