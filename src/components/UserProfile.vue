@@ -1,14 +1,25 @@
 <template>
     <div :class="{ 'bg-gray-800 text-white': isDarkMode, 'bg-white text-black': !isDarkMode }"
         class="w-full p-4 bg-cover bg-center rounded-lg shadow-md relative"
-        :style="{ backgroundImage: `url(${backgroundImage})` }">
+        :style="{ backgroundImage: `url(${user.coverImage || backgroundImage})` }">
         <div class="absolute inset-0 bg-black opacity-50 rounded-lg"></div>
         <div class="relative flex flex-col sm:flex-row items-center justify-between">
             <div
-                class="relative w-24 h-24 sm:w-32 sm:h-32 bg-yellow-500 rounded-full overflow-hidden border-2 border-gray-300 flex items-center justify-center">
-                <img v-if="user && user.look" class="transform scale-125 translate-y-2"
+                class="relative w-24 h-24 sm:w-32 sm:h-32 bg-yellow-500 rounded-full overflow-hidden border-2 border-gray-300 flex items-center justify-center z-10">
+                <img v-if="user && user.profileImage" :src="user.profileImage" alt="Profile" />
+                <img v-else-if="user && user.look"
                     :src="`http://www.habbo.com/habbo-imaging/avatarimage?figure=${user.look}&direction=3&head_direction=3&gesture=nor&action=null&size=l&headonly=0&img_format=gif`"
                     alt="Profile" />
+                <div v-if="isCurrentUser" class="absolute top-0 right-0 flex space-x-1 z-20">
+                    <label class="cursor-pointer relative z-20">
+                        <input type="file" accept="image/*" @change="uploadProfileImage" class="hidden" />
+                        <fa-icon :icon="['fas', 'camera']" class="bg-blue-500 text-white rounded-full p-2" />
+                    </label>
+                    <button v-if="user.profileImage" @click="resetProfileImage"
+                        class="bg-red-500 text-white rounded-full p-2 z-20">
+                        <fa-icon :icon="['fas', 'times']" />
+                    </button>
+                </div>
             </div>
             <div class="flex-1 mt-4 sm:mt-0 sm:ml-4 text-center sm:text-left">
                 <h2 class="text-xl sm:text-2xl font-semibold text-white relative">{{ user.username }}</h2>
@@ -48,21 +59,44 @@
                 </div>
             </div>
         </div>
+        <div v-if="isCurrentUser" class="relative mt-4">
+            <label class="cursor-pointer absolute top-0 right-0 flex space-x-1">
+                <input type="file" accept="image/*" @change="uploadCoverImage" class="hidden" />
+                <fa-icon :icon="['fas', 'camera']" class="bg-blue-500 text-white rounded-full p-2" />
+            </label>
+            <button v-if="user.coverImage" @click="resetCoverImage"
+                class="absolute top-0 right-0 mt-2 bg-red-500 text-white px-2 py-1 rounded-lg">
+                <fa-icon :icon="['fas', 'times']" />
+            </button>
+        </div>
+        <AppModal v-if="showUploadModal" @close="closeModal" :disableClose="uploadInProgress" title="Upload Progress">
+            <div class="flex flex-col items-center justify-center">
+                <p class="mb-4" :class="{ 'text-green-500': !uploadError, 'text-red-500': uploadError }">{{
+                    uploadMessage }}</p>
+                <progress :value="uploadProgress" max="100" class="w-full mb-4"
+                    :class="{ 'progress-blue': uploadInProgress, 'progress-green': !uploadInProgress && !uploadError, 'progress-red': uploadError }"></progress>
+                <button @click="closeModal" :disabled="uploadInProgress"
+                    class="px-4 py-2 bg-blue-500 text-white rounded-lg">Close</button>
+            </div>
+        </AppModal>
     </div>
 </template>
 
 <script>
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { library } from '@fortawesome/fontawesome-svg-core'
-import { faHeart } from '@fortawesome/free-solid-svg-icons'
+import { faHeart, faCamera, faTimes } from '@fortawesome/free-solid-svg-icons'
 import backgroundImage from '@/assets/images/skeleton/topbg.png'
 import axios from 'axios'
+import AWS from 'aws-sdk'
+import AppModal from '../components/AppModal.vue'
 
-library.add(faHeart)
+library.add(faHeart, faCamera, faTimes)
 
 export default {
     components: {
-        'fa-icon': FontAwesomeIcon
+        'fa-icon': FontAwesomeIcon,
+        AppModal
     },
     props: {
         isDarkMode: {
@@ -74,7 +108,12 @@ export default {
         return {
             user: {},
             backgroundImage,
-            isCurrentUser: false
+            isCurrentUser: false,
+            showUploadModal: false,
+            uploadProgress: 0,
+            uploadInProgress: false,
+            uploadMessage: '',
+            uploadError: false
         }
     },
     async created() {
@@ -96,11 +135,215 @@ export default {
             } catch (error) {
                 console.error('Error fetching user profile:', error);
             }
+        },
+        async uploadCoverImage(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            this.showUploadModal = true;
+            this.uploadInProgress = true;
+            this.uploadMessage = 'Uploading cover image...';
+            this.uploadError = false;
+            const fileName = `cover_${this.user.id}_${Date.now()}`;
+            try {
+                const s3 = new AWS.S3({
+                    accessKeyId: process.env.VUE_APP_AWS_ACCESS_KEY,
+                    secretAccessKey: process.env.VUE_APP_AWS_SECRET_KEY,
+                    region: process.env.VUE_APP_AWS_REGION
+                });
+                const params = {
+                    Bucket: process.env.VUE_APP_S3_BUCKET,
+                    Key: fileName,
+                    Body: file,
+                    ACL: 'public-read',
+                    ContentType: file.type
+                };
+                s3.upload(params).on('httpUploadProgress', (evt) => {
+                    this.uploadProgress = Math.round((evt.loaded / evt.total) * 100);
+                }).send(async (err, data) => {
+                    if (err) {
+                        console.error('Error uploading cover image:', err);
+                        this.uploadInProgress = false;
+                        this.uploadMessage = `Error: ${err.message}`;
+                        this.uploadError = true;
+                        return;
+                    }
+                    const token = localStorage.getItem('token');
+                    const apiUrl = process.env.VUE_APP_API_URL || 'http://localhost:3000';
+                    try {
+                        await axios.put(`${apiUrl}/profile/me`, { coverImage: data.Location }, {
+                            headers: { 'x-access-token': token }
+                        });
+                        this.user.coverImage = data.Location;
+                        this.uploadMessage = 'Cover image uploaded successfully!';
+                    } catch (err) {
+                        console.error('Error updating cover image in profile:', err);
+                        this.uploadMessage = `Error: ${err.message}`;
+                        this.uploadError = true;
+                    } finally {
+                        this.uploadInProgress = false;
+                    }
+                });
+            } catch (error) {
+                console.error('Error uploading cover image:', error);
+                this.uploadInProgress = false;
+                this.uploadMessage = `Error: ${error.message}`;
+                this.uploadError = true;
+            }
+        },
+        async uploadProfileImage(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            this.showUploadModal = true;
+            this.uploadInProgress = true;
+            this.uploadMessage = 'Uploading profile image...';
+            this.uploadError = false;
+            const fileName = `profile_${this.user.id}_${Date.now()}`;
+            try {
+                const s3 = new AWS.S3({
+                    accessKeyId: process.env.VUE_APP_AWS_ACCESS_KEY,
+                    secretAccessKey: process.env.VUE_APP_AWS_SECRET_KEY,
+                    region: process.env.VUE_APP_AWS_REGION
+                });
+                const params = {
+                    Bucket: process.env.VUE_APP_S3_BUCKET,
+                    Key: fileName,
+                    Body: file,
+                    ACL: 'public-read',
+                    ContentType: file.type
+                };
+                s3.upload(params).on('httpUploadProgress', (evt) => {
+                    this.uploadProgress = Math.round((evt.loaded / evt.total) * 100);
+                }).send(async (err, data) => {
+                    if (err) {
+                        console.error('Error uploading profile image:', err);
+                        this.uploadInProgress = false;
+                        this.uploadMessage = `Error: ${err.message}`;
+                        this.uploadError = true;
+                        return;
+                    }
+                    const token = localStorage.getItem('token');
+                    const apiUrl = process.env.VUE_APP_API_URL || 'http://localhost:3000';
+                    try {
+                        await axios.put(`${apiUrl}/profile/me`, { profileImage: data.Location }, {
+                            headers: { 'x-access-token': token }
+                        });
+                        this.user.profileImage = data.Location;
+                        this.uploadMessage = 'Profile image uploaded successfully!';
+                    } catch (err) {
+                        console.error('Error updating profile image in profile:', err);
+                        this.uploadMessage = `Error: ${err.message}`;
+                        this.uploadError = true;
+                    } finally {
+                        this.uploadInProgress = false;
+                    }
+                });
+            } catch (error) {
+                console.error('Error uploading profile image:', error);
+                this.uploadInProgress = false;
+                this.uploadMessage = `Error: ${error.message}`;
+                this.uploadError = true;
+            }
+        },
+        async resetCoverImage() {
+            try {
+                const token = localStorage.getItem('token');
+                const apiUrl = process.env.VUE_APP_API_URL || 'http://localhost:3000';
+                await axios.put(`${apiUrl}/profile/me`, { coverImage: '' }, {
+                    headers: { 'x-access-token': token }
+                });
+                this.user.coverImage = '';
+            } catch (error) {
+                console.error('Error resetting cover image:', error);
+            }
+        },
+        async resetProfileImage() {
+            try {
+                const token = localStorage.getItem('token');
+                const apiUrl = process.env.VUE_APP_API_URL || 'http://localhost:3000';
+                await axios.put(`${apiUrl}/profile/me`, { profileImage: '' }, {
+                    headers: { 'x-access-token': token }
+                });
+                this.user.profileImage = '';
+            } catch (error) {
+                console.error('Error resetting profile image:', error);
+            }
+        },
+        closeModal() {
+            if (!this.uploadInProgress) {
+                this.showUploadModal = false;
+                this.uploadProgress = 0;
+                this.uploadMessage = '';
+                this.uploadError = false;
+            }
         }
     }
 }
 </script>
 
 <style scoped>
-/* Add custom styles here if needed */
+.relative {
+    position: relative;
+}
+
+.absolute {
+    position: absolute;
+}
+
+.hidden {
+    display: none;
+}
+
+.bg-cover {
+    background-size: cover;
+}
+
+.bg-center {
+    background-position: center;
+}
+
+.flex {
+    display: flex;
+}
+
+.space-x-1 {
+    gap: 0.25rem;
+}
+
+.z-10 {
+    z-index: 10;
+}
+
+.z-20 {
+    z-index: 20;
+}
+
+progress {
+    width: 100%;
+    height: 20px;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+.progress-blue::-webkit-progress-value {
+    background-color: #3b82f6;
+    border-radius: 0.375rem;
+}
+
+.progress-red::-webkit-progress-value {
+    background-color: #ef4444;
+    border-radius: 0.375rem;
+}
+
+.progress-green::-webkit-progress-value {
+    background-color: #10b981;
+    border-radius: 0.375rem;
+}
+
+.text-green-500 {
+    color: #10b981;
+}
+
+.text-red-500 {
+    color: #ef4444;
+}
 </style>

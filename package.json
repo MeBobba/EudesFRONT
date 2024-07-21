@@ -17,6 +17,7 @@
     "@tiptap/vue-3": "^2.5.4",
     "@vueup/vue-quill": "^1.2.0",
     "assert": "^2.1.0",
+    "aws-sdk": "^2.1659.0",
     "axios": "^1.7.2",
     "blockadblock": "^3.2.1",
     "browserify-zlib": "^0.2.0",
