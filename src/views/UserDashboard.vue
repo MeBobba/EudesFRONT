@@ -5,14 +5,48 @@
         <div class="container mx-auto px-4 py-8 mt-4">
             <UserProfile v-if="!isLoading && !error" :user="user" :isDarkMode="isDarkMode" />
             <ErrorMessage v-if="error" :message="errorMessage" />
-
             <div class="flex flex-col lg:flex-row mt-8">
                 <div class="w-full lg:w-2/3 lg:pr-8">
                     <div v-if="isCurrentUser" :class="postInputClass" class="p-4 rounded-lg shadow-md mb-8">
-                        <textarea v-model="newPostContent" class="w-full p-4 border border-gray-300 rounded-lg"
-                            placeholder="What's on your mind?"></textarea>
-                        <input v-model="newPostVideo" type="text"
-                            class="w-full p-2 border border-gray-300 rounded-lg mt-2" placeholder="Video URL">
+                        <div class="tabs">
+                            <button :class="{ active: currentTab === 'text' }" @click="currentTab = 'text'">
+                                <fa-icon icon="pencil-alt" />
+                            </button>
+                            <button :class="{ active: currentTab === 'gif' }" @click="currentTab = 'gif'">
+                                <fa-icon icon="image" />
+                            </button>
+                            <button :class="{ active: currentTab === 'video' }" @click="currentTab = 'video'">
+                                <fa-icon icon="video" />
+                            </button>
+                        </div>
+                        <div v-if="currentTab === 'text'">
+                            <textarea v-model="newPostContent" class="w-full p-4 border border-gray-300 rounded-lg"
+                                placeholder="What's on your mind?"></textarea>
+                        </div>
+                        <div v-if="currentTab === 'gif'">
+                            <textarea v-model="newPostContent" class="w-full p-4 border border-gray-300 rounded-lg"
+                                placeholder="What's on your mind?"></textarea>
+                            <button @click="toggleGiphyPicker" class="mt-2 bg-blue-500 text-white p-2 rounded-lg">
+                                Search GIF
+                            </button>
+                            <div v-if="showGiphyPicker" class="absolute z-10 giphy-picker-container">
+                                <input v-model="giphySearchQuery" @input="searchGiphy" placeholder="Search GIFs"
+                                    class="p-2 border rounded-lg mb-2">
+                                <div class="giphy-results">
+                                    <div v-for="gif in giphyResults" :key="gif.id" class="giphy-result"
+                                        @click="addGifToPost(gif.images.fixed_height.url)">
+                                        <img :src="gif.images.fixed_height.url" alt="GIF"
+                                            class="w-full h-16 object-cover rounded-lg mb-2">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div v-if="currentTab === 'video'">
+                            <textarea v-model="newPostContent" class="w-full p-4 border border-gray-300 rounded-lg"
+                                placeholder="What's on your mind?"></textarea>
+                            <input v-model="newPostVideo" type="text"
+                                class="w-full p-2 border border-gray-300 rounded-lg mt-2" placeholder="Video URL">
+                        </div>
                         <div class="mt-4 flex items-center">
                             <select v-model="postVisibility" class="border border-gray-300 rounded-lg p-2 mr-4">
                                 <option value="public">Public</option>
@@ -20,8 +54,8 @@
                             </select>
                             <button @click="createPost" class="bg-blue-500 text-white p-2 rounded-lg">Post</button>
                         </div>
-                        <div class="relative mt-2">
-                            <button @click="toggleEmojiPicker" class="absolute right-0 bottom-0 p-2">
+                        <div class="relative mt-2 flex items-center">
+                            <button @click="toggleEmojiPicker" class="mr-4 p-2">
                                 <fa-icon icon="smile" />
                             </button>
                             <div v-if="showEmojiPicker" class="absolute z-10 emoji-picker-container">
@@ -45,7 +79,7 @@
                                 <fa-icon icon="trash-alt" />
                             </button>
                         </div>
-                        <p class="mb-4">{{ post.content }}</p>
+                        <p class="mb-4" v-html="parsePostContent(post.content)"></p>
                         <img v-if="post.image" :src="post.image" alt="Post Image"
                             class="w-full h-48 object-cover rounded-lg mb-4">
                         <iframe v-if="post.video" :src="getVideoEmbedUrl(post.video)" frameborder="0" allowfullscreen
@@ -60,7 +94,6 @@
                                 <span class="ml-2">{{ post.commentsCount }}</span>
                             </button>
                         </div>
-
                         <transition name="slide-fade">
                             <div v-show="post.showComments" class="mt-4">
                                 <h4 class="font-semibold mb-2">Comments</h4>
@@ -107,7 +140,6 @@
                             </div>
                         </div>
                     </div>
-
                     <div :class="sidebarClass" class="p-4 rounded-lg shadow-md">
                         <h2 class="text-2xl font-bold mb-4">Photos</h2>
                         <div class="grid grid-cols-3 gap-2">
@@ -131,10 +163,10 @@ import UserProfile from '../components/UserProfile.vue';
 import ErrorMessage from '../components/ErrorMessage.vue';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { library } from '@fortawesome/fontawesome-svg-core';
-import { faHeart, faComment, faTrashAlt, faSmile } from '@fortawesome/free-solid-svg-icons';
+import { faHeart, faComment, faTrashAlt, faSmile, faImage, faPencilAlt, faVideo } from '@fortawesome/free-solid-svg-icons';
 import 'emoji-picker-element';
 
-library.add(faHeart, faComment, faTrashAlt, faSmile);
+library.add(faHeart, faComment, faTrashAlt, faSmile, faImage, faPencilAlt, faVideo);
 
 export default {
     name: 'UserDashboard',
@@ -166,7 +198,11 @@ export default {
             loading: false,
             noMorePosts: false,
             showEmojiPicker: false,
+            showGiphyPicker: false,
+            giphySearchQuery: '',
+            giphyResults: [],
             isCurrentUser: true,
+            currentTab: 'text', // Track the current tab
         };
     },
     computed: {
@@ -438,6 +474,27 @@ export default {
         toggleEmojiPicker() {
             this.showEmojiPicker = !this.showEmojiPicker;
         },
+        toggleGiphyPicker() {
+            this.showGiphyPicker = !this.showGiphyPicker;
+        },
+        async searchGiphy() {
+            if (this.giphySearchQuery.trim() === '') {
+                this.giphyResults = [];
+                return;
+            }
+            const apiKey = '4B6hLBP7tVbreKD0wySAywzh52awMQhf';
+            const url = `https://api.giphy.com/v1/gifs/search?api_key=${apiKey}&q=${this.giphySearchQuery}&limit=10`;
+            try {
+                const response = await axios.get(url);
+                this.giphyResults = response.data.data;
+            } catch (error) {
+                console.error('Error fetching GIFs:', error);
+            }
+        },
+        addGifToPost(gifUrl) {
+            this.newPostContent += `<img src="${gifUrl}" alt="GIF">`;
+            this.showGiphyPicker = false;
+        },
         addEmoji(event) {
             if (event.detail && event.detail.unicode) {
                 this.newPostContent += event.detail.unicode;
@@ -472,6 +529,9 @@ export default {
         },
         getUserAvatar(look) {
             return `http://www.habbo.com/habbo-imaging/avatarimage?figure=${look}&direction=3&head_direction=3&gesture=nor&action=null&size=m&headonly=1&img_format=gif`;
+        },
+        parsePostContent(content) {
+            return content.replace(/!\[GIF\]\((.*?)\)/g, '<img src="$1" alt="GIF">');
         }
     }
 };
@@ -496,9 +556,42 @@ export default {
     }
 }
 
+.tabs {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+}
+
+.tabs button {
+    background: none;
+    border: none;
+    padding: 0.5rem;
+    cursor: pointer;
+}
+
+.tabs button.active {
+    border-bottom: 2px solid #3490dc;
+}
+
 .emoji-picker-container {
     right: 0;
     bottom: 40px;
+}
+
+.giphy-picker-container {
+    right: 0;
+    bottom: 40px;
+    background: white;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    width: 300px;
+    max-height: 400px;
+    overflow-y: scroll;
+}
+
+.giphy-result img {
+    cursor: pointer;
 }
 
 .slide-fade-enter-active,

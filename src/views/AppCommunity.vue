@@ -21,7 +21,7 @@
                                 <fa-icon icon="trash-alt" />
                             </button>
                         </div>
-                        <p class="mb-4">{{ post.content }}</p>
+                        <div class="mb-4" v-html="parsePostContent(post.content)"></div>
                         <img v-if="post.image" :src="post.image" alt="Post Image"
                             class="w-full h-48 object-cover rounded-lg mb-4">
                         <iframe v-if="post.video" :src="getVideoEmbedUrl(post.video)" frameborder="0" allowfullscreen
@@ -45,7 +45,7 @@
                                     <div class="flex items-center">
                                         <img :src="getAvatarUrl(comment.look, 's')"
                                             class="rounded-full border-2 border-blue-500 p-1 bg-white"
-                                            alt="User Profile">
+                                            :alt="comment.username">
                                         <div class="ml-2">
                                             <p class="font-semibold">{{ comment.username }}</p>
                                             <p>{{ comment.content }}</p>
@@ -56,10 +56,10 @@
                                         <fa-icon icon="trash-alt" />
                                     </button>
                                 </div>
-                                <textarea v-model="post.newComment" placeholder="Add a comment..."
+                                <textarea v-model="post.newComment" :placeholder="$t('addcomment')"
                                     class="w-full p-2 border border-gray-300 rounded-lg"></textarea>
-                                <button @click="addComment(post)"
-                                    class="mt-2 bg-blue-500 text-white p-2 rounded-lg">{{ $t('comment') }}</button>
+                                <button @click="addComment(post)" class="mt-2 bg-blue-500 text-white p-2 rounded-lg">{{
+                                    $t('comment') }}</button>
                             </div>
                         </transition>
                     </div>
@@ -96,6 +96,24 @@
                                 <emoji-picker @emoji-click="addEmoji"></emoji-picker>
                             </div>
                         </div>
+                        <div class="relative mt-2">
+                            <button @click="toggleGiphyPicker" class="absolute right-0 bottom-0 p-2">
+                                <fa-icon icon="image" />
+                            </button>
+                            <div v-if="showGiphyPicker"
+                                class="absolute z-10 bg-white dark:bg-gray-800 p-4 rounded-lg shadow-lg w-full">
+                                <input type="text" v-model="giphySearchQuery" @input="searchGiphy"
+                                    placeholder="Search GIPHY"
+                                    class="w-full p-2 border border-gray-300 rounded-lg mb-2">
+                                <div class="grid grid-cols-2 gap-2">
+                                    <div v-for="gif in giphyResults" :key="gif.id" class="cursor-pointer"
+                                        @click="addGifToPost(gif.images.fixed_height.url)">
+                                        <img :src="gif.images.fixed_height.url" alt="GIF"
+                                            class="w-full h-24 object-cover rounded-lg">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div v-for="card in exampleCards" :key="card.id"
@@ -116,10 +134,10 @@ import AppHeader from '../components/AppHeader.vue';
 import AppFooter from '../components/AppFooter.vue';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { library } from '@fortawesome/fontawesome-svg-core';
-import { faHeart, faComment, faTrashAlt, faSmile } from '@fortawesome/free-solid-svg-icons';
+import { faHeart, faComment, faTrashAlt, faSmile, faImage } from '@fortawesome/free-solid-svg-icons';
 import 'emoji-picker-element';
 
-library.add(faHeart, faComment, faTrashAlt, faSmile);
+library.add(faHeart, faComment, faTrashAlt, faSmile, faImage);
 
 export default {
     name: 'AppCommunity',
@@ -146,6 +164,9 @@ export default {
             newPostVideo: '',
             postVisibility: 'public',
             showEmojiPicker: false,
+            showGiphyPicker: false,
+            giphySearchQuery: '',
+            giphyResults: [],
             exampleCards: [
                 { id: 1, title: 'Example Card 1', content: 'Content goes here...' },
                 { id: 2, title: 'Example Card 2', content: 'Content goes here...' }
@@ -329,8 +350,35 @@ export default {
         toggleEmojiPicker() {
             this.showEmojiPicker = !this.showEmojiPicker;
         },
+        toggleGiphyPicker() {
+            this.showGiphyPicker = !this.showGiphyPicker;
+        },
         addEmoji(event) {
-            this.newPostContent += event.detail.unicode;
+            if (event.detail && event.detail.unicode) {
+                this.newPostContent += event.detail.unicode;
+            }
+        },
+        async searchGiphy() {
+            try {
+                const apiKey = '4B6hLBP7tVbreKD0wySAywzh52awMQhf';
+                const response = await axios.get(`https://api.giphy.com/v1/gifs/search`, {
+                    params: {
+                        api_key: apiKey,
+                        q: this.giphySearchQuery,
+                        limit: 10
+                    }
+                });
+                this.giphyResults = response.data.data;
+            } catch (error) {
+                console.error('Error searching GIPHY:', error);
+            }
+        },
+        addGifToPost(gifUrl) {
+            this.newPostContent += `![GIF](${gifUrl})`;
+        },
+        parsePostContent(content) {
+            const gifRegex = /!\[GIF]\((.*?)\)/g;
+            return content.replace(gifRegex, '<img src="$1" alt="GIF" class="w-full h-48 object-cover rounded-lg mb-4">');
         },
         formatDate(dateString) {
             const options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
@@ -389,6 +437,7 @@ export default {
 };
 </script>
 
+
 <style scoped>
 .like-button .fa-heart.animate-like {
     animation: like-animation 0.5s;
@@ -409,6 +458,18 @@ export default {
 }
 
 .emoji-picker-container {
+    right: 0;
+    bottom: 40px;
+    z-index: 1000;
+}
+
+.emoji-picker {
+    right: 0;
+    bottom: 40px;
+    z-index: 1000;
+}
+
+.giphy-picker {
     right: 0;
     bottom: 40px;
     z-index: 1000;

@@ -6,10 +6,10 @@
         <div class="relative flex flex-col sm:flex-row items-center justify-between">
             <div
                 class="relative w-24 h-24 sm:w-32 sm:h-32 bg-yellow-500 rounded-full overflow-hidden border-2 border-gray-300 flex items-center justify-center z-10">
-                <img v-if="user && user.profileImage" :src="user.profileImage" alt="Profile" />
+                <img v-if="user && user.profileImage" :src="user.profileImage" :alt="user.username" />
                 <img v-else-if="user && user.look"
                     :src="`http://www.habbo.com/habbo-imaging/avatarimage?figure=${user.look}&direction=3&head_direction=3&gesture=nor&action=null&size=l&headonly=0&img_format=gif`"
-                    alt="Profile" />
+                    :alt="user.username" />
                 <div v-if="isCurrentUser" class="absolute top-0 right-0 flex space-x-1 z-20">
                     <label class="cursor-pointer relative z-20">
                         <input type="file" accept="image/*" @change="uploadProfileImage" class="hidden" />
@@ -27,23 +27,25 @@
                     class="flex flex-col sm:flex-row justify-center sm:justify-start space-y-2 sm:space-y-0 sm:space-x-4 mt-2">
                     <div class="text-center text-white relative">
                         <span class="font-bold">{{ user.credits }}</span>
-                        <div class="text-gray-300">Crédits</div>
+                        <div class="text-gray-300">{{ $t('credits') }}</div>
                     </div>
                     <div class="text-center text-white relative">
                         <span class="font-bold">{{ user.pixels }}</span>
-                        <div class="text-gray-300">Pixels</div>
+                        <div class="text-gray-300">{{ $t('pixels') }}</div>
                     </div>
                     <div class="text-center text-white relative">
                         <span class="font-bold">{{ user.points }}</span>
-                        <div class="text-gray-300">Points</div>
+                        <div class="text-gray-300">{{ $t('pixels') }}</div>
                     </div>
                 </div>
             </div>
             <div class="mt-4 sm:mt-0 flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4">
                 <router-link v-if="isCurrentUser" to="/settings"
-                    class="px-4 py-2 bg-blue-500 text-white rounded-lg relative text-center">Settings</router-link>
+                    class="px-4 py-2 bg-blue-500 text-white rounded-lg relative text-center">{{ $t('settings')
+                    }}</router-link>
                 <router-link v-if="isCurrentUser" to="/client"
-                    class="px-4 py-2 bg-green-500 text-white rounded-lg relative text-center">Play Now</router-link>
+                    class="px-4 py-2 bg-green-500 text-white rounded-lg relative text-center">{{ $t('play')
+                    }}</router-link>
             </div>
         </div>
         <div class="relative mt-4 text-center sm:text-left">
@@ -69,7 +71,8 @@
                 <fa-icon :icon="['fas', 'times']" />
             </button>
         </div>
-        <AppModal v-if="showUploadModal" @close="closeModal" :disableClose="uploadInProgress" title="Upload Progress">
+        <AppModal v-if="showUploadModal" @close="closeModal" :disableClose="uploadInProgress"
+            v-bind:title="$t('uprogress')">
             <div class="flex flex-col items-center justify-center">
                 <p class="mb-4" :class="{ 'text-green-500': !uploadError, 'text-red-500': uploadError }">{{
                     uploadMessage }}</p>
@@ -79,7 +82,7 @@
                         :style="{ width: uploadProgress + '%' }"></div>
                 </div>
                 <button @click="closeModal" :disabled="uploadInProgress"
-                    class="px-4 py-2 bg-blue-500 text-white rounded-lg mt-4">Close</button>
+                    class="px-4 py-2 bg-blue-500 text-white rounded-lg mt-4">{{ $t('close') }}</button>
             </div>
         </AppModal>
     </div>
@@ -198,7 +201,7 @@ export default {
             if (!file) return;
             this.showUploadModal = true;
             this.uploadInProgress = true;
-            this.uploadMessage = 'Uploading profile image...';
+            this.uploadMessage = this.$t('uploading');
             this.uploadError = false;
             const fileName = `profile_${this.user.id}_${Date.now()}`;
             try {
