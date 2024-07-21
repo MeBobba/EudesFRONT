@@ -260,6 +260,10 @@ export default {
                 alert('Failed to disable 2FA');
             }
         },
+        closeModal() {
+            this.qrCodeURL = '';
+            this.verificationToken = '';
+        },
         toggleDarkMode() {
             this.isDarkMode = !this.isDarkMode;
             document.documentElement.classList.toggle('dark', this.isDarkMode);
