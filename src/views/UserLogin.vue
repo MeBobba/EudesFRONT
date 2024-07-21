@@ -22,7 +22,6 @@
                         </div>
                         <p v-if="errorMessage" class="text-red-500 mt-4">{{ errorMessage }}</p>
                     </form>
-                    <div class="background-overlay"></div>
                 </div>
                 <div class="w-full md:w-1/2 relative">
                     <img src="@/assets/images/logreg/filler_ad.png" alt="Login Image"
@@ -71,7 +70,8 @@ export default {
         async login() {
             try {
                 const machineId = crypto.createHash('sha256').update(navigator.userAgent + Date.now().toString()).digest('hex');
-                const response = await axios.post('http://localhost:3000/login', {
+                const apiUrl = process.env.VUE_APP_API_URL || 'http://localhost:3000';
+                const response = await axios.post(`${apiUrl}/login`, {
                     username: this.username,
                     password: this.password,
                     token2fa: this.token2fa,
@@ -90,7 +90,8 @@ export default {
         },
         async check2FA() {
             try {
-                const response = await axios.get('http://localhost:3000/check-2fa', {
+                const apiUrl = process.env.VUE_APP_API_URL || 'http://localhost:3000';
+                const response = await axios.get(`${apiUrl}/check-2fa`, {
                     params: { username: this.username }
                 });
                 this.is2FAEnabled = response.data.is2FAEnabled;
@@ -124,26 +125,6 @@ export default {
 </script>
 
 <style scoped>
-.relative {
-    position: relative;
-}
-
-.absolute {
-    position: absolute;
-}
-
-.z-0 {
-    z-index: 0;
-}
-
-.z-10 {
-    z-index: 10;
-}
-
-.z-20 {
-    z-index: 20;
-}
-
 .background-overlay {
     position: absolute;
     bottom: 0;

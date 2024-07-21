@@ -104,7 +104,8 @@ export default {
         async checkUsername() {
             if (this.username.length > 3) {
                 try {
-                    const response = await axios.post(`${process.env.VUE_APP_API_URL}/check-username`, { username: this.username });
+                    const apiUrl = process.env.VUE_APP_API_URL || 'http://localhost:3000';
+                    const response = await axios.post(`${apiUrl}/check-username`, { username: this.username });
                     this.usernameError = response.data.exists ? 'Username already exists' : '';
                     this.canProceedToStep2 = !response.data.exists && this.username;
                 } catch (error) {
@@ -119,7 +120,8 @@ export default {
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             if (emailRegex.test(this.mail)) {
                 try {
-                    const response = await axios.post(`${process.env.VUE_APP_API_URL}/check-email`, { email: this.mail });
+                    const apiUrl = process.env.VUE_APP_API_URL || 'http://localhost:3000';
+                    const response = await axios.post(`${apiUrl}/check-email`, { email: this.mail });
                     this.emailError = response.data.exists ? 'Email already exists' : '';
                     this.canProceedToStep3 = !response.data.exists && this.password && this.mail && this.password === this.confirmPassword;
                 } catch (error) {
@@ -154,7 +156,8 @@ export default {
         },
         async getAntiRobotQuestion() {
             try {
-                const response = await axios.get(`${process.env.VUE_APP_API_URL}/anti-robot-question`);
+                const apiUrl = process.env.VUE_APP_API_URL || 'http://localhost:3000';
+                const response = await axios.get(`${apiUrl}/anti-robot-question`);
                 this.robotQuestion = response.data;
             } catch (error) {
                 this.errorMessage = 'Error fetching anti-robot question';
@@ -163,7 +166,8 @@ export default {
         async register() {
             try {
                 const machineId = crypto.createHash('sha256').update(navigator.userAgent + Date.now().toString()).digest('hex');
-                const response = await axios.post(`${process.env.VUE_APP_API_URL}/register`, {
+                const apiUrl = process.env.VUE_APP_API_URL || 'http://localhost:3000';
+                const response = await axios.post(`${apiUrl}/register`, {
                     username: this.username,
                     password: this.password,
                     mail: this.mail,
@@ -198,39 +202,6 @@ export default {
 </script>
 
 <style scoped>
-.relative {
-    position: relative;
-}
-
-.absolute {
-    position: absolute;
-}
-
-.z-0 {
-    z-index: 0;
-}
-
-.z-10 {
-    z-index: 10;
-}
-
-.z-20 {
-    z-index: 20;
-}
-
-.background-overlay {
-    position: absolute;
-    bottom: 0;
-    right: 0;
-    width: 100%;
-    height: 100%;
-    background-image: url('@/assets/images/logreg/info_background_overlay.png');
-    background-repeat: no-repeat;
-    background-size: cover;
-    z-index: 0;
-    opacity: 0.75;
-}
-
 .input-field {
     box-sizing: border-box;
     height: 2.5rem;

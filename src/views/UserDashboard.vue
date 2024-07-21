@@ -1,5 +1,5 @@
 <template>
-    <div :class="{ 'bg-gray-900 text-white': isDarkMode, 'bg-gray-100 text-black': !isDarkMode }" class="min-h-screen">
+    <div :class="containerClass" class="min-h-screen">
         <AppHeader :logoImage="logoImage" :headerImage="headerImage" @toggleDarkMode="toggleDarkMode"
             @logout="logout" />
         <div class="container mx-auto px-4 py-8 mt-4">
@@ -7,17 +7,12 @@
             <ErrorMessage v-if="error" :message="errorMessage" />
 
             <div class="flex flex-col lg:flex-row mt-8">
-                <!-- Left Sidebar -->
                 <div class="w-full lg:w-2/3 lg:pr-8">
-                    <!-- Post Input -->
-                    <div :class="{ 'bg-gray-800 text-white': isDarkMode, 'bg-white text-black': !isDarkMode }"
-                        class="p-4 rounded-lg shadow-md mb-8" v-if="isCurrentUser">
+                    <div v-if="isCurrentUser" :class="postInputClass" class="p-4 rounded-lg shadow-md mb-8">
                         <textarea v-model="newPostContent" class="w-full p-4 border border-gray-300 rounded-lg"
                             placeholder="What's on your mind?"></textarea>
-                        <div class="mt-2">
-                            <input v-model="newPostVideo" type="text"
-                                class="w-full p-2 border border-gray-300 rounded-lg" placeholder="Video URL">
-                        </div>
+                        <input v-model="newPostVideo" type="text"
+                            class="w-full p-2 border border-gray-300 rounded-lg mt-2" placeholder="Video URL">
                         <div class="mt-4 flex items-center">
                             <select v-model="postVisibility" class="border border-gray-300 rounded-lg p-2 mr-4">
                                 <option value="public">Public</option>
@@ -35,12 +30,11 @@
                         </div>
                     </div>
 
-                    <!-- User Posts -->
-                    <div v-for="post in posts" :key="post.id" :ref="`post-${post.id}`"
+                    <div v-for="post in posts" :key="post.id"
                         class="mb-8 p-4 bg-white dark:bg-gray-800 rounded-lg shadow-md">
                         <div class="flex items-center justify-between mb-4">
                             <div class="flex items-center">
-                                <img :src="`http://www.habbo.com/habbo-imaging/avatarimage?figure=${post.look}&direction=3&head_direction=3&gesture=nor&action=null&size=m&headonly=1&img_format=gif`"
+                                <img :src="getUserAvatar(post.look)"
                                     class="rounded-full border-2 border-blue-500 bg-white" alt="User Profile">
                                 <div class="ml-4">
                                     <h3 class="font-semibold">{{ post.username }}</h3>
@@ -58,8 +52,7 @@
                             class="w-full h-48 mb-4"></iframe>
                         <div class="flex items-center">
                             <button @click="toggleLike(post)" class="mr-4 like-button">
-                                <fa-icon :icon="['fas', 'heart']"
-                                    :class="{ 'text-red-500': post.userLike, 'text-gray-500': !post.userLike }" />
+                                <fa-icon :icon="['fas', 'heart']" :class="likeIconClass(post)" />
                                 <span class="ml-2">{{ post.likesCount }}</span>
                             </button>
                             <button @click="toggleComments(post)" class="flex items-center">
@@ -74,7 +67,7 @@
                                 <div v-for="comment in post.comments" :key="comment.id"
                                     class="mb-2 flex justify-between">
                                     <div class="flex items-center">
-                                        <img :src="`http://www.habbo.com/habbo-imaging/avatarimage?figure=${comment.look}&direction=3&head_direction=3&gesture=nor&action=null&size=s&headonly=1&img_format=gif`"
+                                        <img :src="getUserAvatar(comment.look)"
                                             class="rounded-full border-2 border-blue-500 p-1 bg-white"
                                             alt="User Profile">
                                         <div class="ml-2">
@@ -102,14 +95,11 @@
                     </div>
                 </div>
 
-                <!-- Right Sidebar -->
                 <div class="w-full lg:w-1/3 lg:pl-8 mt-8 lg:mt-0">
-                    <!-- Suggestions -->
-                    <div :class="{ 'bg-gray-800 text-white': isDarkMode, 'bg-white text-black': !isDarkMode }"
-                        class="p-4 rounded-lg shadow-md mb-8">
+                    <div :class="sidebarClass" class="p-4 rounded-lg shadow-md mb-8">
                         <h2 class="text-2xl font-bold mb-4">Suggestions For You</h2>
                         <div v-for="suggestion in suggestions" :key="suggestion.id" class="flex items-center mb-4">
-                            <img :src="`http://www.habbo.com/habbo-imaging/avatarimage?figure=${suggestion.look}&direction=3&head_direction=3&gesture=nor&action=null&size=s&headonly=1&img_format=gif`"
+                            <img :src="getUserAvatar(suggestion.look)"
                                 class="w-12 h-12 rounded-full border-2 border-gray-300" alt="Suggestion Profile">
                             <div class="ml-4">
                                 <h3 class="font-semibold">{{ suggestion.username }}</h3>
@@ -118,9 +108,7 @@
                         </div>
                     </div>
 
-                    <!-- Photos -->
-                    <div :class="{ 'bg-gray-800 text-white': isDarkMode, 'bg-white text-black': !isDarkMode }"
-                        class="p-4 rounded-lg shadow-md">
+                    <div :class="sidebarClass" class="p-4 rounded-lg shadow-md">
                         <h2 class="text-2xl font-bold mb-4">Photos</h2>
                         <div class="grid grid-cols-3 gap-2">
                             <div v-for="photo in photos" :key="photo.id">
@@ -131,8 +119,8 @@
                 </div>
             </div>
         </div>
+        <AppFooter :logoImage="logoImage" />
     </div>
-    <AppFooter :logoImage="logoImage" />
 </template>
 
 <script>
@@ -168,18 +156,44 @@ export default {
             newPostVideo: '',
             postVisibility: 'public',
             headerImage: require('@/assets/images/skeleton/header.png'),
-            logoImage: require('@/assets/images/skeleton/logo.gif'), // Replace with your own image
-            suggestions: [], // Add suggestions data
-            photos: [], // Add photos data
-            posts: [], // Add posts data
+            logoImage: require('@/assets/images/skeleton/logo.gif'),
+            suggestions: [],
+            photos: [],
+            posts: [],
             isDarkMode: false,
             page: 1,
             limit: 10,
             loading: false,
             noMorePosts: false,
             showEmojiPicker: false,
-            isCurrentUser: true, // Add flag to determine if viewing current user
+            isCurrentUser: true,
         };
+    },
+    computed: {
+        containerClass() {
+            return {
+                'bg-gray-900 text-white': this.isDarkMode,
+                'bg-gray-100 text-black': !this.isDarkMode
+            };
+        },
+        postInputClass() {
+            return {
+                'bg-gray-800 text-white': this.isDarkMode,
+                'bg-white text-black': !this.isDarkMode
+            };
+        },
+        sidebarClass() {
+            return {
+                'bg-gray-800 text-white': this.isDarkMode,
+                'bg-white text-black': !this.isDarkMode
+            };
+        },
+        likeIconClass() {
+            return (post) => ({
+                'text-red-500': post.userLike,
+                'text-gray-500': !post.userLike
+            });
+        }
     },
     async created() {
         const userId = this.$route.params.userId || 'me';
@@ -306,7 +320,6 @@ export default {
                     headers: { 'x-access-token': token }
                 });
 
-                // Ajouter le nouveau post à la liste des posts
                 const newPost = response.data;
                 newPost.likesCount = 0;
                 newPost.commentsCount = 0;
@@ -358,7 +371,6 @@ export default {
                 await axios.delete(`${apiUrl}/comments/${commentId}`, {
                     headers: { 'x-access-token': token }
                 });
-                // Remove the comment from the post
                 this.posts = this.posts.map(post => {
                     post.comments = post.comments.filter(c => c.id !== commentId);
                     return post;
@@ -378,13 +390,12 @@ export default {
                     headers: { 'x-access-token': token }
                 });
                 if (response.status === 200) {
-                    // Remove the post from the list
                     this.posts = this.posts.filter(post => post.id !== postId);
                 } else {
                     throw new Error('Failed to delete post');
                 }
             } catch (error) {
-                console.error('Error deleting post:', error); // Log the error
+                console.error('Error deleting post:', error);
                 alert('Failed to delete post. Please try again later.');
             }
         },
@@ -397,7 +408,7 @@ export default {
                 const apiUrl = process.env.VUE_APP_API_URL || 'http://localhost:3000';
                 const response = await axios.post(`${apiUrl}/likes`, {
                     postId: post.id,
-                    isLike: !post.userLike // toggle the like status
+                    isLike: !post.userLike
                 }, {
                     headers: { 'x-access-token': token }
                 });
@@ -458,6 +469,9 @@ export default {
                 return `https://www.dailymotion.com/embed/video/${dailymotionMatch[1] || dailymotionMatch[2]}`;
             }
             return '';
+        },
+        getUserAvatar(look) {
+            return `http://www.habbo.com/habbo-imaging/avatarimage?figure=${look}&direction=3&head_direction=3&gesture=nor&action=null&size=m&headonly=1&img_format=gif`;
         }
     }
 };
@@ -487,19 +501,13 @@ export default {
     bottom: 40px;
 }
 
-.slide-fade-enter-active {
-    transition: all 0.3s ease;
-}
-
+.slide-fade-enter-active,
 .slide-fade-leave-active {
     transition: all 0.3s ease;
 }
 
 .slide-fade-enter,
-.slide-fade-leave-to
-
-/* .slide-fade-leave-active in <2.1.8 */
-    {
+.slide-fade-leave-to {
     transform: translateY(10px);
     opacity: 0;
 }

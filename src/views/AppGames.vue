@@ -3,27 +3,48 @@
         <AppHeader :logoImage="logoImage" :headerImage="headerImage" @toggleDarkMode="toggleDarkMode"
             @logout="logout" />
         <div class="container mx-auto px-4 py-8">
+            <div v-if="isAdmin" class="mb-8">
+                <button @click="showAddModal" class="bg-green-500 text-white px-6 py-2 rounded-lg">Add New Game</button>
+            </div>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                 <div v-for="game in paginatedGames" :key="game.id"
                     class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 flex flex-col items-center w-72 mx-auto">
                     <img :src="game.icon" alt="Game Icon" class="w-32 h-32 object-cover rounded-full mb-4" />
                     <h2 class="text-2xl font-semibold mb-4 text-center">{{ game.title }}</h2>
                     <button @click="playGame(game.id)" class="bg-blue-500 text-white px-6 py-2 rounded-lg">Play</button>
+                    <button v-if="isAdmin" @click="deleteGame(game.id)"
+                        class="mt-2 bg-red-500 text-white px-4 py-2 rounded-lg">Delete</button>
                 </div>
             </div>
             <div v-if="totalPages > 1" class="flex justify-center mt-8">
                 <button @click="prevPage" :disabled="currentPage === 1"
-                    class="bg-blue-500 text-white px-4 py-2 mx-2 rounded-lg">
-                    Previous
-                </button>
+                    :class="['bg-blue-500 text-white px-4 py-2 mx-2 rounded-lg', { 'disabled:opacity-50': currentPage === 1 }]">Previous</button>
                 <span class="mx-2">{{ currentPage }} / {{ totalPages }}</span>
                 <button @click="nextPage" :disabled="currentPage === totalPages"
-                    class="bg-blue-500 text-white px-4 py-2 mx-2 rounded-lg">
-                    Next
-                </button>
+                    :class="['bg-blue-500 text-white px-4 py-2 mx-2 rounded-lg', { 'disabled:opacity-50': currentPage === totalPages }]">Next</button>
             </div>
         </div>
         <AppFooter :logoImage="logoImage" />
+        <AppModal v-if="showModal" @close="closeModal" title="Add New Game">
+            <form @submit.prevent="addGame">
+                <div class="mb-4">
+                    <label class="block text-gray-700 dark:text-gray-200">Title</label>
+                    <input v-model="newGame.title" type="text" required
+                        class="w-full p-2 border border-gray-300 rounded-lg" />
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 dark:text-gray-200">Icon URL</label>
+                    <input v-model="newGame.icon" type="text" required
+                        class="w-full p-2 border border-gray-300 rounded-lg" />
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 dark:text-gray-200">Source URL</label>
+                    <input v-model="newGame.source" type="text" required
+                        class="w-full p-2 border border-gray-300 rounded-lg" />
+                </div>
+                <button type="submit" class="bg-green-500 text-white px-4 py-2 rounded-lg">Add Game</button>
+            </form>
+        </AppModal>
     </div>
 </template>
 
@@ -31,11 +52,13 @@
 import axios from 'axios';
 import AppHeader from '../components/AppHeader.vue';
 import AppFooter from '../components/AppFooter.vue';
+import AppModal from '../components/AppModal.vue';
 
 export default {
     components: {
         AppHeader,
         AppFooter,
+        AppModal
     },
     data() {
         return {
@@ -45,6 +68,13 @@ export default {
             games: [],
             currentPage: 1,
             gamesPerPage: 8,
+            showModal: false,
+            newGame: {
+                title: '',
+                icon: '',
+                source: ''
+            },
+            isAdmin: false // To be set based on user's role
         };
     },
     computed: {
@@ -58,6 +88,7 @@ export default {
     },
     async created() {
         await this.fetchGames();
+        await this.checkAdmin();
     },
     methods: {
         async fetchGames() {
@@ -69,6 +100,40 @@ export default {
                 this.games = response.data;
             } catch (error) {
                 console.error('Error fetching games:', error);
+            }
+        },
+        async checkAdmin() {
+            try {
+                const apiUrl = process.env.VUE_APP_API_URL || 'http://localhost:3000';
+                const response = await axios.get(`${apiUrl}/profile/me`, {
+                    headers: this.getAuthHeaders()
+                });
+                this.isAdmin = response.data.rank >= 5;
+            } catch (error) {
+                console.error('Error checking admin status:', error);
+            }
+        },
+        async addGame() {
+            try {
+                const apiUrl = process.env.VUE_APP_API_URL || 'http://localhost:3000';
+                const response = await axios.post(`${apiUrl}/games`, this.newGame, {
+                    headers: this.getAuthHeaders()
+                });
+                this.games.push(response.data);
+                this.closeModal();
+            } catch (error) {
+                console.error('Error adding game:', error);
+            }
+        },
+        async deleteGame(id) {
+            try {
+                const apiUrl = process.env.VUE_APP_API_URL || 'http://localhost:3000';
+                await axios.delete(`${apiUrl}/games/${id}`, {
+                    headers: this.getAuthHeaders()
+                });
+                this.games = this.games.filter(game => game.id !== id);
+            } catch (error) {
+                console.error('Error deleting game:', error);
             }
         },
         toggleDarkMode() {
@@ -92,6 +157,17 @@ export default {
                 this.currentPage--;
             }
         },
+        showAddModal() {
+            this.showModal = true;
+        },
+        closeModal() {
+            this.showModal = false;
+            this.newGame = {
+                title: '',
+                icon: '',
+                source: ''
+            };
+        },
         getAuthHeaders() {
             const token = localStorage.getItem('token');
             return token ? { 'x-access-token': token } : {};
@@ -101,10 +177,14 @@ export default {
 </script>
 
 <style scoped>
-/* Add custom styles here if needed */
 .container {
     display: flex;
     flex-direction: column;
     align-items: center;
+}
+
+.disabled\:opacity-50 {
+    opacity: 0.5;
+    pointer-events: none;
 }
 </style>
