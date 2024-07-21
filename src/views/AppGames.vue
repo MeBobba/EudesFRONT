@@ -53,8 +53,7 @@ export default {
         },
         paginatedGames() {
             const start = (this.currentPage - 1) * this.gamesPerPage;
-            const end = start + this.gamesPerPage;
-            return this.games.slice(start, end);
+            return this.games.slice(start, start + this.gamesPerPage);
         }
     },
     async created() {
@@ -63,7 +62,10 @@ export default {
     methods: {
         async fetchGames() {
             try {
-                const response = await axios.get('http://localhost:3000/games');
+                const apiUrl = process.env.VUE_APP_API_URL || 'http://localhost:3000';
+                const response = await axios.get(`${apiUrl}/games`, {
+                    headers: this.getAuthHeaders()
+                });
                 this.games = response.data;
             } catch (error) {
                 console.error('Error fetching games:', error);
@@ -89,6 +91,10 @@ export default {
             if (this.currentPage > 1) {
                 this.currentPage--;
             }
+        },
+        getAuthHeaders() {
+            const token = localStorage.getItem('token');
+            return token ? { 'x-access-token': token } : {};
         }
     },
 };

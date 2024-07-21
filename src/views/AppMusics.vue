@@ -11,7 +11,7 @@
                 <div class="latest-releases grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                     <div v-for="track in latestTracks" :key="track.id" class="track-item" @click="playTrack(track)">
                         <img :src="track.album.images[0]?.url || ''" :alt="track.name" class="w-full h-auto rounded-lg"
-                            v-if="track.album.images && track.album.images.length > 0" />
+                            v-if="track.album.images.length > 0" />
                         <div class="mt-2">
                             <h3 class="text-lg font-medium">{{ track.name }}</h3>
                             <p class="text-sm text-gray-500">{{ track.artists[0].name }}</p>
@@ -27,8 +27,7 @@
                         <div v-for="result in searchResults.tracks" :key="result.id" class="track-item"
                             @click="playTrack(result)">
                             <img :src="result.album.images[0]?.url || ''" :alt="result.name"
-                                class="w-full h-auto rounded-lg"
-                                v-if="result.album && result.album.images && result.album.images.length > 0" />
+                                class="w-full h-auto rounded-lg" v-if="result.album.images.length > 0" />
                             <div class="mt-2">
                                 <h3 class="text-lg font-medium">{{ result.name }}</h3>
                                 <p class="text-sm text-gray-500">{{ result.artists[0].name }}</p>
@@ -39,7 +38,7 @@
                     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                         <div v-for="artist in searchResults.artists" :key="artist.id" class="artist-item">
                             <img :src="artist.images[0]?.url || ''" :alt="artist.name" class="w-16 h-16 rounded-full"
-                                v-if="artist.images && artist.images.length > 0" />
+                                v-if="artist.images.length > 0" />
                             <div class="mt-2">
                                 <h3 class="text-lg font-medium">{{ artist.name }}</h3>
                             </div>
@@ -52,7 +51,7 @@
             class="music-player fixed bottom-0 left-0 right-0 bg-gray-800 text-white p-4 flex flex-col sm:flex-row items-center justify-between rounded-t-lg shadow-lg">
             <div class="flex items-center mb-4 sm:mb-0">
                 <img :src="currentTrack.album.images[0]?.url || ''" alt="Album cover" class="w-16 h-16 rounded-lg"
-                    v-if="currentTrack.album && currentTrack.album.images && currentTrack.album.images.length > 0" />
+                    v-if="currentTrack.album.images.length > 0" />
                 <div class="track-info ml-4">
                     <h3 class="text-lg font-medium">{{ currentTrack.name }}</h3>
                     <p class="text-sm text-gray-400">{{ currentTrack.artists[0].name }}</p>
@@ -138,14 +137,12 @@ export default {
     },
     methods: {
         async fetchSpotifyToken() {
-            const clientId = 'c977a9c0addb40fb8ce10dfefd5bbf81';
-            const clientSecret = '2ec6a460145f44fc845dfc771f5f701b';
+            const clientId = process.env.VUE_APP_SPOTIFY_CLIENT_ID;
+            const clientSecret = process.env.VUE_APP_SPOTIFY_CLIENT_SECRET;
             try {
                 const response = await axios.post(
                     'https://accounts.spotify.com/api/token',
-                    new URLSearchParams({
-                        grant_type: 'client_credentials',
-                    }),
+                    new URLSearchParams({ grant_type: 'client_credentials' }),
                     {
                         headers: {
                             'Content-Type': 'application/x-www-form-urlencoded',
@@ -164,44 +161,20 @@ export default {
                 this.latestTracks = this.cache[cacheKey];
                 return;
             }
-
             try {
                 await this.fetchSpotifyToken();
                 const response = await this.retryRequest(
                     'https://api.spotify.com/v1/browse/new-releases?limit=10',
-                    {
-                        headers: {
-                            Authorization: `Bearer ${this.spotifyToken}`,
-                        },
-                    }
+                    { headers: { Authorization: `Bearer ${this.spotifyToken}` } }
                 );
-
-                console.log('API Response:', response.data); // Log the entire response
-
                 if (response.data && response.data.albums && Array.isArray(response.data.albums.items)) {
-                    const albums = response.data.albums.items;
-
-                    if (albums.length > 0) {
-                        const tracks = [];
-                        for (const album of albums) {
-                            // Extraire les informations nécessaires de l'album directement
-                            if (album.artists && album.images) {
-                                tracks.push({
-                                    id: album.id,
-                                    name: album.name,
-                                    artists: album.artists,
-                                    album: { images: album.images },
-                                });
-                            }
-                        }
-
-                        this.latestTracks = tracks;
-                        console.log('Latest Tracks:', this.latestTracks); // Log the tracks array
-                        this.cache[cacheKey] = this.latestTracks;
-                    } else {
-                        console.error('No albums found in the response:', response.data);
-                        this.latestTracks = [];
-                    }
+                    this.latestTracks = response.data.albums.items.map(album => ({
+                        id: album.id,
+                        name: album.name,
+                        artists: album.artists,
+                        album: { images: album.images }
+                    }));
+                    this.cache[cacheKey] = this.latestTracks;
                 } else {
                     console.error('Unexpected response structure:', response.data);
                     this.latestTracks = [];
@@ -212,30 +185,20 @@ export default {
             }
         },
         async searchMusic(page = 1) {
-            if (this.searchQuery.trim() === '') {
+            if (!this.searchQuery.trim()) {
                 this.searchResults = { tracks: [], artists: [] };
                 return;
             }
-
             const cacheKey = `search_${this.searchQuery}_page_${page}`;
             if (this.cache[cacheKey]) {
                 this.updateSearchResults(this.cache[cacheKey], page);
                 return;
             }
-
             try {
                 const response = await axios.get('https://api.spotify.com/v1/search', {
-                    headers: {
-                        Authorization: `Bearer ${this.spotifyToken}`,
-                    },
-                    params: {
-                        q: this.searchQuery,
-                        type: 'track,artist',
-                        limit: 20,
-                        offset: (page - 1) * 20,
-                    },
+                    headers: { Authorization: `Bearer ${this.spotifyToken}` },
+                    params: { q: this.searchQuery, type: 'track,artist', limit: 20, offset: (page - 1) * 20 }
                 });
-
                 if (response.data) {
                     this.updateSearchResults(response.data, page);
                     this.cache[cacheKey] = response.data;
@@ -255,57 +218,31 @@ export default {
                 this.searchResults.tracks.push(...this.filterUnique(data.tracks.items));
                 this.searchResults.artists.push(...data.artists.items);
             }
-            if (data.tracks.items.length === 0 && data.artists.items.length === 0) {
-                this.noMorePosts = true;
-            }
+            this.noMorePosts = data.tracks.items.length === 0 && data.artists.items.length === 0;
             this.nextPage = page + 1;
         },
         filterUnique(tracks) {
-            const uniqueTracks = [];
-            const trackIds = new Set();
-            tracks.forEach((track) => {
-                if (!trackIds.has(track.id)) {
-                    uniqueTracks.push(track);
-                    trackIds.add(track.id);
-                }
-            });
-            return uniqueTracks;
-        },
-        async checkTrackExists(spotifyId) {
-            try {
-                const response = await axios.get(`http://localhost:8080/tracks/${spotifyId}`);
-                return response.data.exists;
-            } catch (error) {
-                if (error.response && error.response.status === 404) {
-                    console.log('Track not found:', spotifyId);
-                } else {
-                    console.error('Error checking track existence:', error);
-                }
-                return false;
-            }
+            const trackIds = new Set(this.searchResults.tracks.map(track => track.id));
+            return tracks.filter(track => !trackIds.has(track.id));
         },
         async playTrack(track, fromMounted = false) {
             this.currentTrack = track;
             this.resetPlayer();
             const query = `${track.name} ${track.artists[0].name}`;
-            console.log(`Playing track: ${query}`);
             try {
                 const response = await axios.get('https://www.googleapis.com/youtube/v3/search', {
                     params: {
                         part: 'snippet',
                         q: query,
-                        key: 'AIzaSyDCdoD5B-_QCeiYFpR8fdnpGu69OkZvLWs',
-                        type: 'video',
-                    },
+                        key: process.env.VUE_APP_YOUTUBE_API_KEY,
+                        type: 'video'
+                    }
                 });
-                console.log('YouTube API response:', response.data);
-                if (response.data && response.data.items && response.data.items.length > 0) {
+                if (response.data && response.data.items.length > 0) {
                     this.youtubeVideoId = response.data.items[0].id.videoId;
                     await this.initializePlayer(fromMounted);
                     localStorage.setItem('currentTrack', JSON.stringify(track));
-                    if (!fromMounted) {
-                        localStorage.setItem('currentTime', 0); // Reset the saved time to 0
-                    }
+                    if (!fromMounted) localStorage.setItem('currentTime', 0);
                 } else {
                     console.error('No YouTube video found for the track:', track);
                     this.youtubeVideoId = null;
@@ -321,20 +258,13 @@ export default {
                 this.player = new window.YT.Player(this.$refs.youtubePlayer, {
                     videoId: this.youtubeVideoId,
                     events: {
-                        'onReady': (event) => this.onPlayerReady(event, fromMounted),
-                        'onStateChange': this.onPlayerStateChange
+                        onReady: (event) => this.onPlayerReady(event, fromMounted),
+                        onStateChange: this.onPlayerStateChange
                     }
                 });
             } else {
-                if (this.player && typeof this.player.cueVideoById === 'function' && typeof this.player.loadVideoById === 'function') {
-                    if (fromMounted) {
-                        this.player.cueVideoById(this.youtubeVideoId);
-                    } else {
-                        this.player.loadVideoById(this.youtubeVideoId);
-                    }
-                } else {
-                    console.error('YouTube player is not properly initialized.');
-                }
+                this.player.loadVideoById(this.youtubeVideoId);
+                if (fromMounted) this.player.cueVideoById(this.youtubeVideoId);
             }
         },
         loadYouTubeApi() {
@@ -348,12 +278,7 @@ export default {
                     const tag = document.createElement('script');
                     tag.src = "https://www.youtube.com/iframe_api";
                     tag.id = 'youtube-iframe-api';
-                    const firstScriptTag = document.getElementsByTagName('script')[0];
-                    if (firstScriptTag && firstScriptTag.parentNode) {
-                        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-                    } else {
-                        document.head.appendChild(tag); // Ajout en tant qu'enfant direct du head si firstScriptTag n'existe pas
-                    }
+                    document.head.appendChild(tag);
                 } else {
                     resolve();
                 }
@@ -361,9 +286,7 @@ export default {
         },
         onPlayerReady(event, fromMounted = false) {
             const savedTime = parseFloat(localStorage.getItem('currentTime')) || 0;
-            if (savedTime && fromMounted) {
-                event.target.seekTo(savedTime, true);
-            }
+            if (savedTime && fromMounted) event.target.seekTo(savedTime, true);
             event.target.playVideo();
             this.isPlaying = true;
             this.setVolume(this.volume);
@@ -379,23 +302,19 @@ export default {
                     this.playNextTrack();
                 } else {
                     this.fetchSimilarTracks().then(() => {
-                        if (this.similarTracks.length > 0) {
-                            this.playNextTrack();
-                        }
+                        if (this.similarTracks.length > 0) this.playNextTrack();
                     });
                 }
             } else if (event.data === window.YT.PlayerState.PLAYING) {
                 this.isPlaying = true;
-                this.duration = this.player.getDuration(); // Ensure duration is updated
+                this.duration = this.player.getDuration();
                 this.updateTime();
             } else if (event.data === window.YT.PlayerState.PAUSED) {
                 this.isPlaying = false;
             }
         },
         async playNextTrack() {
-            if (this.similarTracks.length === 0) {
-                await this.fetchSimilarTracks();
-            }
+            if (this.similarTracks.length === 0) await this.fetchSimilarTracks();
             if (this.similarTracks.length > 0) {
                 const nextTrack = this.similarTracks.shift();
                 await this.playTrack(nextTrack);
@@ -406,15 +325,10 @@ export default {
         async fetchSimilarTracks() {
             try {
                 const response = await this.retryRequest(
-                    `https://api.spotify.com/v1/recommendations`,
+                    'https://api.spotify.com/v1/recommendations',
                     {
-                        headers: {
-                            Authorization: `Bearer ${this.spotifyToken}`,
-                        },
-                        params: {
-                            seed_tracks: this.currentTrack.id,
-                            limit: 10
-                        },
+                        headers: { Authorization: `Bearer ${this.spotifyToken}` },
+                        params: { seed_tracks: this.currentTrack.id, limit: 10 }
                     }
                 );
                 if (response.data && response.data.tracks) {
@@ -429,16 +343,16 @@ export default {
         resetPlayer() {
             this.currentTime = 0;
             this.duration = 0;
-            this.isPlaying = false; // Reset play/pause button state
+            this.isPlaying = false;
         },
         async playVideo() {
-            if (this.player && typeof this.player.playVideo === 'function') {
+            if (this.player && this.player.playVideo) {
                 this.player.playVideo();
                 this.isPlaying = true;
                 this.syncLyrics();
             } else {
                 await this.initializePlayer();
-                if (this.player && typeof this.player.playVideo === 'function') {
+                if (this.player && this.player.playVideo) {
                     this.player.playVideo();
                     this.isPlaying = true;
                     this.syncLyrics();
@@ -455,21 +369,14 @@ export default {
             }
         },
         togglePlayPause() {
-            if (this.isPlaying) {
-                this.pauseVideo();
-            } else {
-                this.playVideo();
-            }
+            this.isPlaying ? this.pauseVideo() : this.playVideo();
         },
         changeVolume(event) {
-            const volume = event.target.value;
-            this.volume = volume;
-            this.setVolume(volume);
+            this.volume = event.target.value;
+            this.setVolume(this.volume);
         },
         setVolume(volume) {
-            if (this.player) {
-                this.player.setVolume(volume);
-            }
+            if (this.player) this.player.setVolume(volume);
         },
         seek(event) {
             const time = event.target.value;
@@ -503,49 +410,22 @@ export default {
         },
         async fetchLyrics(track) {
             if (!track || !track.name || !track.artists || !track.artists[0].name) return;
-
             try {
                 const response = await axios.get('https://api.musixmatch.com/ws/1.1/matcher.lyrics.get', {
                     params: {
                         q_track: track.name,
                         q_artist: track.artists[0].name,
-                        apikey: '36f47fcbf61142afa2028d7fc17f95e1'
+                        apikey: process.env.VUE_APP_MUSIXMATCH_API_KEY
                     }
                 });
-                if (response.data && response.data.message && response.data.message.body && response.data.message.body.lyrics) {
+                if (response.data.message.body.lyrics) {
                     this.lyrics = response.data.message.body.lyrics.lyrics_body;
                 } else {
-                    console.error('No lyrics found for the track:', track);
                     this.lyrics = 'Lyrics not available.';
                 }
             } catch (error) {
-                console.error('Error fetching lyrics from Musixmatch:', error);
-                try {
-                    const response = await axios.get('https://api.genius.com/search', {
-                        params: {
-                            q: `${track.name} ${track.artists[0].name}`,
-                            access_token: 'Y019cPKIZWxAM-Om9bKVCX7XNB2dQ1gOHq30RHpuyvtpK5-srcAAZCuWb3uzRje4'
-                        }
-                    });
-                    if (response.data && response.data.response && response.data.response.hits.length > 0) {
-                        const songId = response.data.response.hits[0].result.id;
-                        const lyricsResponse = await axios.get(`https://api.genius.com/songs/${songId}`, {
-                            headers: { Authorization: `Bearer Y019cPKIZWxAM-Om9bKVCX7XNB2dQ1gOHq30RHpuyvtpK5-srcAAZCuWb3uzRje4` }
-                        });
-                        if (lyricsResponse.data && lyricsResponse.data.response && lyricsResponse.data.response.song) {
-                            this.lyrics = lyricsResponse.data.response.song.lyrics;
-                        } else {
-                            console.error('No lyrics found on Genius:', track);
-                            this.lyrics = 'Lyrics not available.';
-                        }
-                    } else {
-                        console.error('No lyrics found on Genius:', track);
-                        this.lyrics = 'Lyrics not available.';
-                    }
-                } catch (error) {
-                    console.error('Error fetching lyrics from Genius:', error);
-                    this.lyrics = 'Network error. Please try again later.';
-                }
+                console.error('Error fetching lyrics:', error);
+                this.lyrics = 'Network error. Please try again later.';
             }
         },
         formatLyrics(lyrics) {
@@ -555,21 +435,17 @@ export default {
         showBioModal() {
             this.fetchArtistBio(this.currentTrack).then(() => {
                 this.modalTitle = 'Biography';
-                this.modalContent = this.artistBio;
+                this.modalContent = this.artistBio || 'Biography not available.';
                 this.showModal = true;
             });
         },
         async fetchArtistBio(track) {
             if (!track || !track.artists || !track.artists[0].name) return;
-
             try {
                 const response = await axios.get(`https://theaudiodb.com/api/v1/json/1/search.php?s=${encodeURIComponent(track.artists[0].name)}`);
-                if (response.data && response.data.artists && response.data.artists[0]) {
-                    const artist = response.data.artists[0];
-                    this.artistBio = artist.strBiographyEN;
-                    this.artistBioImages = artist.strArtistThumb;
+                if (response.data.artists) {
+                    this.artistBio = response.data.artists[0].strBiographyEN;
                 } else {
-                    console.error('No biography found for the artist:', track.artists[0].name);
                     this.artistBio = 'Biography not available.';
                 }
             } catch (error) {
@@ -577,30 +453,18 @@ export default {
                 this.artistBio = 'Error fetching biography.';
             }
         },
-        async storeTrack(trackData) {
-            try {
-                // Check if track exists
-                const trackExists = await this.checkTrackExists(trackData.spotify_id);
-                if (!trackExists) {
-                    await axios.post('http://localhost:8080/tracks', trackData);
-                }
-            } catch (error) {
-                console.error('Error storing track:', error);
-            }
-        },
         async retryRequest(url, options, retries = 3, delay = 1000) {
             for (let i = 0; i < retries; i++) {
                 try {
                     const response = await axios.get(url, options);
-                    return response; // succès, on retourne la réponse
+                    return response;
                 } catch (error) {
                     if (error.response && error.response.status === 429) {
-                        // Trop de requêtes, on attend et on essaie de nouveau
                         const retryAfter = parseInt(error.response.headers['retry-after']) * 1000 || delay;
                         console.warn(`Rate limited. Retrying after ${retryAfter}ms...`);
                         await new Promise((resolve) => setTimeout(resolve, retryAfter));
                     } else {
-                        throw error; // autre erreur, on lance l'exception
+                        throw error;
                     }
                 }
             }
@@ -641,39 +505,28 @@ export default {
                         line.classList.remove('current-line');
                     }
                 });
-            }, 1000); // ajustez la fréquence de mise à jour selon vos besoins
+            }, 1000);
         },
         closeModal() {
             this.showModal = false;
         }
     },
     created() {
-        this.fetchSpotifyToken().then(() => {
-            this.fetchLatestTracks();
-        });
+        this.fetchSpotifyToken().then(() => this.fetchLatestTracks());
         this.debouncedSearchMusic = _.debounce(() => this.searchMusic(1), 300);
-
         const savedTrack = localStorage.getItem('currentTrack');
         const savedTime = localStorage.getItem('currentTime');
-        if (savedTrack) {
-            this.currentTrack = JSON.parse(savedTrack);
-        }
-        if (savedTime) {
-            this.currentTime = parseFloat(savedTime);
-        }
+        if (savedTrack) this.currentTrack = JSON.parse(savedTrack);
+        if (savedTime) this.currentTime = parseFloat(savedTime);
     },
     mounted() {
         window.addEventListener('scroll', this.handleScroll);
-        if (this.currentTrack) {
-            this.playTrack(this.currentTrack, true).then(() => {
-                this.playVideo(); // Démarrer automatiquement la lecture si une piste est sauvegardée
-            });
-        }
+        if (this.currentTrack) this.playTrack(this.currentTrack, true).then(() => this.playVideo());
     },
     beforeUnmount() {
         window.removeEventListener('scroll', this.handleScroll);
         clearInterval(this.lyricsTimer);
-    },
+    }
 };
 </script>
 

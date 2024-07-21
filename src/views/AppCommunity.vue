@@ -6,11 +6,11 @@
             <div class="w-full lg:w-2/3 lg:pr-8">
                 <div v-if="error" class="text-red-500">{{ errorMessage }}</div>
                 <div v-else>
-                    <div :key="post.id" v-for="post in posts"
+                    <div v-for="post in posts" :key="post.id"
                         class="mb-8 p-4 bg-white dark:bg-gray-800 rounded-lg shadow-md">
                         <div class="flex items-center justify-between mb-4">
                             <div class="flex items-center">
-                                <img :src="`http://www.habbo.com/habbo-imaging/avatarimage?figure=${post.look}&direction=3&head_direction=3&gesture=nor&action=null&size=m&headonly=1&img_format=gif`"
+                                <img :src="getAvatarUrl(post.look)"
                                     class="rounded-full border-2 border-blue-500 bg-white" alt="User Profile">
                                 <div class="ml-4">
                                     <h3 class="font-semibold">{{ post.username }}</h3>
@@ -43,7 +43,7 @@
                                 <div v-for="comment in post.comments" :key="comment.id"
                                     class="mb-2 flex justify-between">
                                     <div class="flex items-center">
-                                        <img :src="`http://www.habbo.com/habbo-imaging/avatarimage?figure=${comment.look}&direction=3&head_direction=3&gesture=nor&action=null&size=s&headonly=1&img_format=gif`"
+                                        <img :src="getAvatarUrl(comment.look, 's')"
                                             class="rounded-full border-2 border-blue-500 p-1 bg-white"
                                             alt="User Profile">
                                         <div class="ml-2">
@@ -51,7 +51,7 @@
                                             <p>{{ comment.content }}</p>
                                         </div>
                                     </div>
-                                    <button v-if="comment.user_id === user.id" @click="deleteComment(comment.id)"
+                                    <button v-if="canDeleteComment(comment)" @click="deleteComment(comment.id)"
                                         class="text-red-500">
                                         <fa-icon icon="trash-alt" />
                                     </button>
@@ -72,7 +72,6 @@
                 </div>
             </div>
             <div class="w-full lg:w-1/3 lg:pl-8">
-                <!-- Card 1: What's on your mind? -->
                 <div :class="{ 'bg-gray-800 text-white': isDarkMode, 'bg-white text-black': !isDarkMode }"
                     class="p-4 rounded-lg shadow-md mb-8">
                     <div class="mb-4">
@@ -99,22 +98,16 @@
                         </div>
                     </div>
                 </div>
-                <!-- Card 2: Example Card 1 -->
-                <div :class="{ 'bg-gray-800 text-white': isDarkMode, 'bg-white text-black': !isDarkMode }"
-                    class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md mb-8">
-                    <h2 class="text-2xl font-bold mb-4">Example Card 1</h2>
-                    <p>Content goes here...</p>
-                </div>
-                <!-- Card 3: Example Card 2 -->
-                <div :class="{ 'bg-gray-800 text-white': isDarkMode, 'bg-white text-black': !isDarkMode }"
-                    class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md mb-8">
-                    <h2 class="text-2xl font-bold mb-4">Example Card 2</h2>
-                    <p>Content goes here...</p>
+                <div v-for="card in exampleCards" :key="card.id"
+                    :class="{ 'bg-gray-800 text-white': isDarkMode, 'bg-white text-black': !isDarkMode }"
+                    class="p-4 rounded-lg shadow-md mb-8">
+                    <h2 class="text-2xl font-bold mb-4">{{ card.title }}</h2>
+                    <p>{{ card.content }}</p>
                 </div>
             </div>
         </div>
+        <AppFooter :logoImage="logoImage" />
     </div>
-    <AppFooter :logoImage="logoImage" />
 </template>
 
 <script>
@@ -139,7 +132,7 @@ export default {
     data() {
         return {
             headerImage: require('@/assets/images/skeleton/header.png'),
-            logoImage: require('@/assets/images/skeleton/logo.gif'), // Replace with your own image
+            logoImage: require('@/assets/images/skeleton/logo.gif'),
             isDarkMode: false,
             posts: [],
             user: {},
@@ -152,7 +145,11 @@ export default {
             newPostContent: '',
             newPostVideo: '',
             postVisibility: 'public',
-            showEmojiPicker: false
+            showEmojiPicker: false,
+            exampleCards: [
+                { id: 1, title: 'Example Card 1', content: 'Content goes here...' },
+                { id: 2, title: 'Example Card 2', content: 'Content goes here...' }
+            ]
         };
     },
     async created() {
@@ -184,10 +181,7 @@ export default {
                 });
                 this.user = response.data;
             } catch (error) {
-                this.error = true;
-                this.errorMessage = error.response
-                    ? error.response.data || 'Failed to fetch user data. Please try again later.'
-                    : 'Failed to fetch user data. Please check your network connection.';
+                this.handleError(error, 'Failed to fetch user data. Please try again later.');
             }
         },
         async fetchPublicPosts() {
@@ -210,12 +204,9 @@ export default {
                     this.posts = [...this.posts, ...newPosts];
                     this.page++;
                 }
-                this.loading = false;
             } catch (error) {
-                this.error = true;
-                this.errorMessage = error.response
-                    ? error.response.data || 'Failed to fetch posts. Please try again later.'
-                    : 'Failed to fetch posts. Please check your network connection.';
+                this.handleError(error, 'Failed to fetch posts. Please try again later.');
+            } finally {
                 this.loading = false;
             }
         },
@@ -240,16 +231,13 @@ export default {
                     headers: { 'x-access-token': token }
                 });
 
-                // Ajouter le nouveau post à la liste des posts
                 const newPost = response.data;
                 newPost.likesCount = 0;
                 newPost.commentsCount = 0;
                 newPost.comments = [];
                 this.posts.unshift(newPost);
 
-                this.newPostContent = '';
-                this.newPostVideo = '';
-                this.postVisibility = 'public';
+                this.resetPostForm();
             } catch (error) {
                 if (error.response && error.response.status === 429) {
                     alert('Please wait 15 seconds before posting again.');
@@ -289,20 +277,11 @@ export default {
                 await axios.delete(`${apiUrl}/comments/${commentId}`, {
                     headers: { 'x-access-token': token }
                 });
-                // Remove the comment from the post and update commentsCount
-                this.posts = this.posts.map(post => {
-                    const updatedComments = post.comments.filter(c => c.id !== commentId);
-                    if (updatedComments.length !== post.comments.length) {
-                        post.comments = updatedComments;
-                        post.commentsCount = updatedComments.length;
-                    }
-                    return post;
-                });
+                this.removeComment(commentId);
             } catch (error) {
                 console.error('Error deleting comment:', error);
             }
         },
-
         async deletePost(postId) {
             try {
                 const token = localStorage.getItem('token');
@@ -314,13 +293,12 @@ export default {
                     headers: { 'x-access-token': token }
                 });
                 if (response.status === 200) {
-                    // Remove the post from the list
                     this.posts = this.posts.filter(post => post.id !== postId);
                 } else {
                     throw new Error('Failed to delete post');
                 }
             } catch (error) {
-                console.error('Error deleting post:', error); // Log the error
+                console.error('Error deleting post:', error);
                 alert('Failed to delete post. Please try again later.');
             }
         },
@@ -333,20 +311,14 @@ export default {
                 const apiUrl = process.env.VUE_APP_API_URL || 'http://localhost:3000';
                 const response = await axios.post(`${apiUrl}/likes`, {
                     postId: post.id,
-                    isLike: !post.userLike // toggle the like status
+                    isLike: !post.userLike
                 }, {
                     headers: { 'x-access-token': token }
                 });
                 const data = response.data;
                 post.userLike = data.userLike;
                 post.likesCount = data.likesCount;
-                const likeIcon = this.$el.querySelector(`#post-${post.id} .fa-heart`);
-                if (likeIcon) {
-                    likeIcon.classList.add('animate-like');
-                    setTimeout(() => {
-                        likeIcon.classList.remove('animate-like');
-                    }, 500);
-                }
+                this.animateLike(post.id);
             } catch (error) {
                 console.error('Error liking post:', error);
             }
@@ -379,8 +351,39 @@ export default {
             }
             return '';
         },
+        getAvatarUrl(look, size = 'm') {
+            return `http://www.habbo.com/habbo-imaging/avatarimage?figure=${look}&direction=3&head_direction=3&gesture=nor&action=null&size=${size}&headonly=1&img_format=gif`;
+        },
         canDeletePost(post) {
             return this.user.rank >= 5 || post.user_id === this.user.id;
+        },
+        canDeleteComment(comment) {
+            return comment.user_id === this.user.id;
+        },
+        handleError(error, defaultMessage) {
+            this.error = true;
+            this.errorMessage = error.response ? error.response.data || defaultMessage : defaultMessage;
+        },
+        resetPostForm() {
+            this.newPostContent = '';
+            this.newPostVideo = '';
+            this.postVisibility = 'public';
+        },
+        removeComment(commentId) {
+            this.posts = this.posts.map(post => {
+                post.comments = post.comments.filter(c => c.id !== commentId);
+                post.commentsCount = post.comments.length;
+                return post;
+            });
+        },
+        animateLike(postId) {
+            const likeIcon = this.$el.querySelector(`#post-${postId} .fa-heart`);
+            if (likeIcon) {
+                likeIcon.classList.add('animate-like');
+                setTimeout(() => {
+                    likeIcon.classList.remove('animate-like');
+                }, 500);
+            }
         }
     }
 };
@@ -409,23 +412,15 @@ export default {
     right: 0;
     bottom: 40px;
     z-index: 1000;
-    /* Ajouter un z-index élevé pour mettre la boîte en avant */
 }
 
-
-.slide-fade-enter-active {
-    transition: all 0.3s ease;
-}
-
+.slide-fade-enter-active,
 .slide-fade-leave-active {
     transition: all 0.3s ease;
 }
 
 .slide-fade-enter,
-.slide-fade-leave-to
-
-/* .slide-fade-leave-active in <2.1.8 */
-    {
+.slide-fade-leave-to {
     transform: translateY(10px);
     opacity: 0;
 }

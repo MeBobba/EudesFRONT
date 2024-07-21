@@ -12,7 +12,7 @@
                         <p class="text-gray-600 dark:text-gray-400 mb-4">{{ formatDate(article.date) }}</p>
                         <p class="mb-4">{{ article.content }}</p>
                         <!-- Like and Comment Section -->
-                        <div class="flex items-center">
+                        <div class="flex items-center mb-4">
                             <button @click="toggleLike(article)" class="mr-4 like-button">
                                 <font-awesome-icon :icon="['fas', 'heart']"
                                     :class="{ 'text-red-500': article.userLike, 'text-gray-500': !article.userLike }" />
@@ -49,6 +49,12 @@
                                 <p v-if="error" class="text-red-500 mt-2">{{ error }}</p>
                             </div>
                         </transition>
+                        <div v-if="user.rank >= 5" class="flex space-x-2 mt-4">
+                            <button @click="showEditModal(article)"
+                                class="bg-yellow-500 text-white px-2 py-1 rounded">Edit</button>
+                            <button @click="deleteArticle(article.id)"
+                                class="bg-red-500 text-white px-2 py-1 rounded">Delete</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -72,6 +78,34 @@
             </div>
         </div>
         <AppFooter :logoImage="logoImage" />
+
+        <modal v-if="showModal" @close="closeModal">
+            <template v-slot:header>{{ modalTitle }}</template>
+            <template v-slot:body>
+                <form @submit.prevent="submitForm">
+                    <div class="mb-4">
+                        <label class="block text-gray-700 dark:text-gray-200">Title</label>
+                        <input v-model="form.title" type="text" class="w-full p-2 border border-gray-300 rounded-lg"
+                            required />
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-700 dark:text-gray-200">Summary</label>
+                        <textarea v-model="form.summary" class="w-full p-2 border border-gray-300 rounded-lg"
+                            required></textarea>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-700 dark:text-gray-200">Content</label>
+                        <textarea v-model="form.content" class="w-full p-2 border border-gray-300 rounded-lg"
+                            required></textarea>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-700 dark:text-gray-200">Image URL</label>
+                        <input v-model="form.image" type="text" class="w-full p-2 border border-gray-300 rounded-lg" />
+                    </div>
+                    <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-lg">Submit</button>
+                </form>
+            </template>
+        </modal>
     </div>
 </template>
 
@@ -79,6 +113,7 @@
 import axios from 'axios';
 import AppHeader from '../components/AppHeader.vue';
 import AppFooter from '../components/AppFooter.vue';
+import modal from '../components/AppModal.vue';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { faHeart, faComment, faTrashAlt } from '@fortawesome/free-solid-svg-icons';
@@ -90,6 +125,7 @@ export default {
     components: {
         AppHeader,
         AppFooter,
+        modal,
         'font-awesome-icon': FontAwesomeIcon
     },
     data() {
@@ -107,7 +143,16 @@ export default {
             user: {},
             headerImage: require('@/assets/images/skeleton/header.png'),
             logoImage: require('@/assets/images/skeleton/logo.gif'),
-            error: null
+            error: null,
+            showModal: false,
+            modalTitle: '',
+            form: {
+                id: null,
+                title: '',
+                summary: '',
+                content: '',
+                image: ''
+            }
         };
     },
     async created() {
@@ -119,13 +164,22 @@ export default {
         '$route.params.id': 'fetchArticle'
     },
     methods: {
+        toggleDarkMode() {
+            this.isDarkMode = !this.isDarkMode;
+            document.documentElement.classList.toggle('dark', this.isDarkMode);
+        },
+        logout() {
+            localStorage.removeItem('token');
+            this.$router.push('/login');
+        },
         async fetchUser() {
             try {
                 const token = localStorage.getItem('token');
                 if (!token) {
                     throw new Error('No token found');
                 }
-                const response = await axios.get('http://localhost:3000/dashboard', {
+                const apiUrl = process.env.VUE_APP_API_URL || 'http://localhost:3000';
+                const response = await axios.get(`${apiUrl}/dashboard`, {
                     headers: { 'x-access-token': token }
                 });
                 this.user = response.data;
@@ -136,9 +190,9 @@ export default {
         async fetchArticle() {
             const articleId = this.$route.params.id;
             try {
-                const token = localStorage.getItem('token');
-                const response = await axios.get(`http://localhost:3000/articles/${articleId}`, {
-                    headers: { 'x-access-token': token }
+                const apiUrl = process.env.VUE_APP_API_URL || 'http://localhost:3000';
+                const response = await axios.get(`${apiUrl}/articles/${articleId}`, {
+                    headers: { 'x-access-token': localStorage.getItem('token') }
                 });
                 this.article = response.data;
                 this.article.newComment = '';
@@ -149,7 +203,8 @@ export default {
         },
         async fetchOtherArticles() {
             try {
-                const response = await axios.get('http://localhost:3000/articles');
+                const apiUrl = process.env.VUE_APP_API_URL || 'http://localhost:3000';
+                const response = await axios.get(`${apiUrl}/articles`);
                 this.otherArticles = response.data.filter(article => article.id !== this.$route.params.id);
             } catch (error) {
                 console.error('Error fetching other articles:', error);
@@ -164,7 +219,8 @@ export default {
                 if (!token) {
                     throw new Error('No token found');
                 }
-                const response = await axios.post(`http://localhost:3000/articles/${article.id}/comments`, {
+                const apiUrl = process.env.VUE_APP_API_URL || 'http://localhost:3000';
+                const response = await axios.post(`${apiUrl}/articles/${article.id}/comments`, {
                     content: article.newComment
                 }, {
                     headers: { 'x-access-token': token }
@@ -188,29 +244,28 @@ export default {
                 if (!token) {
                     throw new Error('No token found');
                 }
-                await axios.delete(`http://localhost:3000/article-comments/${commentId}`, {
+                const apiUrl = process.env.VUE_APP_API_URL || 'http://localhost:3000';
+                await axios.delete(`${apiUrl}/article-comments/${commentId}`, {
                     headers: { 'x-access-token': token }
                 });
-                // Remove the comment from the article
                 this.article.comments = this.article.comments.filter(comment => comment.id !== commentId);
                 this.article.commentsCount--;
             } catch (error) {
                 console.error('Error deleting comment:', error);
             }
         },
-
         async toggleLike(article) {
             try {
                 const token = localStorage.getItem('token');
                 if (!token) {
                     throw new Error('No token found');
                 }
-                const response = await axios.post(`http://localhost:3000/articles/${article.id}/likes`, {
-                    isLike: !article.userLike // Toggle the like status
+                const apiUrl = process.env.VUE_APP_API_URL || 'http://localhost:3000';
+                const response = await axios.post(`${apiUrl}/articles/${article.id}/likes`, {
+                    isLike: !article.userLike
                 }, {
                     headers: { 'x-access-token': token }
                 });
-
                 article.userLike = response.data.userLike;
                 article.likesCount = response.data.likesCount;
             } catch (error) {
@@ -224,13 +279,42 @@ export default {
             const options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
             return new Date(dateString).toLocaleDateString(undefined, options);
         },
-        toggleDarkMode() {
-            this.isDarkMode = !this.isDarkMode;
-            document.documentElement.classList.toggle('dark', this.isDarkMode);
+        showEditModal(article) {
+            this.form = { ...article };
+            this.modalTitle = 'Edit News';
+            this.showModal = true;
         },
-        logout() {
-            localStorage.removeItem('token');
-            this.$router.push('/login');
+        async submitForm() {
+            try {
+                const apiUrl = process.env.VUE_APP_API_URL || 'http://localhost:3000';
+                if (this.form.id) {
+                    await axios.put(`${apiUrl}/articles/${this.form.id}`, this.form, {
+                        headers: { 'x-access-token': localStorage.getItem('token') }
+                    });
+                } else {
+                    await axios.post(`${apiUrl}/articles`, this.form, {
+                        headers: { 'x-access-token': localStorage.getItem('token') }
+                    });
+                }
+                await this.fetchArticle();
+                this.closeModal();
+            } catch (error) {
+                console.error('Error submitting form:', error);
+            }
+        },
+        async deleteArticle(articleId) {
+            try {
+                const apiUrl = process.env.VUE_APP_API_URL || 'http://localhost:3000';
+                await axios.delete(`${apiUrl}/articles/${articleId}`, {
+                    headers: { 'x-access-token': localStorage.getItem('token') }
+                });
+                this.$router.push('/');
+            } catch (error) {
+                console.error('Error deleting article:', error);
+            }
+        },
+        closeModal() {
+            this.showModal = false;
         }
     }
 };
@@ -294,10 +378,7 @@ img {
 }
 
 .slide-fade-enter,
-.slide-fade-leave-to
-
-/* .slide-fade-leave-active in <2.1.8 */
-    {
+.slide-fade-leave-to {
     transform: translateY(10px);
     opacity: 0;
 }

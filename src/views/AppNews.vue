@@ -7,6 +7,9 @@
                 <input v-model="searchQuery" @input="filterArticles" type="text" placeholder="Search news..."
                     class="w-full p-4 border border-gray-300 rounded-lg" />
             </div>
+            <div v-if="user.rank >= 5" class="mb-6">
+                <button @click="showAddModal" class="bg-green-500 text-white px-4 py-2 rounded-lg">Add News</button>
+            </div>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
                 <div v-for="article in paginatedArticles" :key="article.id"
                     class="relative bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
@@ -19,6 +22,12 @@
                             <p class="mt-2">{{ article.summary }}</p>
                         </div>
                     </router-link>
+                    <div v-if="user.rank >= 5" class="absolute top-0 right-0 m-4 flex space-x-2">
+                        <button @click="showEditModal(article)"
+                            class="bg-yellow-500 text-white px-2 py-1 rounded">Edit</button>
+                        <button @click="deleteArticle(article.id)"
+                            class="bg-red-500 text-white px-2 py-1 rounded">Delete</button>
+                    </div>
                 </div>
             </div>
             <div class="flex justify-center mt-6">
@@ -29,6 +38,34 @@
             </div>
         </div>
         <AppFooter :logoImage="logoImage" />
+
+        <modal v-if="showModal" @close="closeModal">
+            <template v-slot:header>{{ modalTitle }}</template>
+            <template v-slot:body>
+                <form @submit.prevent="submitForm">
+                    <div class="mb-4">
+                        <label class="block text-gray-700 dark:text-gray-200">Title</label>
+                        <input v-model="form.title" type="text" class="w-full p-2 border border-gray-300 rounded-lg"
+                            required />
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-700 dark:text-gray-200">Summary</label>
+                        <textarea v-model="form.summary" class="w-full p-2 border border-gray-300 rounded-lg"
+                            required></textarea>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-700 dark:text-gray-200">Content</label>
+                        <textarea v-model="form.content" class="w-full p-2 border border-gray-300 rounded-lg"
+                            required></textarea>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-700 dark:text-gray-200">Image URL</label>
+                        <input v-model="form.image" type="text" class="w-full p-2 border border-gray-300 rounded-lg" />
+                    </div>
+                    <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-lg">Submit</button>
+                </form>
+            </template>
+        </modal>
     </div>
 </template>
 
@@ -36,12 +73,14 @@
 import axios from 'axios';
 import AppHeader from '../components/AppHeader.vue';
 import AppFooter from '../components/AppFooter.vue';
+import modal from '../components/AppModal.vue';
 
 export default {
     name: 'AppNews',
     components: {
         AppHeader,
-        AppFooter
+        AppFooter,
+        modal
     },
     data() {
         return {
@@ -52,7 +91,17 @@ export default {
             filteredArticles: [],
             searchQuery: '',
             currentPage: 1,
-            articlesPerPage: 6
+            articlesPerPage: 6,
+            user: {},
+            showModal: false,
+            modalTitle: '',
+            form: {
+                id: null,
+                title: '',
+                summary: '',
+                content: '',
+                image: ''
+            }
         };
     },
     computed: {
@@ -61,11 +110,11 @@ export default {
         },
         paginatedArticles() {
             const start = (this.currentPage - 1) * this.articlesPerPage;
-            const end = start + this.articlesPerPage;
-            return this.filteredArticles.slice(start, end);
+            return this.filteredArticles.slice(start, start + this.articlesPerPage);
         }
     },
     async created() {
+        await this.fetchUserData();
         await this.fetchArticles();
     },
     methods: {
@@ -77,9 +126,22 @@ export default {
             localStorage.removeItem('token');
             this.$router.push('/login');
         },
+        async fetchUserData() {
+            try {
+                const token = localStorage.getItem('token');
+                if (!token) throw new Error('No token found');
+                const apiUrl = process.env.VUE_APP_API_URL || 'http://localhost:3000';
+                const response = await axios.get(`${apiUrl}/dashboard`, { headers: { 'x-access-token': token } });
+                this.user = response.data;
+            } catch (error) {
+                console.error('Error fetching user data:', error);
+                this.$router.push('/login');
+            }
+        },
         async fetchArticles() {
             try {
-                const response = await axios.get('http://localhost:3000/articles'); // Remplacez par l'URL de votre API
+                const apiUrl = process.env.VUE_APP_API_URL || 'http://localhost:3000';
+                const response = await axios.get(`${apiUrl}/articles`);
                 this.articles = response.data;
                 this.filteredArticles = this.articles;
             } catch (error) {
@@ -91,21 +153,69 @@ export default {
             this.filteredArticles = this.articles.filter(article =>
                 article.title.toLowerCase().includes(query) || article.summary.toLowerCase().includes(query)
             );
-            this.currentPage = 1; // Reset to the first page after filtering
+            this.currentPage = 1;
         },
         formatDate(dateString) {
             const options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
             return new Date(dateString).toLocaleDateString(undefined, options);
         },
         nextPage() {
-            if (this.currentPage < this.totalPages) {
-                this.currentPage++;
-            }
+            if (this.currentPage < this.totalPages) this.currentPage++;
         },
         prevPage() {
-            if (this.currentPage > 1) {
-                this.currentPage--;
+            if (this.currentPage > 1) this.currentPage--;
+        },
+        showAddModal() {
+            this.resetForm();
+            this.modalTitle = 'Add News';
+            this.showModal = true;
+        },
+        showEditModal(article) {
+            this.form = { ...article };
+            this.modalTitle = 'Edit News';
+            this.showModal = true;
+        },
+        async submitForm() {
+            try {
+                const apiUrl = process.env.VUE_APP_API_URL || 'http://localhost:3000';
+                if (this.form.id) {
+                    await axios.put(`${apiUrl}/articles/${this.form.id}`, this.form, {
+                        headers: { 'x-access-token': localStorage.getItem('token') }
+                    });
+                } else {
+                    await axios.post(`${apiUrl}/articles`, this.form, {
+                        headers: { 'x-access-token': localStorage.getItem('token') }
+                    });
+                }
+                await this.fetchArticles();
+                this.closeModal();
+            } catch (error) {
+                console.error('Error submitting form:', error);
             }
+        },
+        async deleteArticle(articleId) {
+            try {
+                const apiUrl = process.env.VUE_APP_API_URL || 'http://localhost:3000';
+                await axios.delete(`${apiUrl}/articles/${articleId}`, {
+                    headers: { 'x-access-token': localStorage.getItem('token') }
+                });
+                this.articles = this.articles.filter(article => article.id !== articleId);
+                this.filteredArticles = this.filteredArticles.filter(article => article.id !== articleId);
+            } catch (error) {
+                console.error('Error deleting article:', error);
+            }
+        },
+        resetForm() {
+            this.form = {
+                id: null,
+                title: '',
+                summary: '',
+                content: '',
+                image: ''
+            };
+        },
+        closeModal() {
+            this.showModal = false;
         }
     }
 };
