@@ -73,10 +73,13 @@
             <div class="flex flex-col items-center justify-center">
                 <p class="mb-4" :class="{ 'text-green-500': !uploadError, 'text-red-500': uploadError }">{{
                     uploadMessage }}</p>
-                <progress :value="uploadProgress" max="100" class="w-full mb-4"
-                    :class="{ 'progress-blue': uploadInProgress, 'progress-green': !uploadInProgress && !uploadError, 'progress-red': uploadError }"></progress>
+                <div class="progress-bar">
+                    <div class="progress-bar-fill"
+                        :class="{ 'bg-blue-500': uploadInProgress, 'bg-green-500': !uploadInProgress && !uploadError, 'bg-red-500': uploadError }"
+                        :style="{ width: uploadProgress + '%' }"></div>
+                </div>
                 <button @click="closeModal" :disabled="uploadInProgress"
-                    class="px-4 py-2 bg-blue-500 text-white rounded-lg">Close</button>
+                    class="px-4 py-2 bg-blue-500 text-white rounded-lg mt-4">Close</button>
             </div>
         </AppModal>
     </div>
@@ -317,26 +320,29 @@ export default {
     z-index: 20;
 }
 
-progress {
+.progress-bar {
     width: 100%;
     height: 20px;
-    -webkit-appearance: none;
-    appearance: none;
+    background-color: #f3f4f6;
+    border-radius: 0.375rem;
+    overflow: hidden;
 }
 
-.progress-blue::-webkit-progress-value {
+.progress-bar-fill {
+    height: 100%;
+    border-radius: 0.375rem;
+}
+
+.bg-blue-500 {
     background-color: #3b82f6;
-    border-radius: 0.375rem;
 }
 
-.progress-red::-webkit-progress-value {
+.bg-red-500 {
     background-color: #ef4444;
-    border-radius: 0.375rem;
 }
 
-.progress-green::-webkit-progress-value {
+.bg-green-500 {
     background-color: #10b981;
-    border-radius: 0.375rem;
 }
 
 .text-green-500 {
