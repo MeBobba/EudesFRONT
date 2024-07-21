@@ -140,19 +140,23 @@ export default {
         async fetchSpotifyToken() {
             const clientId = 'c977a9c0addb40fb8ce10dfefd5bbf81';
             const clientSecret = '2ec6a460145f44fc845dfc771f5f701b';
-            const response = await axios.post(
-                'https://accounts.spotify.com/api/token',
-                new URLSearchParams({
-                    grant_type: 'client_credentials',
-                }),
-                {
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                        Authorization: `Basic ${btoa(`${clientId}:${clientSecret}`)}`,
-                    },
-                }
-            );
-            this.spotifyToken = response.data.access_token;
+            try {
+                const response = await axios.post(
+                    'https://accounts.spotify.com/api/token',
+                    new URLSearchParams({
+                        grant_type: 'client_credentials',
+                    }),
+                    {
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                            Authorization: `Basic ${btoa(`${clientId}:${clientSecret}`)}`,
+                        },
+                    }
+                );
+                this.spotifyToken = response.data.access_token;
+            } catch (error) {
+                console.error('Error fetching Spotify token:', error);
+            }
         },
         async fetchLatestTracks() {
             const cacheKey = 'latestTracks';
@@ -220,20 +224,17 @@ export default {
             }
 
             try {
-                const response = await this.retryRequest(
-                    'https://api.spotify.com/v1/search',
-                    {
-                        headers: {
-                            Authorization: `Bearer ${this.spotifyToken}`,
-                        },
-                        params: {
-                            q: this.searchQuery,
-                            type: 'track,artist',
-                            limit: 20,
-                            offset: (page - 1) * 20,
-                        },
-                    }
-                );
+                const response = await axios.get('https://api.spotify.com/v1/search', {
+                    headers: {
+                        Authorization: `Bearer ${this.spotifyToken}`,
+                    },
+                    params: {
+                        q: this.searchQuery,
+                        type: 'track,artist',
+                        limit: 20,
+                        offset: (page - 1) * 20,
+                    },
+                });
 
                 if (response.data) {
                     this.updateSearchResults(response.data, page);
@@ -287,15 +288,17 @@ export default {
             this.currentTrack = track;
             this.resetPlayer();
             const query = `${track.name} ${track.artists[0].name}`;
+            console.log(`Playing track: ${query}`);
             try {
                 const response = await axios.get('https://www.googleapis.com/youtube/v3/search', {
                     params: {
                         part: 'snippet',
                         q: query,
-                        key: 'AIzaSyC2RVdaBwA84zZSWxTXb8mpnAsBGKawuYM', // Replace with your new YouTube API key
+                        key: 'AIzaSyDCdoD5B-_QCeiYFpR8fdnpGu69OkZvLWs',
                         type: 'video',
                     },
                 });
+                console.log('YouTube API response:', response.data);
                 if (response.data && response.data.items && response.data.items.length > 0) {
                     this.youtubeVideoId = response.data.items[0].id.videoId;
                     await this.initializePlayer(fromMounted);
@@ -323,20 +326,37 @@ export default {
                     }
                 });
             } else {
-                this.player.loadVideoById(this.youtubeVideoId);
+                if (this.player && typeof this.player.cueVideoById === 'function' && typeof this.player.loadVideoById === 'function') {
+                    if (fromMounted) {
+                        this.player.cueVideoById(this.youtubeVideoId);
+                    } else {
+                        this.player.loadVideoById(this.youtubeVideoId);
+                    }
+                } else {
+                    console.error('YouTube player is not properly initialized.');
+                }
             }
         },
         loadYouTubeApi() {
             return new Promise((resolve) => {
-                if (window.YT) {
+                if (window.YT && window.YT.Player) {
                     resolve();
                     return;
                 }
-                const tag = document.createElement('script');
-                tag.src = "https://www.youtube.com/iframe_api";
-                const firstScriptTag = document.getElementsByTagName('script')[0];
-                firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-                window.onYouTubeIframeAPIReady = () => resolve();
+                if (!document.getElementById('youtube-iframe-api')) {
+                    window.onYouTubeIframeAPIReady = () => resolve();
+                    const tag = document.createElement('script');
+                    tag.src = "https://www.youtube.com/iframe_api";
+                    tag.id = 'youtube-iframe-api';
+                    const firstScriptTag = document.getElementsByTagName('script')[0];
+                    if (firstScriptTag && firstScriptTag.parentNode) {
+                        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+                    } else {
+                        document.head.appendChild(tag); // Ajout en tant qu'enfant direct du head si firstScriptTag n'existe pas
+                    }
+                } else {
+                    resolve();
+                }
             });
         },
         onPlayerReady(event, fromMounted = false) {
@@ -355,7 +375,15 @@ export default {
             if (event.data === window.YT.PlayerState.ENDED) {
                 this.isPlaying = false;
                 clearInterval(this.lyricsTimer);
-                this.playNextTrack();
+                if (this.similarTracks.length > 0) {
+                    this.playNextTrack();
+                } else {
+                    this.fetchSimilarTracks().then(() => {
+                        if (this.similarTracks.length > 0) {
+                            this.playNextTrack();
+                        }
+                    });
+                }
             } else if (event.data === window.YT.PlayerState.PLAYING) {
                 this.isPlaying = true;
                 this.duration = this.player.getDuration(); // Ensure duration is updated
@@ -371,6 +399,8 @@ export default {
             if (this.similarTracks.length > 0) {
                 const nextTrack = this.similarTracks.shift();
                 await this.playTrack(nextTrack);
+            } else {
+                console.warn('No similar tracks available.');
             }
         },
         async fetchSimilarTracks() {
@@ -401,11 +431,20 @@ export default {
             this.duration = 0;
             this.isPlaying = false; // Reset play/pause button state
         },
-        playVideo() {
-            if (this.player) {
+        async playVideo() {
+            if (this.player && typeof this.player.playVideo === 'function') {
                 this.player.playVideo();
                 this.isPlaying = true;
                 this.syncLyrics();
+            } else {
+                await this.initializePlayer();
+                if (this.player && typeof this.player.playVideo === 'function') {
+                    this.player.playVideo();
+                    this.isPlaying = true;
+                    this.syncLyrics();
+                } else {
+                    console.error('YouTube player is not properly initialized.');
+                }
             }
         },
         pauseVideo() {
@@ -626,13 +665,15 @@ export default {
     mounted() {
         window.addEventListener('scroll', this.handleScroll);
         if (this.currentTrack) {
-            this.playTrack(this.currentTrack, true); // Reinitialize player for the current track
+            this.playTrack(this.currentTrack, true).then(() => {
+                this.playVideo(); // Démarrer automatiquement la lecture si une piste est sauvegardée
+            });
         }
     },
     beforeUnmount() {
         window.removeEventListener('scroll', this.handleScroll);
         clearInterval(this.lyricsTimer);
-    }
+    },
 };
 </script>
 
