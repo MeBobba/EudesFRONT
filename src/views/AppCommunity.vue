@@ -39,7 +39,7 @@
                         </div>
                         <transition name="slide-fade">
                             <div v-show="post.showComments" class="mt-4">
-                                <h4 class="font-semibold mb-2">Comments</h4>
+                                <h4 class="font-semibold mb-2">{{ $t('comments') }}</h4>
                                 <div v-for="comment in post.comments" :key="comment.id"
                                     class="mb-2 flex justify-between">
                                     <div class="flex items-center">
@@ -59,16 +59,16 @@
                                 <textarea v-model="post.newComment" placeholder="Add a comment..."
                                     class="w-full p-2 border border-gray-300 rounded-lg"></textarea>
                                 <button @click="addComment(post)"
-                                    class="mt-2 bg-blue-500 text-white p-2 rounded-lg">Comment</button>
+                                    class="mt-2 bg-blue-500 text-white p-2 rounded-lg">{{ $t('comment') }}</button>
                             </div>
                         </transition>
                     </div>
                 </div>
                 <div v-if="loading" class="text-center mt-4">
-                    <span>Loading...</span>
+                    <span>{{ $t('loading') }}</span>
                 </div>
                 <div v-if="!loading && noMorePosts" class="text-center mt-4">
-                    <span>No more posts</span>
+                    <span>{{ $t('nomoreposts') }}</span>
                 </div>
             </div>
             <div class="w-full lg:w-1/3 lg:pl-8">

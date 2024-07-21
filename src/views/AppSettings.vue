@@ -1,26 +1,14 @@
 <template>
-    <div :class="{ 'bg-gray-900 text-white': isDarkMode, 'bg-gray-100 text-black': !isDarkMode }" class="min-h-screen">
+    <div :class="containerClass" class="min-h-screen">
         <AppHeader :logoImage="logoImage" :headerImage="headerImage" @toggleDarkMode="toggleDarkMode"
             @logout="logout" />
         <div class="container mx-auto px-4 py-8 mt-4 grid grid-cols-1 lg:grid-cols-4 gap-8">
             <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md">
                 <ul class="space-y-4">
-                    <li>
-                        <button @click="setTab('account')" :class="{ 'font-bold': currentTab === 'account' }"
+                    <li v-for="tab in tabs" :key="tab.name">
+                        <button @click="setTab(tab.name)" :class="{ 'font-bold': currentTab === tab.name }"
                             class="flex items-center text-left w-full">
-                            <fa-icon :icon="['fas', 'user']" class="mr-2" /> Account Settings
-                        </button>
-                    </li>
-                    <li>
-                        <button @click="setTab('privacy')" :class="{ 'font-bold': currentTab === 'privacy' }"
-                            class="flex items-center text-left w-full">
-                            <fa-icon :icon="['fas', 'lock']" class="mr-2" /> Privacy Settings
-                        </button>
-                    </li>
-                    <li>
-                        <button @click="setTab('security')" :class="{ 'font-bold': currentTab === 'security' }"
-                            class="flex items-center text-left w-full">
-                            <fa-icon :icon="['fas', 'shield-alt']" class="mr-2" /> Security Settings
+                            <fa-icon :icon="tab.icon" class="mr-2" /> {{ tab.label }}
                         </button>
                     </li>
                 </ul>
@@ -30,47 +18,20 @@
                     <h2 class="text-xl font-bold mb-4">Account Settings</h2>
                     <form @submit.prevent="updateAccount">
                         <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                            <div class="mb-4">
-                                <label class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2"
-                                    for="username">Username</label>
-                                <input v-model="formData.username" @blur="checkUsernameAvailability" type="text"
-                                    id="username"
+                            <div v-for="field in accountFields" :key="field.id" class="mb-4">
+                                <label :for="field.id"
+                                    class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">{{ field.label
+                                    }}</label>
+                                <input v-if="field.type !== 'select'" v-model="formData[field.model]" :type="field.type"
+                                    :id="field.id" @blur="field.onBlur ? $options.methods[field.onBlur]() : null"
                                     class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" />
-                                <span v-if="usernameExists" class="text-red-500 text-sm">Username already taken</span>
-                            </div>
-                            <div class="mb-4">
-                                <label class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2"
-                                    for="real_name">Real Name</label>
-                                <input v-model="formData.real_name" type="text" id="real_name"
-                                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" />
-                            </div>
-                            <div class="mb-4">
-                                <label class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2"
-                                    for="mail">Email</label>
-                                <input v-model="formData.mail" @blur="checkEmailAvailability" type="email" id="mail"
-                                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" />
-                                <span v-if="emailExists" class="text-red-500 text-sm">Email already in use</span>
-                            </div>
-                            <div class="mb-4">
-                                <label class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2"
-                                    for="motto">Motto</label>
-                                <input v-model="formData.motto" type="text" id="motto"
-                                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" />
-                            </div>
-                            <div class="mb-4">
-                                <label class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2"
-                                    for="look">Look</label>
-                                <input v-model="formData.look" type="text" id="look"
-                                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" />
-                            </div>
-                            <div class="mb-4">
-                                <label class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2"
-                                    for="gender">Gender</label>
-                                <select v-model="formData.gender" id="gender"
+                                <select v-if="field.type === 'select'" v-model="formData[field.model]" :id="field.id"
                                     class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-                                    <option value="M">Male</option>
-                                    <option value="F">Female</option>
+                                    <option v-for="option in field.options" :key="option.value" :value="option.value">{{
+                                        option.label }}</option>
                                 </select>
+                                <span v-if="field.error && $data[field.error]" class="text-red-500 text-sm">{{
+                                    field.errorMsg }}</span>
                             </div>
                         </div>
                         <button type="submit" class="bg-blue-500 text-white py-2 px-4 rounded-lg">Save Changes</button>
@@ -83,14 +44,15 @@
                 <div v-if="currentTab === 'security'">
                     <h2 class="text-xl font-bold mb-4">Security Settings</h2>
                     <div class="mb-4">
-                        <label class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2"
-                            for="new_password">New Password</label>
+                        <label for="new_password"
+                            class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">New Password</label>
                         <input v-model="formData.newPassword" type="password" id="new_password"
                             class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" />
                     </div>
                     <div class="mb-4">
-                        <label class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2"
-                            for="confirm_password">Confirm New Password</label>
+                        <label for="confirm_password"
+                            class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">Confirm New
+                            Password</label>
                         <input v-model="formData.confirmPassword" type="password" id="confirm_password"
                             class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" />
                     </div>
@@ -115,26 +77,24 @@
                 </div>
             </div>
         </div>
-        <div v-if="qrCodeURL" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-lg">
-                <h2 class="text-xl font-bold mb-4">Scan this QR code with Google Authenticator</h2>
-                <img :src="qrCodeURL" alt="QR Code" />
-                <div class="mt-4">
-                    <label class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">Verification
-                        Code</label>
-                    <input v-model="verificationToken" type="text"
-                        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" />
-                    <button @click="verify2FA" class="mt-4 bg-blue-500 text-white py-2 px-4 rounded-lg">Verify</button>
-                </div>
+        <AppFooter :logoImage="logoImage" />
+        <Modal v-if="qrCodeURL" @close="closeModal" title="Scan this QR code with Google Authenticator">
+            <div class="text-center">
+                <img :src="qrCodeURL" alt="QR Code" class="mx-auto" />
+                <label class="block text-gray-700 dark:text-gray-300 text-sm font-bold mt-4 mb-2">Verification
+                    Code</label>
+                <input v-model="verificationToken" type="text"
+                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" />
+                <button @click="verify2FA" class="mt-4 bg-blue-500 text-white py-2 px-4 rounded-lg">Verify</button>
             </div>
-        </div>
+        </Modal>
     </div>
-    <AppFooter :logoImage="logoImage" />
 </template>
 
 <script>
 import AppHeader from '../components/AppHeader.vue';
 import AppFooter from '../components/AppFooter.vue';
+import Modal from '../components/AppModal.vue';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { faUser, faLock, faShieldAlt } from '@fortawesome/free-solid-svg-icons';
@@ -146,6 +106,7 @@ export default {
     components: {
         AppHeader,
         AppFooter,
+        Modal,
         'fa-icon': FontAwesomeIcon
     },
     data() {
@@ -161,15 +122,36 @@ export default {
                 confirmPassword: ''
             },
             headerImage: require('@/assets/images/skeleton/header.png'),
-            logoImage: require('@/assets/images/skeleton/logo.gif'), // Replace with your own image
+            logoImage: require('@/assets/images/skeleton/logo.gif'),
             isDarkMode: false,
             currentTab: 'account',
             usernameExists: false,
             emailExists: false,
             is2FAEnabled: false,
             qrCodeURL: '',
-            verificationToken: ''
+            verificationToken: '',
+            tabs: [
+                { name: 'account', label: 'Account Settings', icon: ['fas', 'user'] },
+                { name: 'privacy', label: 'Privacy Settings', icon: ['fas', 'lock'] },
+                { name: 'security', label: 'Security Settings', icon: ['fas', 'shield-alt'] }
+            ],
+            accountFields: [
+                { id: 'username', model: 'username', label: 'Username', type: 'text', onBlur: 'checkUsernameAvailability', error: 'usernameExists', errorMsg: 'Username already taken' },
+                { id: 'real_name', model: 'real_name', label: 'Real Name', type: 'text' },
+                { id: 'mail', model: 'mail', label: 'Email', type: 'email', onBlur: 'checkEmailAvailability', error: 'emailExists', errorMsg: 'Email already in use' },
+                { id: 'motto', model: 'motto', label: 'Motto', type: 'text' },
+                { id: 'look', model: 'look', label: 'Look', type: 'text' },
+                { id: 'gender', model: 'gender', label: 'Gender', type: 'select', options: [{ value: 'M', label: 'Male' }, { value: 'F', label: 'Female' }] }
+            ]
         };
+    },
+    computed: {
+        containerClass() {
+            return {
+                'bg-gray-900 text-white': this.isDarkMode,
+                'bg-gray-100 text-black': !this.isDarkMode
+            };
+        }
     },
     methods: {
         setTab(tab) {
@@ -178,10 +160,8 @@ export default {
         async updateAccount() {
             try {
                 const token = localStorage.getItem('token');
-                await axios.put(`${process.env.VUE_APP_API_URL || 'http://localhost:3000'}/update-account`, this.formData, {
-                    headers: {
-                        'x-access-token': token
-                    }
+                await axios.put(`${process.env.VUE_APP_API_URL}/update-account`, this.formData, {
+                    headers: { 'x-access-token': token }
                 });
                 alert('Account updated successfully');
             } catch (error) {
@@ -192,10 +172,8 @@ export default {
         async downloadData() {
             try {
                 const token = localStorage.getItem('token');
-                const response = await axios.get(`${process.env.VUE_APP_API_URL || 'http://localhost:3000'}/download-data`, {
-                    headers: {
-                        'x-access-token': token
-                    }
+                const response = await axios.get(`${process.env.VUE_APP_API_URL}/download-data`, {
+                    headers: { 'x-access-token': token }
                 });
                 const blob = new Blob([JSON.stringify(response.data, null, 2)], { type: 'application/json' });
                 const url = URL.createObjectURL(blob);
@@ -210,15 +188,11 @@ export default {
             }
         },
         async deleteAccount() {
-            if (!confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
-                return;
-            }
+            if (!confirm('Are you sure you want to delete your account? This action cannot be undone.')) return;
             try {
                 const token = localStorage.getItem('token');
-                await axios.delete(`${process.env.VUE_APP_API_URL || 'http://localhost:3000'}/delete-account`, {
-                    headers: {
-                        'x-access-token': token
-                    }
+                await axios.delete(`${process.env.VUE_APP_API_URL}/delete-account`, {
+                    headers: { 'x-access-token': token }
                 });
                 localStorage.removeItem('token');
                 this.$router.push('/login');
@@ -230,7 +204,7 @@ export default {
         async checkUsernameAvailability() {
             if (this.formData.username) {
                 try {
-                    const response = await axios.post(`${process.env.VUE_APP_API_URL || 'http://localhost:3000'}/check-username`, { username: this.formData.username });
+                    const response = await axios.post(`${process.env.VUE_APP_API_URL}/check-username`, { username: this.formData.username });
                     this.usernameExists = response.data.exists;
                 } catch (error) {
                     console.error('Error checking username:', error);
@@ -240,7 +214,7 @@ export default {
         async checkEmailAvailability() {
             if (this.formData.mail) {
                 try {
-                    const response = await axios.post(`${process.env.VUE_APP_API_URL || 'http://localhost:3000'}/check-email`, { email: this.formData.mail });
+                    const response = await axios.post(`${process.env.VUE_APP_API_URL}/check-email`, { email: this.formData.mail });
                     this.emailExists = response.data.exists;
                 } catch (error) {
                     console.error('Error checking email:', error);
@@ -250,10 +224,8 @@ export default {
         async enable2FA() {
             try {
                 const token = localStorage.getItem('token');
-                const { data } = await axios.post(`${process.env.VUE_APP_API_URL || 'http://localhost:3000'}/enable-2fa`, {}, {
-                    headers: {
-                        'x-access-token': token
-                    }
+                const { data } = await axios.post(`${process.env.VUE_APP_API_URL}/enable-2fa`, {}, {
+                    headers: { 'x-access-token': token }
                 });
                 this.qrCodeURL = data.dataURL;
                 this.secret = data.secret; // Store the secret for later use
@@ -265,10 +237,8 @@ export default {
         async verify2FA() {
             try {
                 const token = localStorage.getItem('token');
-                await axios.post(`${process.env.VUE_APP_API_URL || 'http://localhost:3000'}/verify-2fa`, { token: this.verificationToken }, {
-                    headers: {
-                        'x-access-token': token
-                    }
+                await axios.post(`${process.env.VUE_APP_API_URL}/verify-2fa`, { token: this.verificationToken }, {
+                    headers: { 'x-access-token': token }
                 });
                 this.is2FAEnabled = true;
                 this.qrCodeURL = '';
@@ -281,10 +251,8 @@ export default {
         async disable2FA() {
             try {
                 const token = localStorage.getItem('token');
-                await axios.post(`${process.env.VUE_APP_API_URL || 'http://localhost:3000'}/disable-2fa`, {}, {
-                    headers: {
-                        'x-access-token': token
-                    }
+                await axios.post(`${process.env.VUE_APP_API_URL}/disable-2fa`, {}, {
+                    headers: { 'x-access-token': token }
                 });
                 this.is2FAEnabled = false;
             } catch (error) {
@@ -304,10 +272,8 @@ export default {
     async created() {
         try {
             const token = localStorage.getItem('token');
-            const response = await axios.get(`${process.env.VUE_APP_API_URL || 'http://localhost:3000'}/dashboard`, {
-                headers: {
-                    'x-access-token': token
-                }
+            const response = await axios.get(`${process.env.VUE_APP_API_URL}/dashboard`, {
+                headers: { 'x-access-token': token }
             });
             this.formData = { ...this.formData, ...response.data };
             this.is2FAEnabled = response.data.is_2fa_enabled;

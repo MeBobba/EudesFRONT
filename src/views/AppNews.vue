@@ -39,33 +39,30 @@
         </div>
         <AppFooter :logoImage="logoImage" />
 
-        <modal v-if="showModal" @close="closeModal">
-            <template v-slot:header>{{ modalTitle }}</template>
-            <template v-slot:body>
-                <form @submit.prevent="submitForm">
-                    <div class="mb-4">
-                        <label class="block text-gray-700 dark:text-gray-200">Title</label>
-                        <input v-model="form.title" type="text" class="w-full p-2 border border-gray-300 rounded-lg"
-                            required />
-                    </div>
-                    <div class="mb-4">
-                        <label class="block text-gray-700 dark:text-gray-200">Summary</label>
-                        <textarea v-model="form.summary" class="w-full p-2 border border-gray-300 rounded-lg"
-                            required></textarea>
-                    </div>
-                    <div class="mb-4">
-                        <label class="block text-gray-700 dark:text-gray-200">Content</label>
-                        <textarea v-model="form.content" class="w-full p-2 border border-gray-300 rounded-lg"
-                            required></textarea>
-                    </div>
-                    <div class="mb-4">
-                        <label class="block text-gray-700 dark:text-gray-200">Image URL</label>
-                        <input v-model="form.image" type="text" class="w-full p-2 border border-gray-300 rounded-lg" />
-                    </div>
-                    <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-lg">Submit</button>
-                </form>
-            </template>
-        </modal>
+        <AppModal v-if="showModal" @close="closeModal" :title="modalTitle">
+            <form @submit.prevent="submitForm">
+                <div class="mb-4">
+                    <label class="block text-gray-700 dark:text-gray-200">Title</label>
+                    <input v-model="form.title" type="text" class="w-full p-2 border border-gray-300 rounded-lg"
+                        required />
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 dark:text-gray-200">Summary</label>
+                    <textarea v-model="form.summary" class="w-full p-2 border border-gray-300 rounded-lg"
+                        required></textarea>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 dark:text-gray-200">Content</label>
+                    <textarea v-model="form.content" class="w-full p-2 border border-gray-300 rounded-lg"
+                        required></textarea>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 dark:text-gray-200">Image URL</label>
+                    <input v-model="form.image" type="text" class="w-full p-2 border border-gray-300 rounded-lg" />
+                </div>
+                <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-lg">Submit</button>
+            </form>
+        </AppModal>
     </div>
 </template>
 
@@ -73,14 +70,14 @@
 import axios from 'axios';
 import AppHeader from '../components/AppHeader.vue';
 import AppFooter from '../components/AppFooter.vue';
-import modal from '../components/AppModal.vue';
+import AppModal from '../components/AppModal.vue';
 
 export default {
     name: 'AppNews',
     components: {
         AppHeader,
         AppFooter,
-        modal
+        AppModal
     },
     data() {
         return {
