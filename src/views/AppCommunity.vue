@@ -211,6 +211,7 @@ export default {
             showEditModal: false,
             selectedPost: null,
             editPostContent: '',
+            showPostMenu: null, // Ajoutez cette ligne
         };
     },
     async created() {
