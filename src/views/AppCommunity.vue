@@ -135,11 +135,11 @@
                         </div>
                         <div class="mt-4 flex items-center">
                             <select v-model="postVisibility" class="border border-gray-300 rounded-lg p-2 mr-4">
-                                <option value="public">Public</option>
-                                <option value="friends">Friends</option>
+                                <option value="public">{{ $t('public') }}</option>
+                                <option value="friends">{{ $t('friends') }}</option>
                             </select>
                             <button @click="createPost" :disabled="currentTab === 'video' && !isValidVideoUrl"
-                                class="bg-blue-500 text-white p-2 rounded-lg">Post</button>
+                                class="bg-blue-500 text-white p-2 rounded-lg">{{ $t('post') }}</button>
                         </div>
                         <div class="relative mt-2 flex items-center">
                             <button @click="toggleEmojiPicker" class="mr-4 p-2">

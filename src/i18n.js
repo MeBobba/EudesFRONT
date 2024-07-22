@@ -46,6 +46,9 @@ const messages = {
         whatsonyourmind: 'What\'s on your mind?',
         invalidvideourl: 'Invalid Video URL',
         removevideo: 'Remove Video',
+        public: 'Public',
+        friends: 'Friends',
+        post: 'Post',
     },
     fr: {
         home: 'Accueil',
@@ -90,6 +93,9 @@ const messages = {
         whatsonyourmind: 'Quoi de neuf ?',
         invalidvideourl: 'URL vidéo invalide',
         removevideo: 'Supprimer la vidéo',
+        public: 'Public',
+        friends: 'Amis',
+        post: 'Publier',
     },
     it: {
         home: 'Home',
@@ -100,7 +106,7 @@ const messages = {
         news: 'Notizie',
         searchPlaceholder: 'Cerca...',
         logout: 'Logout',
-        terms:'Condizioni',
+        terms: 'Condizioni',
         privacy: 'Riservatezza',
         loading: 'Caricamento...',
         nomoreposts: 'Nessun altra publicazione...',
@@ -134,6 +140,9 @@ const messages = {
         whatsonyourmind: 'Cosa c\'è di nuovo?',
         invalidvideourl: 'URL video non valido',
         removevideo: 'Rimuovere il video',
+        public: 'Pubblico',
+        friends: 'Amici',
+        post: 'Pubblicare',
     },
 };
 
