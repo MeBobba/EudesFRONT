@@ -2,31 +2,35 @@
     <div :class="{ 'bg-gray-900 text-white': isDarkMode, 'bg-gray-100 text-black': !isDarkMode }" class="min-h-screen">
         <AppHeader :logoImage="logoImage" :headerImage="headerImage" @toggleDarkMode="toggleDarkMode"
             @logout="logout" />
-        <div class="container mx-auto px-4 py-8">
+        <div class="container mx-auto px-4 py-8 animate-fade-in">
             <div v-if="isAdmin" class="mb-8">
-                <button @click="showAddModal" class="bg-green-500 text-white px-6 py-2 rounded-lg">Add New Game</button>
+                <button @click="showAddModal"
+                    class="bg-green-500 text-white px-6 py-2 rounded-lg transition-transform transform hover:scale-105">Add
+                    New Game</button>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                 <div v-for="game in paginatedGames" :key="game.id"
-                    class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 flex flex-col items-center w-72 mx-auto">
-                    <img :src="game.icon" alt="Game Icon" class="w-32 h-32 object-cover rounded-full mb-4" />
+                    class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 flex flex-col items-center w-72 mx-auto transition-transform transform hover:scale-105">
+                    <img :src="game.icon" alt="Game Icon"
+                        class="w-32 h-32 object-cover rounded-full mb-4 animate-fade-in" />
                     <h2 class="text-2xl font-semibold mb-4 text-center">{{ game.title }}</h2>
-                    <button @click="playGame(game.id)" class="bg-blue-500 text-white px-6 py-2 rounded-lg">Play</button>
+                    <button @click="playGame(game.id)"
+                        class="bg-blue-500 text-white px-6 py-2 rounded-lg transition-transform transform hover:scale-105">Play</button>
                     <button v-if="isAdmin" @click="deleteGame(game.id)"
-                        class="mt-2 bg-red-500 text-white px-4 py-2 rounded-lg">Delete</button>
+                        class="mt-2 bg-red-500 text-white px-4 py-2 rounded-lg transition-transform transform hover:scale-105">Delete</button>
                 </div>
             </div>
             <div v-if="totalPages > 1" class="flex justify-center mt-8">
                 <button @click="prevPage" :disabled="currentPage === 1"
-                    :class="['bg-blue-500 text-white px-4 py-2 mx-2 rounded-lg', { 'disabled:opacity-50': currentPage === 1 }]">Previous</button>
+                    :class="['bg-blue-500 text-white px-4 py-2 mx-2 rounded-lg transition-transform transform hover:scale-105', { 'disabled:opacity-50': currentPage === 1 }]">Previous</button>
                 <span class="mx-2">{{ currentPage }} / {{ totalPages }}</span>
                 <button @click="nextPage" :disabled="currentPage === totalPages"
-                    :class="['bg-blue-500 text-white px-4 py-2 mx-2 rounded-lg', { 'disabled:opacity-50': currentPage === totalPages }]">Next</button>
+                    :class="['bg-blue-500 text-white px-4 py-2 mx-2 rounded-lg transition-transform transform hover:scale-105', { 'disabled:opacity-50': currentPage === totalPages }]">Next</button>
             </div>
         </div>
         <AppFooter :logoImage="logoImage" />
         <AppModal v-if="showModal" @close="closeModal" title="Add New Game">
-            <form @submit.prevent="addGame">
+            <form @submit.prevent="addGame" class="animate-fade-in">
                 <div class="mb-4">
                     <label class="block text-gray-700 dark:text-gray-200">Title</label>
                     <input v-model="newGame.title" type="text" required
@@ -42,7 +46,9 @@
                     <input v-model="newGame.source" type="text" required
                         class="w-full p-2 border border-gray-300 rounded-lg" />
                 </div>
-                <button type="submit" class="bg-green-500 text-white px-4 py-2 rounded-lg">Add Game</button>
+                <button type="submit"
+                    class="bg-green-500 text-white px-4 py-2 rounded-lg transition-transform transform hover:scale-105">Add
+                    Game</button>
             </form>
         </AppModal>
     </div>
@@ -177,6 +183,20 @@ export default {
 </script>
 
 <style scoped>
+@keyframes fade-in {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+.animate-fade-in {
+    animation: fade-in 0.5s ease-in-out;
+}
+
 .container {
     display: flex;
     flex-direction: column;
@@ -186,5 +206,13 @@ export default {
 .disabled\:opacity-50 {
     opacity: 0.5;
     pointer-events: none;
+}
+
+.transition-transform {
+    transition: transform 0.3s ease-in-out;
+}
+
+.transform:hover {
+    transform: scale(1.05);
 }
 </style>

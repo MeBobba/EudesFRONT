@@ -2,7 +2,7 @@
     <div :class="{ 'bg-gray-900 text-white': isDarkMode, 'bg-gray-100 text-black': !isDarkMode }" class="min-h-screen">
         <AppHeader :logoImage="logoImage" :headerImage="headerImage" @toggleDarkMode="toggleDarkMode"
             @logout="logout" />
-        <div class="container mx-auto px-4 py-8">
+        <div class="container mx-auto px-4 py-8 animate-fade-in">
             <h1 class="text-4xl font-bold mb-4">Staff Page</h1>
             <div class="flex">
                 <div class="flex-grow">
@@ -10,10 +10,10 @@
                         <h2 class="text-2xl font-semibold mb-4">{{ section.rank_name }}</h2>
                         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                             <div v-for="user in section.users" :key="user.id"
-                                class="bg-cover bg-center rounded-lg shadow-md relative flex items-center justify-center"
+                                class="bg-cover bg-center rounded-lg shadow-md relative flex items-center justify-center transition-transform transform hover:scale-105"
                                 :style="{ backgroundImage: `url(${user.coverImage || backgroundImage})` }">
                                 <div class="absolute inset-0 bg-black opacity-50 rounded-lg"></div>
-                                <div class="relative flex flex-col items-center p-4">
+                                <div class="relative flex flex-col items-center p-4 animate-fade-in">
                                     <div
                                         class="relative w-16 h-16 sm:w-20 sm:h-20 bg-yellow-500 rounded-full overflow-hidden border-2 border-gray-300 flex items-center justify-center z-10">
                                         <img v-if="user.profileImage" :src="user.profileImage" alt="Profile" />
@@ -30,7 +30,8 @@
                         </div>
                     </div>
                 </div>
-                <div class="w-1/4 ml-8 bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md">
+                <div
+                    class="w-1/4 ml-8 bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md transition-transform transform hover:scale-105 animate-fade-in">
                     <h2 class="text-2xl font-semibold mb-4">Informations importantes</h2>
                     <p class="text-gray-700 dark:text-gray-300">Voici quelques informations importantes concernant le
                         staff. Vous trouverez ici des détails sur les rôles, les responsabilités et les dernières mises
@@ -38,7 +39,7 @@
                 </div>
             </div>
         </div>
-        <div v-if="loading" class="text-center py-4">Loading...</div>
+        <div v-if="loading" class="text-center py-4 animate-fade-in">Loading...</div>
         <AppFooter :logoImage="logoImage" />
     </div>
 </template>
@@ -116,6 +117,20 @@ export default {
 </script>
 
 <style scoped>
+@keyframes fade-in {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+.animate-fade-in {
+    animation: fade-in 0.5s ease-in-out;
+}
+
 .bg-cover {
     background-size: cover;
 }
@@ -131,5 +146,13 @@ export default {
 .flex-col.items-center.p-4 {
     padding: 16px;
     text-align: center;
+}
+
+.transition-transform {
+    transition: transform 0.3s ease-in-out;
+}
+
+.transform:hover {
+    transform: scale(1.05);
 }
 </style>
