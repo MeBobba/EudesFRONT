@@ -11,9 +11,11 @@
                         <div class="flex items-center justify-between mb-4">
                             <div class="flex items-center">
                                 <img :src="getAvatarUrl(post.look)"
-                                    class="rounded-full border-2 border-blue-500 bg-white" alt="User Profile">
+                                    class="rounded-full border-2 border-blue-500 bg-white" :alt="post.username">
                                 <div class="ml-4">
-                                    <h3 class="font-semibold">{{ post.username }}</h3>
+                                    <h3 class="font-semibold"><router-link :to="`/dashboard/${user.id}`">{{
+                                        post.username
+                                            }}</router-link></h3>
                                     <p class="text-gray-600">{{ formatDate(post.created_at) }}</p>
                                 </div>
                             </div>
