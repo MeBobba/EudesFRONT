@@ -23,14 +23,14 @@
                             <textarea v-model="newPostContent" class="w-full p-4 border border-gray-300 rounded-lg"
                                 placeholder="What's on your mind?"></textarea>
                         </div>
-                        <div v-if="currentTab === 'gif'">
+                        <div v-if="currentTab === 'gif'" class="relative">
                             <textarea v-model="newPostContent" class="w-full p-4 border border-gray-300 rounded-lg"
                                 placeholder="What's on your mind?"></textarea>
-                            <input v-model="giphySearchQuery" @input="searchGiphy" placeholder="Search GIFs"
-                                class="p-2 border rounded-lg mb-2"> <!-- Déplacez cet élément ici -->
-                            <button @click="toggleGiphyPicker" class="mt-2 bg-blue-500 text-white p-2 rounded-lg">Search
-                                GIF</button>
-                            <div v-if="showGiphyPicker" class="absolute z-10 giphy-picker-container">
+                            <button ref="gifButton" @click="toggleGiphyPicker"
+                                class="mt-2 bg-blue-500 text-white p-2 rounded-lg">Search GIF</button>
+                            <div v-if="showGiphyPicker" class="giphy-picker-container">
+                                <input v-model="giphySearchQuery" @input="searchGiphy" placeholder="Search GIFs"
+                                    class="p-2 border rounded-lg mb-2">
                                 <div class="giphy-results">
                                     <div v-for="gif in giphyResults" :key="gif.id" class="giphy-result"
                                         @click="addGifToPost(gif.images.fixed_height.url)">
@@ -173,13 +173,15 @@
     </div>
 </template>
 
+
+
 <script>
 import axios from 'axios';
 import AppHeader from '../components/AppHeader.vue';
 import AppFooter from '../components/AppFooter.vue';
 import UserProfile from '../components/UserProfile.vue';
 import ErrorMessage from '../components/ErrorMessage.vue';
-import AppModal from '../components/AppModal.vue';
+import AppModal from '../components/AppModal.vue'; // Ajoutez cette ligne
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { faHeart, faComment, faTrashAlt, faSmile, faImage, faPencilAlt, faVideo, faEllipsisV } from '@fortawesome/free-solid-svg-icons';
@@ -228,7 +230,7 @@ export default {
             showEditModal: false,
             selectedPost: null,
             editPostContent: '',
-            lastPostTime: 0,
+            lastPostTime: 0, // Ajoutez cette ligne pour stocker le dernier temps de publication
         };
     },
     computed: {
@@ -435,7 +437,7 @@ export default {
                     throw new Error('No token found');
                 }
                 const apiUrl = process.env.VUE_APP_API_URL || 'http://localhost:3000';
-                await axios.delete(`${apiUrl}/article-comments/${commentId}`, {
+                await axios.delete(`${apiUrl}/comments/${commentId}`, {
                     headers: { 'x-access-token': token }
                 });
                 this.posts = this.posts.map(post => {
@@ -458,6 +460,7 @@ export default {
                 });
                 if (response.status === 200) {
                     this.posts = this.posts.filter(post => post.id !== postId);
+                    this.showPostMenu = null;  // Ajoutez cette ligne
                 } else {
                     throw new Error('Failed to delete post');
                 }
@@ -507,6 +510,7 @@ export default {
             this.selectedPost = post;
             this.editPostContent = post.content;
             this.showEditModal = true;
+            this.showPostMenu = null;  // Ajoutez cette ligne
         },
         canPost() {
             const currentTime = Math.floor(Date.now() / 1000);
@@ -515,31 +519,19 @@ export default {
         },
         async savePost() {
             try {
-                console.log("Début de savePost");
                 const token = localStorage.getItem('token');
                 if (!token) {
                     throw new Error('No token found');
                 }
-                console.log("Token trouvé:", token);
-
                 const apiUrl = process.env.VUE_APP_API_URL || 'http://localhost:3000';
-                console.log("API URL:", apiUrl);
-
-                const filteredContent = await this.applyWordFilter(this.editPostContent);
-                console.log("Contenu filtré:", filteredContent);
-
                 const response = await axios.put(`${apiUrl}/posts/${this.selectedPost.id}`, {
-                    content: filteredContent
+                    content: await this.applyWordFilter(this.editPostContent)
                 }, {
                     headers: { 'x-access-token': token }
                 });
-
-                console.log("Réponse du serveur:", response);
-
                 if (response.status === 200) {
                     this.selectedPost.content = response.data.content;
                     this.showEditModal = false;
-                    console.log("Post mis à jour avec succès");
                 } else {
                     throw new Error('Failed to update post');
                 }
@@ -548,7 +540,6 @@ export default {
                 alert('Failed to update post. Please try again later.');
             }
         },
-
         toggleComments(post) {
             post.showComments = !post.showComments;
         },
@@ -558,6 +549,7 @@ export default {
         toggleGiphyPicker() {
             this.showGiphyPicker = !this.showGiphyPicker;
         },
+
         async searchGiphy() {
             if (this.giphySearchQuery.trim() === '') {
                 this.giphyResults = [];
@@ -572,6 +564,7 @@ export default {
                 console.error('Error fetching GIFs:', error);
             }
         },
+
         addGifToPost(gifUrl) {
             this.newPostContent += `<img src="${gifUrl}" alt="GIF">`;
             this.showGiphyPicker = false;
@@ -692,13 +685,6 @@ export default {
     border-bottom: 2px solid #3490dc;
 }
 
-.container {
-    position: relative;
-    /* Ajoutez cette ligne pour assurer que le conteneur principal ait un positionnement relatif */
-    z-index: 1;
-    /* Assurez-vous que le z-index du conteneur principal est inférieur à celui du modal */
-}
-
 .emoji-picker-container {
     bottom: 40px;
 }
@@ -712,7 +698,10 @@ export default {
     width: 300px;
     max-height: 400px;
     overflow-y: scroll;
+    /* Remplacez 'bottom: 40px;' par 'top: -300px;' pour positionner le conteneur correctement */
+    top: -300px;
 }
+
 
 .giphy-result img {
     cursor: pointer;
