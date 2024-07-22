@@ -4,6 +4,24 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;500;700&display=swap');
 
+:root {
+    --primary-color: #3490dc; /* Bleu vif */
+    --secondary-color: #ff6f61; /* Rouge corail */
+    --background-color-light: #f5f5f5; /* Gris clair */
+    --background-color-dark: #2c3e50; /* Bleu nuit */
+    --text-color-light: #2c3e50; /* Bleu nuit */
+    --text-color-dark: #ecf0f1; /* Blanc cassé */
+    --border-radius: 10px;
+    --shadow-color: rgba(0, 0, 0, 0.1);
+}
+
+body.dark {
+    --background-color: var(--background-color-dark);
+    --text-color: var(--text-color-dark);
+}
+
 body {
+    --background-color: var(--background-color-light);
+    --text-color: var(--text-color-light);
     font-family: 'Ubuntu', sans-serif;
 }
