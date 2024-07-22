@@ -26,11 +26,11 @@
                         <div v-if="currentTab === 'gif'">
                             <textarea v-model="newPostContent" class="w-full p-4 border border-gray-300 rounded-lg"
                                 placeholder="What's on your mind?"></textarea>
+                            <input v-model="giphySearchQuery" @input="searchGiphy" placeholder="Search GIFs"
+                                class="p-2 border rounded-lg mb-2"> <!-- Déplacez cet élément ici -->
                             <button @click="toggleGiphyPicker" class="mt-2 bg-blue-500 text-white p-2 rounded-lg">Search
                                 GIF</button>
                             <div v-if="showGiphyPicker" class="absolute z-10 giphy-picker-container">
-                                <input v-model="giphySearchQuery" @input="searchGiphy" placeholder="Search GIFs"
-                                    class="p-2 border rounded-lg mb-2">
                                 <div class="giphy-results">
                                     <div v-for="gif in giphyResults" :key="gif.id" class="giphy-result"
                                         @click="addGifToPost(gif.images.fixed_height.url)">
@@ -228,6 +228,7 @@ export default {
             showEditModal: false,
             selectedPost: null,
             editPostContent: '',
+            lastPostTime: 0, // Ajoutez cette ligne pour stocker le dernier temps de publication
         };
     },
     computed: {
@@ -364,6 +365,11 @@ export default {
         },
         async createPost() {
             try {
+                if (!this.canPost()) {
+                    alert('Please wait 15 seconds before posting again.');
+                    return;
+                }
+
                 const token = localStorage.getItem('token');
                 if (!token) {
                     throw new Error('No token found');
@@ -387,6 +393,9 @@ export default {
                 this.newPostVideo = '';
                 this.postVisibility = 'public';
                 this.isValidVideoUrl = true;
+
+                // Mettez à jour le dernier temps de publication
+                this.lastPostTime = Math.floor(Date.now() / 1000);
             } catch (error) {
                 if (error.response && error.response.status === 429) {
                     alert('Please wait 15 seconds before posting again.');
@@ -499,6 +508,11 @@ export default {
             this.editPostContent = post.content;
             this.showEditModal = true;
         },
+        canPost() {
+            const currentTime = Math.floor(Date.now() / 1000);
+            const timeDifference = currentTime - this.lastPostTime;
+            return timeDifference >= 15;
+        },
         async savePost() {
             try {
                 const token = localStorage.getItem('token');
@@ -595,7 +609,7 @@ export default {
             return `http://www.habbo.com/habbo-imaging/avatarimage?figure=${look}&direction=3&head_direction=3&gesture=nor&action=null&size=m&headonly=1&img_format=gif`;
         },
         parsePostContent(content) {
-            return content.replace(/<img src=".*?" alt="GIF">/g, '<img src="$1" alt="GIF">');
+            return content.replace(/<img src="(.*?)" alt="GIF">/g, '<img src="$1" alt="GIF">');
         },
         async applyWordFilter(content) {
             try {
