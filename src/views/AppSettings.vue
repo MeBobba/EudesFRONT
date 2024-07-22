@@ -7,7 +7,7 @@
                 <ul class="space-y-4">
                     <li v-for="tab in tabs" :key="tab.name">
                         <button @click="setTab(tab.name)" :class="{ 'font-bold': currentTab === tab.name }"
-                            class="flex items-center text-left w-full">
+                            class="flex items-center text-left w-full hover:scale-105 transform transition-transform duration-300">
                             <fa-icon :icon="tab.icon" class="mr-2" /> {{ tab.label }}
                         </button>
                     </li>
@@ -23,7 +23,8 @@
                                     class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">{{ field.label
                                     }}</label>
                                 <input v-if="field.type !== 'select'" v-model="formData[field.model]" :type="field.type"
-                                    :id="field.id" @blur="field.onBlur ? $options.methods[field.onBlur]() : null"
+                                    :id="field.id"
+                                    @blur="field.onBlur ? $options.methods[field.onBlur].call(this) : null"
                                     class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" />
                                 <select v-if="field.type === 'select'" v-model="formData[field.model]" :id="field.id"
                                     class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
@@ -34,7 +35,9 @@
                                     field.errorMsg }}</span>
                             </div>
                         </div>
-                        <button type="submit" class="bg-blue-500 text-white py-2 px-4 rounded-lg">Save Changes</button>
+                        <button type="submit"
+                            class="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors duration-300">Save
+                            Changes</button>
                     </form>
                 </div>
                 <div v-if="currentTab === 'privacy'">
@@ -60,20 +63,24 @@
                         <label class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">Google
                             Authenticator</label>
                         <div v-if="!is2FAEnabled">
-                            <button @click="enable2FA" class="bg-blue-500 text-white py-2 px-4 rounded-lg">Enable Google
-                                Authenticator</button>
+                            <button @click="enable2FA"
+                                class="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors duration-300">Enable
+                                Google Authenticator</button>
                         </div>
                         <div v-if="is2FAEnabled">
-                            <button @click="disable2FA" class="bg-red-500 text-white py-2 px-4 rounded-lg">Disable
+                            <button @click="disable2FA"
+                                class="bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-700 transition-colors duration-300">Disable
                                 Google Authenticator</button>
                         </div>
                     </div>
                 </div>
                 <div class="mt-8">
-                    <button @click="downloadData" class="bg-green-500 text-white py-2 px-4 rounded-lg">Download My
-                        Data</button>
-                    <button @click="deleteAccount" class="bg-red-500 text-white py-2 px-4 rounded-lg ml-4">Delete My
-                        Account</button>
+                    <button @click="downloadData"
+                        class="bg-green-500 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition-colors duration-300">Download
+                        My Data</button>
+                    <button @click="deleteAccount"
+                        class="bg-red-500 text-white py-2 px-4 rounded-lg ml-4 hover:bg-red-700 transition-colors duration-300">Delete
+                        My Account</button>
                 </div>
             </div>
         </div>
@@ -85,7 +92,8 @@
                     Code</label>
                 <input v-model="verificationToken" type="text"
                     class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" />
-                <button @click="verify2FA" class="mt-4 bg-blue-500 text-white py-2 px-4 rounded-lg">Verify</button>
+                <button @click="verify2FA"
+                    class="mt-4 bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors duration-300">Verify</button>
             </div>
         </Modal>
     </div>
@@ -289,5 +297,11 @@ export default {
 </script>
 
 <style scoped>
-/* Add custom styles here if needed */
+button {
+    transition: transform 0.2s ease-in-out;
+}
+
+button:hover {
+    transform: scale(1.05);
+}
 </style>

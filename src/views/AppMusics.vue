@@ -1,15 +1,17 @@
 <template>
     <div :class="{ 'bg-gray-900 text-white': isDarkMode, 'bg-gray-100 text-black': !isDarkMode }"
-        class="min-h-screen font-ubuntu">
+        class="min-h-screen font-ubuntu transition-all">
         <AppHeader :logoImage="logoImage" :headerImage="headerImage" @toggleDarkMode="toggleDarkMode"
             @logout="logout" />
         <div class="container mx-auto px-4 py-8">
             <input type="text" v-model="searchQuery" @input="debouncedSearchMusic" placeholder="Search for music..."
-                class="search-bar" />
+                class="search-bar transition-transform duration-300 ease-in-out transform hover:scale-105" />
             <section v-if="!searchQuery">
                 <h2 class="text-2xl font-semibold mb-4">Latest Releases</h2>
                 <div class="latest-releases grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                    <div v-for="track in latestTracks" :key="track.id" class="track-item" @click="playTrack(track)">
+                    <div v-for="track in latestTracks" :key="track.id"
+                        class="track-item transition-transform duration-300 ease-in-out transform hover:scale-105"
+                        @click="playTrack(track)">
                         <img :src="track.album.images[0]?.url || ''" :alt="track.name" class="w-full h-auto rounded-lg"
                             v-if="track.album.images.length > 0" />
                         <div class="mt-2">
@@ -24,7 +26,8 @@
                 <div class="search-results">
                     <h3 class="text-xl font-semibold mb-2">Songs</h3>
                     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                        <div v-for="result in searchResults.tracks" :key="result.id" class="track-item"
+                        <div v-for="result in searchResults.tracks" :key="result.id"
+                            class="track-item transition-transform duration-300 ease-in-out transform hover:scale-105"
                             @click="playTrack(result)">
                             <img :src="result.album.images[0]?.url || ''" :alt="result.name"
                                 class="w-full h-auto rounded-lg" v-if="result.album.images.length > 0" />
@@ -36,7 +39,8 @@
                     </div>
                     <h3 class="text-xl font-semibold mt-4 mb-2">Artists</h3>
                     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                        <div v-for="artist in searchResults.artists" :key="artist.id" class="artist-item">
+                        <div v-for="artist in searchResults.artists" :key="artist.id"
+                            class="artist-item transition-transform duration-300 ease-in-out transform hover:scale-105">
                             <img :src="artist.images[0]?.url || ''" :alt="artist.name" class="w-16 h-16 rounded-full"
                                 v-if="artist.images.length > 0" />
                             <div class="mt-2">
@@ -48,7 +52,7 @@
             </section>
         </div>
         <div v-if="currentTrack"
-            class="music-player fixed bottom-0 left-0 right-0 bg-gray-800 text-white p-4 flex flex-col sm:flex-row items-center justify-between rounded-t-lg shadow-lg">
+            class="music-player fixed bottom-0 left-0 right-0 bg-gray-800 text-white p-4 flex flex-col sm:flex-row items-center justify-between rounded-t-lg shadow-lg transition-transform duration-300 ease-in-out transform hover:scale-105">
             <div class="flex items-center mb-4 sm:mb-0">
                 <img :src="currentTrack.album.images[0]?.url || ''" alt="Album cover" class="w-16 h-16 rounded-lg"
                     v-if="currentTrack.album.images.length > 0" />
@@ -596,6 +600,7 @@ body {
     right: 0;
     border-radius: 10px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    transition: transform 0.2s ease-in-out;
 }
 
 @media (min-width: 640px) {
