@@ -2,20 +2,20 @@
     <div :class="{ 'bg-gray-900 text-white': isDarkMode, 'bg-gray-100 text-black': !isDarkMode }" class="min-h-screen">
         <AppHeader :logoImage="logoImage" :headerImage="headerImage" @toggleDarkMode="toggleDarkMode"
             @logout="logout" />
-        <div class="container mx-auto px-4 py-8 flex flex-col lg:flex-row">
+        <div class="container mx-auto px-4 py-8 flex flex-col lg:flex-row animate-fade-in">
             <div class="w-full lg:w-2/3 lg:pr-8">
                 <div v-if="error" class="text-red-500">{{ errorMessage }}</div>
                 <div v-else>
                     <div v-for="post in posts" :key="post.id"
-                        class="mb-8 p-4 bg-white dark:bg-gray-800 rounded-lg shadow-md">
+                        class="mb-8 p-4 bg-white dark:bg-gray-800 rounded-lg shadow-md animate-fade-in">
                         <div class="flex items-center justify-between mb-4">
                             <div class="flex items-center">
                                 <img :src="getAvatarUrl(post.look)"
                                     class="rounded-full border-2 border-blue-500 bg-white" :alt="post.username">
                                 <div class="ml-4">
-                                    <h3 class="font-semibold"><router-link :to="`/dashboard/${user.id}`">{{
-                                        post.username
-                                            }}</router-link></h3>
+                                    <h3 class="font-semibold">
+                                        <router-link :to="`/dashboard/${user.id}`">{{ post.username }}</router-link>
+                                    </h3>
                                     <p class="text-gray-600">{{ formatDate(post.created_at) }}</p>
                                 </div>
                             </div>
@@ -26,16 +26,13 @@
                                 <div v-if="showPostMenu === post.id"
                                     class="absolute right-0 bg-white dark:bg-gray-800 rounded shadow-md z-10">
                                     <button v-if="canEditPost(post)" @click="editPost(post)"
-                                        class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700">{{ $t('edit') }}</button>
+                                        class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700">{{
+                                        $t('edit') }}</button>
                                     <button @click="deletePost(post.id)"
-                                        class="block px-4 py-2 text-sm text-red-500 hover:bg-gray-100 dark:hover:bg-gray-700">{{ $t('delete') }}</button>
+                                        class="block px-4 py-2 text-sm text-red-500 hover:bg-gray-100 dark:hover:bg-gray-700">{{
+                                        $t('delete') }}</button>
                                 </div>
                             </div>
-                            <AppModal v-if="showEditModal" @close="showEditModal = false" title="Edit Post">
-                                <textarea v-model="editPostContent"
-                                    class="w-full p-4 border border-gray-300 rounded-lg mb-4"></textarea>
-                                <button @click="savePost" class="bg-blue-500 text-white p-2 rounded-lg">{{ $t('save') }}</button>
-                            </AppModal>
                         </div>
                         <div class="mb-4" v-html="parsePostContent(post.content)"></div>
                         <img v-if="post.image" :src="post.image" alt="EudesCMS"
@@ -57,7 +54,7 @@
                             <div v-show="post.showComments" class="mt-4">
                                 <h4 class="font-semibold mb-2">{{ $t('comments') }}</h4>
                                 <div v-for="comment in post.comments" :key="comment.id"
-                                    class="mb-2 flex justify-between">
+                                    class="mb-2 flex justify-between animate-fade-in">
                                     <div class="flex items-center">
                                         <img :src="getAvatarUrl(comment.look, 's')"
                                             class="rounded-full border-2 border-blue-500 p-1 bg-white"
@@ -153,13 +150,17 @@
                 </div>
                 <div v-for="card in exampleCards" :key="card.id"
                     :class="{ 'bg-gray-800 text-white': isDarkMode, 'bg-white text-black': !isDarkMode }"
-                    class="p-4 rounded-lg shadow-md mb-8">
+                    class="p-4 rounded-lg shadow-md mb-8 animate-fade-in">
                     <h2 class="text-2xl font-bold mb-4">{{ card.title }}</h2>
                     <p>{{ card.content }}</p>
                 </div>
             </div>
         </div>
         <AppFooter :logoImage="logoImage" />
+        <AppModal v-if="showEditModal" @close="showEditModal = false" title="Edit Post">
+            <textarea v-model="editPostContent" class="w-full p-4 border border-gray-300 rounded-lg mb-4"></textarea>
+            <button @click="savePost" class="bg-blue-500 text-white p-2 rounded-lg">{{ $t('save') }}</button>
+        </AppModal>
     </div>
 </template>
 
@@ -169,11 +170,11 @@ import AppHeader from '../components/AppHeader.vue';
 import AppFooter from '../components/AppFooter.vue';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { library } from '@fortawesome/fontawesome-svg-core';
-import { faHeart, faComment, faTrashAlt, faSmile, faImage, faPencilAlt, faVideo } from '@fortawesome/free-solid-svg-icons';
+import { faHeart, faComment, faTrashAlt, faSmile, faImage, faPencilAlt, faVideo, faEllipsisV } from '@fortawesome/free-solid-svg-icons';
 import 'emoji-picker-element';
-import AppModal from '../components/AppModal.vue'; // Ajoutez cette ligne
+import AppModal from '../components/AppModal.vue';
 
-library.add(faHeart, faComment, faTrashAlt, faSmile, faImage, faPencilAlt, faVideo);
+library.add(faHeart, faComment, faTrashAlt, faSmile, faImage, faPencilAlt, faVideo, faEllipsisV);
 
 export default {
     name: 'AppCommunity',
@@ -214,7 +215,7 @@ export default {
             selectedPost: null,
             editPostContent: '',
             showPostMenu: null,
-            lastPostTime: 0,  // Ajoutez cette ligne
+            lastPostTime: 0,
         };
     },
     async created() {
@@ -285,7 +286,7 @@ export default {
             const currentTime = Date.now();
             const timeSinceLastPost = currentTime - this.lastPostTime;
 
-            if (timeSinceLastPost < 15000) {  // 15 secondes
+            if (timeSinceLastPost < 15000) {
                 alert('Please wait 15 seconds before posting again.');
                 return;
             }
@@ -313,7 +314,7 @@ export default {
                 this.resetPostForm();
                 this.isValidVideoUrl = true;
 
-                this.lastPostTime = currentTime;  // Met à jour le dernier timestamp de post
+                this.lastPostTime = currentTime;
             } catch (error) {
                 if (error.response && error.response.status === 429) {
                     alert('Please wait 15 seconds before posting again.');
@@ -412,7 +413,7 @@ export default {
                     const gifButton = this.$refs.gifButton;
                     const pickerContainer = this.$el.querySelector('.giphy-picker-container');
                     if (gifButton && pickerContainer) {
-                        const offsetTop = gifButton.offsetTop - pickerContainer.offsetHeight - 10; // 10px de marge
+                        const offsetTop = gifButton.offsetTop - pickerContainer.offsetHeight - 10;
                         pickerContainer.style.top = `${offsetTop}px`;
                     }
                 });
@@ -484,7 +485,6 @@ export default {
         canDeleteComment(comment) {
             return comment.user_id === this.user.id;
         },
-        // Ajoutez cette méthode pour vérifier si l'utilisateur peut éditer le post
         canEditPost(post) {
             return this.user.rank >= 5 || post.user_id === this.user.id;
         },
@@ -611,14 +611,11 @@ export default {
 .emoji-picker-container {
     bottom: 40px;
     z-index: 9999;
-    /* Assurez-vous que ce soit plus élevé que les autres éléments */
 }
-
 
 .giphy-picker-container {
     position: absolute;
     bottom: calc(100% + 10px);
-    /* Place juste au-dessus du bouton avec un petit espace */
     left: 0;
     background: white;
     padding: 10px;
@@ -629,9 +626,7 @@ export default {
     overflow-y: scroll;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     z-index: 10;
-    /* Assurez-vous qu'il soit au-dessus des autres éléments */
     min-height: 100px;
-    /* Hauteur minimale pour afficher la barre de recherche sans la couper */
 }
 
 .giphy-result img {
@@ -647,5 +642,27 @@ export default {
 .slide-fade-leave-to {
     transform: translateY(10px);
     opacity: 0;
+}
+
+@keyframes fade-in {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+.animate-fade-in {
+    animation: fade-in 0.5s ease-in-out;
+}
+
+.transition-transform {
+    transition: transform 0.3s ease-in-out;
+}
+
+.transform:hover {
+    transform: scale(1.05);
 }
 </style>
