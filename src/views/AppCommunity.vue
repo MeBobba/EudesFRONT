@@ -26,19 +26,19 @@
                                 <div v-if="showPostMenu === post.id"
                                     class="absolute right-0 bg-white dark:bg-gray-800 rounded shadow-md z-10">
                                     <button v-if="canEditPost(post)" @click="editPost(post)"
-                                        class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700">Edit</button>
+                                        class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700">{{ $t('edit') }}</button>
                                     <button @click="deletePost(post.id)"
-                                        class="block px-4 py-2 text-sm text-red-500 hover:bg-gray-100 dark:hover:bg-gray-700">Delete</button>
+                                        class="block px-4 py-2 text-sm text-red-500 hover:bg-gray-100 dark:hover:bg-gray-700">{{ $t('delete') }}</button>
                                 </div>
                             </div>
                             <AppModal v-if="showEditModal" @close="showEditModal = false" title="Edit Post">
                                 <textarea v-model="editPostContent"
                                     class="w-full p-4 border border-gray-300 rounded-lg mb-4"></textarea>
-                                <button @click="savePost" class="bg-blue-500 text-white p-2 rounded-lg">Save</button>
+                                <button @click="savePost" class="bg-blue-500 text-white p-2 rounded-lg">{{ $t('save') }}</button>
                             </AppModal>
                         </div>
                         <div class="mb-4" v-html="parsePostContent(post.content)"></div>
-                        <img v-if="post.image" :src="post.image" alt="Post Image"
+                        <img v-if="post.image" :src="post.image" alt="EudesCMS"
                             class="w-full h-48 object-cover rounded-lg mb-4">
                         <iframe v-if="post.video" :src="getVideoEmbedUrl(post.video)" frameborder="0" allowfullscreen
                             class="w-full h-48 mb-4"></iframe>
@@ -72,7 +72,7 @@
                                         <fa-icon icon="trash-alt" />
                                     </button>
                                 </div>
-                                <textarea v-model="post.newComment" placeholder="Add a comment..."
+                                <textarea v-model="post.newComment" :placeholder="$t('addcomment')"
                                     class="w-full p-2 border border-gray-300 rounded-lg"></textarea>
                                 <button @click="addComment(post)" class="mt-2 bg-blue-500 text-white p-2 rounded-lg">{{
                                     $t('comment') }}</button>
@@ -104,15 +104,15 @@
                         </div>
                         <div v-if="currentTab === 'text'">
                             <textarea v-model="newPostContent" class="w-full p-4 border border-gray-300 rounded-lg"
-                                placeholder="What's on your mind?"></textarea>
+                                :placeholder="$t('whatsonyourmind')"></textarea>
                         </div>
                         <div v-if="currentTab === 'gif'" class="relative">
                             <textarea v-model="newPostContent" class="w-full p-4 border border-gray-300 rounded-lg"
-                                placeholder="What's on your mind?"></textarea>
+                                :placeholder="$t('whatsonyourmind')"></textarea>
                             <button ref="gifButton" @click="toggleGiphyPicker"
-                                class="mt-2 bg-blue-500 text-white p-2 rounded-lg">Search GIF</button>
+                                class="mt-2 bg-blue-500 text-white p-2 rounded-lg">{{ $t('searchgifs') }}</button>
                             <div v-if="showGiphyPicker" class="giphy-picker-container">
-                                <input v-model="giphySearchQuery" @input="searchGiphy" placeholder="Search GIFs"
+                                <input v-model="giphySearchQuery" @input="searchGiphy" :placeholder="$t('searchgifs')"
                                     class="p-2 border rounded-lg mb-2">
                                 <div class="giphy-results">
                                     <div v-for="gif in giphyResults" :key="gif.id" class="giphy-result"
@@ -125,13 +125,13 @@
                         </div>
                         <div v-if="currentTab === 'video'">
                             <textarea v-model="newPostContent" class="w-full p-4 border border-gray-300 rounded-lg"
-                                placeholder="What's on your mind?"></textarea>
+                                :placeholder="$t('whatsonyourmind')"></textarea>
                             <input v-model="newPostVideo" type="text"
                                 class="w-full p-2 border border-gray-300 rounded-lg mt-2" placeholder="Video URL"
                                 @input="validateVideoUrl">
-                            <p v-if="!isValidVideoUrl" class="text-red-500">Invalid Video URL</p>
+                            <p v-if="!isValidVideoUrl" class="text-red-500">{{ $t('invalidvideourl') }}</p>
                             <button v-if="newPostVideo" @click="removeVideo"
-                                class="mt-2 bg-red-500 text-white p-2 rounded-lg">Remove Video</button>
+                                class="mt-2 bg-red-500 text-white p-2 rounded-lg">{{ $t('removevideo') }}</button>
                         </div>
                         <div class="mt-4 flex items-center">
                             <select v-model="postVisibility" class="border border-gray-300 rounded-lg p-2 mr-4">
