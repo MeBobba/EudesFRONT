@@ -9,13 +9,13 @@
                 <div class="w-full lg:w-2/3 lg:pr-8">
                     <div v-if="isCurrentUser" :class="postInputClass" class="p-4 rounded-lg shadow-md mb-8">
                         <div class="tabs">
-                            <button :class="{ active: currentTab === 'text' }" @click="currentTab = 'text'">
+                            <button :class="{ active: currentTab === 'text' }" @click="selectTab('text')">
                                 <fa-icon icon="pencil-alt" />
                             </button>
-                            <button :class="{ active: currentTab === 'gif' }" @click="currentTab = 'gif'">
+                            <button :class="{ active: currentTab === 'gif' }" @click="selectTab('gif')">
                                 <fa-icon icon="image" />
                             </button>
-                            <button :class="{ active: currentTab === 'video' }" @click="currentTab = 'video'">
+                            <button :class="{ active: currentTab === 'video' }" @click="selectTab('video')">
                                 <fa-icon icon="video" />
                             </button>
                         </div>
@@ -26,9 +26,8 @@
                         <div v-if="currentTab === 'gif'">
                             <textarea v-model="newPostContent" class="w-full p-4 border border-gray-300 rounded-lg"
                                 placeholder="What's on your mind?"></textarea>
-                            <button @click="toggleGiphyPicker" class="mt-2 bg-blue-500 text-white p-2 rounded-lg">
-                                Search GIF
-                            </button>
+                            <button @click="toggleGiphyPicker" class="mt-2 bg-blue-500 text-white p-2 rounded-lg">Search
+                                GIF</button>
                             <div v-if="showGiphyPicker" class="absolute z-10 giphy-picker-container">
                                 <input v-model="giphySearchQuery" @input="searchGiphy" placeholder="Search GIFs"
                                     class="p-2 border rounded-lg mb-2">
@@ -45,14 +44,19 @@
                             <textarea v-model="newPostContent" class="w-full p-4 border border-gray-300 rounded-lg"
                                 placeholder="What's on your mind?"></textarea>
                             <input v-model="newPostVideo" type="text"
-                                class="w-full p-2 border border-gray-300 rounded-lg mt-2" placeholder="Video URL">
+                                class="w-full p-2 border border-gray-300 rounded-lg mt-2" placeholder="Video URL"
+                                @input="validateVideoUrl">
+                            <p v-if="!isValidVideoUrl" class="text-red-500">Invalid Video URL</p>
+                            <button v-if="newPostVideo" @click="removeVideo"
+                                class="mt-2 bg-red-500 text-white p-2 rounded-lg">Remove Video</button>
                         </div>
                         <div class="mt-4 flex items-center">
                             <select v-model="postVisibility" class="border border-gray-300 rounded-lg p-2 mr-4">
                                 <option value="public">Public</option>
                                 <option value="friends">Friends</option>
                             </select>
-                            <button @click="createPost" class="bg-blue-500 text-white p-2 rounded-lg">Post</button>
+                            <button @click="createPost" :disabled="currentTab === 'video' && !isValidVideoUrl"
+                                class="bg-blue-500 text-white p-2 rounded-lg">Post</button>
                         </div>
                         <div class="relative mt-2 flex items-center">
                             <button @click="toggleEmojiPicker" class="mr-4 p-2">
@@ -75,9 +79,23 @@
                                     <p class="text-gray-600">{{ formatDate(post.created_at) }}</p>
                                 </div>
                             </div>
-                            <button v-if="canDeletePost(post)" @click="deletePost(post.id)" class="text-red-500">
-                                <fa-icon icon="trash-alt" />
-                            </button>
+                            <div class="relative">
+                                <button @click="togglePostMenu(post.id)" class="text-gray-500">
+                                    <fa-icon icon="ellipsis-v" />
+                                </button>
+                                <div v-if="showPostMenu === post.id"
+                                    class="absolute right-0 bg-white dark:bg-gray-800 rounded shadow-md z-10">
+                                    <button v-if="canEditPost(post)" @click="editPost(post)"
+                                        class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700">Edit</button>
+                                    <button @click="deletePost(post.id)"
+                                        class="block px-4 py-2 text-sm text-red-500 hover:bg-gray-100 dark:hover:bg-gray-700">Delete</button>
+                                </div>
+                            </div>
+                            <AppModal v-if="showEditModal" @close="showEditModal = false" title="Edit Post">
+                                <textarea v-model="editPostContent"
+                                    class="w-full p-4 border border-gray-300 rounded-lg mb-4"></textarea>
+                                <button @click="savePost" class="bg-blue-500 text-white p-2 rounded-lg">Save</button>
+                            </AppModal>
                         </div>
                         <p class="mb-4" v-html="parsePostContent(post.content)"></p>
                         <img v-if="post.image" :src="post.image" alt="Post Image"
@@ -161,12 +179,13 @@ import AppHeader from '../components/AppHeader.vue';
 import AppFooter from '../components/AppFooter.vue';
 import UserProfile from '../components/UserProfile.vue';
 import ErrorMessage from '../components/ErrorMessage.vue';
+import AppModal from '../components/AppModal.vue'; // Ajoutez cette ligne
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { library } from '@fortawesome/fontawesome-svg-core';
-import { faHeart, faComment, faTrashAlt, faSmile, faImage, faPencilAlt, faVideo } from '@fortawesome/free-solid-svg-icons';
+import { faHeart, faComment, faTrashAlt, faSmile, faImage, faPencilAlt, faVideo, faEllipsisV } from '@fortawesome/free-solid-svg-icons';
 import 'emoji-picker-element';
 
-library.add(faHeart, faComment, faTrashAlt, faSmile, faImage, faPencilAlt, faVideo);
+library.add(faHeart, faComment, faTrashAlt, faSmile, faImage, faPencilAlt, faVideo, faEllipsisV);
 
 export default {
     name: 'UserDashboard',
@@ -174,6 +193,7 @@ export default {
         AppHeader,
         AppFooter,
         UserProfile,
+        AppModal,
         ErrorMessage,
         'fa-icon': FontAwesomeIcon,
         EmojiPicker: 'emoji-picker'
@@ -202,7 +222,12 @@ export default {
             giphySearchQuery: '',
             giphyResults: [],
             isCurrentUser: true,
-            currentTab: 'text', // Track the current tab
+            currentTab: 'text',
+            isValidVideoUrl: true,
+            showPostMenu: null,
+            showEditModal: false,
+            selectedPost: null,
+            editPostContent: '',
         };
     },
     computed: {
@@ -279,9 +304,7 @@ export default {
                 this.isLoading = false;
             } catch (error) {
                 this.error = true;
-                this.errorMessage = error.response
-                    ? error.response.data || 'Failed to fetch user data. Please try again later.'
-                    : 'Failed to fetch user data. Please check your network connection.';
+                this.errorMessage = error.response ? error.response.data || 'Failed to fetch user data. Please try again later.' : 'Failed to fetch user data. Please check your network connection.';
                 this.isLoading = false;
             }
         },
@@ -329,9 +352,7 @@ export default {
                 this.loading = false;
             } catch (error) {
                 this.error = true;
-                this.errorMessage = error.response
-                    ? error.response.data || 'Failed to fetch posts. Please try again later.'
-                    : 'Failed to fetch posts. Please check your network connection.';
+                this.errorMessage = error.response ? error.response.data || 'Failed to fetch posts. Please try again later.' : 'Failed to fetch posts. Please check your network connection.';
                 this.loading = false;
             }
         },
@@ -349,7 +370,7 @@ export default {
                 }
                 const apiUrl = process.env.VUE_APP_API_URL || 'http://localhost:3000';
                 const response = await axios.post(`${apiUrl}/posts`, {
-                    content: this.newPostContent,
+                    content: await this.applyWordFilter(this.newPostContent),
                     video: this.newPostVideo,
                     visibility: this.postVisibility
                 }, {
@@ -365,6 +386,7 @@ export default {
                 this.newPostContent = '';
                 this.newPostVideo = '';
                 this.postVisibility = 'public';
+                this.isValidVideoUrl = true;
             } catch (error) {
                 if (error.response && error.response.status === 429) {
                     alert('Please wait 15 seconds before posting again.');
@@ -382,7 +404,7 @@ export default {
                 const apiUrl = process.env.VUE_APP_API_URL || 'http://localhost:3000';
                 const response = await axios.post(`${apiUrl}/comments`, {
                     postId: post.id,
-                    content: post.newComment
+                    content: await this.applyWordFilter(post.newComment)
                 }, {
                     headers: { 'x-access-token': token }
                 });
@@ -468,6 +490,38 @@ export default {
         canDeleteComment(comment) {
             return this.user.rank >= 5 || comment.user_id === this.user.id;
         },
+        // Ajoutez cette méthode pour vérifier si l'utilisateur peut éditer le post
+        canEditPost(post) {
+            return this.user.rank >= 5 || post.user_id === this.user.id;
+        },
+        editPost(post) {
+            this.selectedPost = post;
+            this.editPostContent = post.content;
+            this.showEditModal = true;
+        },
+        async savePost() {
+            try {
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    throw new Error('No token found');
+                }
+                const apiUrl = process.env.VUE_APP_API_URL || 'http://localhost:3000';
+                const response = await axios.put(`${apiUrl}/posts/${this.selectedPost.id}`, {
+                    content: await this.applyWordFilter(this.editPostContent)
+                }, {
+                    headers: { 'x-access-token': token }
+                });
+                if (response.status === 200) {
+                    this.selectedPost.content = response.data.content;
+                    this.showEditModal = false;
+                } else {
+                    throw new Error('Failed to update post');
+                }
+            } catch (error) {
+                console.error('Error updating post:', error);
+                alert('Failed to update post. Please try again later.');
+            }
+        },
         toggleComments(post) {
             post.showComments = !post.showComments;
         },
@@ -527,11 +581,49 @@ export default {
             }
             return '';
         },
+        validateVideoUrl() {
+            const youtubeMatch = this.newPostVideo.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|v\/|.*?v=))([^?&]+)/);
+            const vimeoMatch = this.newPostVideo.match(/(?:vimeo\.com\/(?:.*#|.*\/videos\/|.*\/)?)([0-9]+)/);
+            const dailymotionMatch = this.newPostVideo.match(/(?:dailymotion\.com\/(?:video|hub)\/([^_]+)|dai\.ly\/([^_]+))/);
+            this.isValidVideoUrl = !!(youtubeMatch || vimeoMatch || dailymotionMatch);
+        },
+        removeVideo() {
+            this.newPostVideo = '';
+            this.isValidVideoUrl = true;
+        },
         getUserAvatar(look) {
             return `http://www.habbo.com/habbo-imaging/avatarimage?figure=${look}&direction=3&head_direction=3&gesture=nor&action=null&size=m&headonly=1&img_format=gif`;
         },
         parsePostContent(content) {
-            return content.replace(/!\[GIF\]\((.*?)\)/g, '<img src="$1" alt="GIF">');
+            return content.replace(/<img src=".*?" alt="GIF">/g, '<img src="$1" alt="GIF">');
+        },
+        async applyWordFilter(content) {
+            try {
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    throw new Error('No token found');
+                }
+                const apiUrl = process.env.VUE_APP_API_URL || 'http://localhost:3000';
+                const response = await axios.get(`${apiUrl}/wordfilter`, {
+                    headers: { 'x-access-token': token }
+                });
+
+                const wordFilters = response.data;
+                wordFilters.forEach(filter => {
+                    const regex = new RegExp(`\\b${filter.key}\\b`, 'gi');
+                    content = content.replace(regex, filter.replacement);
+                });
+                return content;
+            } catch (error) {
+                console.error('Error fetching word filters:', error);
+                return content;
+            }
+        },
+        togglePostMenu(postId) {
+            this.showPostMenu = this.showPostMenu === postId ? null : postId;
+        },
+        selectTab(tab) {
+            this.currentTab = tab;
         }
     }
 };
@@ -574,12 +666,10 @@ export default {
 }
 
 .emoji-picker-container {
-    right: 0;
     bottom: 40px;
 }
 
 .giphy-picker-container {
-    right: 0;
     bottom: 40px;
     background: white;
     padding: 10px;

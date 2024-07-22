@@ -119,7 +119,7 @@ export default {
             uploadProgress: 0,
             uploadInProgress: false,
             uploadMessage: '',
-            uploadError: false
+            uploadError: false,
         }
     },
     async created() {
