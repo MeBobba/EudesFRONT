@@ -3,7 +3,6 @@
         <AppHeader :logoImage="logoImage" :headerImage="headerImage" @toggleDarkMode="toggleDarkMode"
             @logout="logout" />
         <div class="container mx-auto px-4 py-8 mt-4">
-            <UserStories :user="user" :userId="user.id" />
             <UserProfile v-if="!isLoading && !error" :user="user" :isDarkMode="isDarkMode" />
             <ErrorMessage v-if="error" :message="errorMessage" />
             <div class="flex flex-col lg:flex-row mt-8">
@@ -176,7 +175,6 @@
 
 <script>
 import axios from 'axios';
-import UserStories from '../components/UserStories.vue';
 import AppHeader from '../components/AppHeader.vue';
 import AppFooter from '../components/AppFooter.vue';
 import UserProfile from '../components/UserProfile.vue';
@@ -194,7 +192,6 @@ export default {
     components: {
         AppHeader,
         AppFooter,
-        UserStories,
         UserProfile,
         AppModal,
         ErrorMessage,
@@ -438,7 +435,7 @@ export default {
                     throw new Error('No token found');
                 }
                 const apiUrl = process.env.VUE_APP_API_URL || 'http://localhost:3000';
-                await axios.delete(`${apiUrl}/comments/${commentId}`, {
+                await axios.delete(`${apiUrl}/article-comments/${commentId}`, {
                     headers: { 'x-access-token': token }
                 });
                 this.posts = this.posts.map(post => {
@@ -518,19 +515,31 @@ export default {
         },
         async savePost() {
             try {
+                console.log("Début de savePost");
                 const token = localStorage.getItem('token');
                 if (!token) {
                     throw new Error('No token found');
                 }
+                console.log("Token trouvé:", token);
+
                 const apiUrl = process.env.VUE_APP_API_URL || 'http://localhost:3000';
+                console.log("API URL:", apiUrl);
+
+                const filteredContent = await this.applyWordFilter(this.editPostContent);
+                console.log("Contenu filtré:", filteredContent);
+
                 const response = await axios.put(`${apiUrl}/posts/${this.selectedPost.id}`, {
-                    content: await this.applyWordFilter(this.editPostContent)
+                    content: filteredContent
                 }, {
                     headers: { 'x-access-token': token }
                 });
+
+                console.log("Réponse du serveur:", response);
+
                 if (response.status === 200) {
                     this.selectedPost.content = response.data.content;
                     this.showEditModal = false;
+                    console.log("Post mis à jour avec succès");
                 } else {
                     throw new Error('Failed to update post');
                 }
@@ -539,6 +548,7 @@ export default {
                 alert('Failed to update post. Please try again later.');
             }
         },
+
         toggleComments(post) {
             post.showComments = !post.showComments;
         },
