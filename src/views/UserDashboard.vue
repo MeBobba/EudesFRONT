@@ -3,6 +3,7 @@
         <AppHeader :logoImage="logoImage" :headerImage="headerImage" @toggleDarkMode="toggleDarkMode"
             @logout="logout" />
         <div class="container mx-auto px-4 py-8 mt-4">
+            <UserStories :user="user" :userId="user.id" />
             <UserProfile v-if="!isLoading && !error" :user="user" :isDarkMode="isDarkMode" />
             <ErrorMessage v-if="error" :message="errorMessage" />
             <div class="flex flex-col lg:flex-row mt-8">
@@ -175,11 +176,12 @@
 
 <script>
 import axios from 'axios';
+import UserStories from '../components/UserStories.vue';
 import AppHeader from '../components/AppHeader.vue';
 import AppFooter from '../components/AppFooter.vue';
 import UserProfile from '../components/UserProfile.vue';
 import ErrorMessage from '../components/ErrorMessage.vue';
-import AppModal from '../components/AppModal.vue'; // Ajoutez cette ligne
+import AppModal from '../components/AppModal.vue';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { faHeart, faComment, faTrashAlt, faSmile, faImage, faPencilAlt, faVideo, faEllipsisV } from '@fortawesome/free-solid-svg-icons';
@@ -192,6 +194,7 @@ export default {
     components: {
         AppHeader,
         AppFooter,
+        UserStories,
         UserProfile,
         AppModal,
         ErrorMessage,
@@ -228,7 +231,7 @@ export default {
             showEditModal: false,
             selectedPost: null,
             editPostContent: '',
-            lastPostTime: 0, // Ajoutez cette ligne pour stocker le dernier temps de publication
+            lastPostTime: 0,
         };
     },
     computed: {
@@ -677,6 +680,13 @@ export default {
 
 .tabs button.active {
     border-bottom: 2px solid #3490dc;
+}
+
+.container {
+    position: relative;
+    /* Ajoutez cette ligne pour assurer que le conteneur principal ait un positionnement relatif */
+    z-index: 1;
+    /* Assurez-vous que le z-index du conteneur principal est inférieur à celui du modal */
 }
 
 .emoji-picker-container {
