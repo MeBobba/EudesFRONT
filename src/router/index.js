@@ -13,6 +13,8 @@ import ArticleDetail from '../views/ArticleDetail.vue';
 import AppGames from '../views/AppGames.vue';
 import GameDetail from '../views/GameDetail.vue';
 import AppMusics from '../views/AppMusics.vue';
+import AppBoutique from '../views/AppBoutique.vue';
+import AppLottery from '../views/AppLottery.vue';
 
 const routes = [
     { path: '/', redirect: '/login' },
@@ -26,6 +28,8 @@ const routes = [
     { path: '/staff', component: AppStaff, meta: { requiresAuth: true } },
     { path: '/musics', component: AppMusics, meta: { requiresAuth: true } },
     { path: '/news', component: AppNews, meta: { requiresAuth: true } },
+    { path: '/boutique', component: AppBoutique, meta: { requiresAuth: true } },
+    { path: '/lottery', component: AppLottery, meta: { requiresAuth: true } },
     { path: '/dashboard/:userId', component: UserDashboard, meta: { requiresAuth: true } },
     { path: '/dashboard', redirect: `/dashboard/me` },
     { path: '/404', component: AppError404 },

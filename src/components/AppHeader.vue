@@ -25,8 +25,8 @@
                                 exact-active-class="exact-active">{{ $t('games') }}</router-link></li>
                         <li><router-link to="/staff" class="nav-link" active-class="active"
                                 exact-active-class="exact-active">{{ $t('staff') }}</router-link></li>
-                        <li><router-link to="/musics" class="nav-link" active-class="active"
-                                exact-active-class="exact-active">{{ $t('musics') }}</router-link></li>
+                        <li><router-link to="/boutique" class="nav-link" active-class="active"
+                                exact-active-class="exact-active">Shop</router-link></li>
                         <li><router-link to="/news" class="nav-link" active-class="active"
                                 exact-active-class="exact-active">{{ $t('news') }}</router-link></li>
                     </ul>

@@ -6,8 +6,9 @@
             </router-link>
             <nav class="flex-1 text-center">
                 <ul class="flex justify-center space-x-8">
-                    <li><router-link to="/" class="nav-link">{{ $t('terms') }}</router-link></li>
-                    <li><router-link to="/community" class="nav-link">{{ $t('privacy') }}</router-link></li>
+                    <li><router-link to="/terms" class="nav-link">{{ $t('musics') }}</router-link></li>
+                    <li><router-link to="/musics" class="nav-link">{{ $t('privacy') }}</router-link></li>
+                    <li><router-link to="/privacy" class="nav-link">{{ $t('privacy') }}</router-link></li>
                 </ul>
             </nav>
             <div class="flex space-x-4">
