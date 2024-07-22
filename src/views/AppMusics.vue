@@ -263,8 +263,13 @@ export default {
                     }
                 });
             } else {
-                this.player.loadVideoById(this.youtubeVideoId);
-                if (fromMounted) this.player.cueVideoById(this.youtubeVideoId);
+                // Vérifiez si loadVideoById existe avant de l'appeler
+                if (this.player.loadVideoById) {
+                    this.player.loadVideoById(this.youtubeVideoId);
+                }
+                if (fromMounted && this.player.cueVideoById) {
+                    this.player.cueVideoById(this.youtubeVideoId);
+                }
             }
         },
         loadYouTubeApi() {
