@@ -166,7 +166,7 @@ export default {
                     // Token expiré, forcer la déconnexion
                     this.logout();
                 } else {
-                    console.error('Error searching users:', error);
+                    console.error(this.$t('searchinguserserror'), error);
                 }
             }
         },
@@ -180,7 +180,7 @@ export default {
                     }
                 });
             } catch (error) {
-                console.error('Logout error:', error);
+                console.error(this.$t('logouterror'), error);
             } finally {
                 localStorage.removeItem('token');
                 this.$router.push('/login');

@@ -53,7 +53,7 @@
         </div>
         <div class="relative grid grid-cols-2 sm:grid-cols-3 gap-4 mt-6">
             <div v-for="post in user.posts" :key="post.id" class="relative">
-                <img :src="post.image" alt="Post Image" class="w-full h-32 sm:h-48 object-cover rounded-lg" />
+                <img :src="post.image" alt="EudesCMS" class="w-full h-32 sm:h-48 object-cover rounded-lg" />
                 <div
                     class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
                     <fa-icon :icon="['fas', 'heart']" class="text-white mr-2" />
@@ -139,7 +139,7 @@ export default {
                 });
                 this.user = response.data;
             } catch (error) {
-                console.error('Error fetching user profile:', error);
+                console.error(this.$t('errorfetchinguser'), error);
             }
         },
         async uploadCoverImage(event) {
@@ -147,7 +147,7 @@ export default {
             if (!file) return;
             this.showUploadModal = true;
             this.uploadInProgress = true;
-            this.uploadMessage = 'Uploading cover image...';
+            this.uploadMessage = this.$t('uploadcoverimage');
             this.uploadError = false;
             const fileName = `cover_${this.user.id}_${Date.now()}`;
             try {
@@ -167,7 +167,7 @@ export default {
                     this.uploadProgress = Math.round((evt.loaded / evt.total) * 100);
                 }).send(async (err, data) => {
                     if (err) {
-                        console.error('Error uploading cover image:', err);
+                        console.error(this.$t('erroruploadingcover'), err);
                         this.uploadInProgress = false;
                         this.uploadMessage = `Error: ${err.message}`;
                         this.uploadError = true;
@@ -180,9 +180,9 @@ export default {
                             headers: { 'x-access-token': token }
                         });
                         this.user.coverImage = data.Location;
-                        this.uploadMessage = 'Cover image uploaded successfully!';
+                        this.uploadMessage = this.$t('successcoverimage');
                     } catch (err) {
-                        console.error('Error updating cover image in profile:', err);
+                        console.error(this.$t('errorupdatingcover'), err);
                         this.uploadMessage = `Error: ${err.message}`;
                         this.uploadError = true;
                     } finally {
@@ -190,7 +190,7 @@ export default {
                     }
                 });
             } catch (error) {
-                console.error('Error uploading cover image:', error);
+                console.error(this.$t('erroruploadingcover'), error);
                 this.uploadInProgress = false;
                 this.uploadMessage = `Error: ${error.message}`;
                 this.uploadError = true;
@@ -221,7 +221,7 @@ export default {
                     this.uploadProgress = Math.round((evt.loaded / evt.total) * 100);
                 }).send(async (err, data) => {
                     if (err) {
-                        console.error('Error uploading profile image:', err);
+                        console.error(this.$t('erroruploadingprofile'), err);
                         this.uploadInProgress = false;
                         this.uploadMessage = `Error: ${err.message}`;
                         this.uploadError = true;
@@ -234,9 +234,9 @@ export default {
                             headers: { 'x-access-token': token }
                         });
                         this.user.profileImage = data.Location;
-                        this.uploadMessage = 'Profile image uploaded successfully!';
+                        this.uploadMessage = this.$t('successprofileimage');
                     } catch (err) {
-                        console.error('Error updating profile image in profile:', err);
+                        console.error(this.$t('errorupdatingprofile'), err);
                         this.uploadMessage = `Error: ${err.message}`;
                         this.uploadError = true;
                     } finally {
@@ -244,7 +244,7 @@ export default {
                     }
                 });
             } catch (error) {
-                console.error('Error uploading profile image:', error);
+                console.error(this.$t('erroruploadingprofile'), error);
                 this.uploadInProgress = false;
                 this.uploadMessage = `Error: ${error.message}`;
                 this.uploadError = true;
@@ -271,7 +271,7 @@ export default {
                 });
                 this.user.profileImage = '';
             } catch (error) {
-                console.error('Error resetting profile image:', error);
+                console.error(this.$t('errorresttingprofileimage'), error);
             }
         },
         closeModal() {

@@ -2,7 +2,7 @@
     <footer :class="{ 'bg-gray-900 text-white': isDarkMode, 'bg-white text-black': !isDarkMode }" class="shadow">
         <div class="container mx-auto py-6 px-6 flex justify-between items-center">
             <router-link to="/" class="hover:text-gray-900">
-                <img :src="logoImage" alt="Logo" class="footer-logo">
+                <img :src="logoImage" alt="EudesCMS" class="footer-logo">
             </router-link>
             <nav class="flex-1 text-center">
                 <ul class="flex justify-center space-x-8">
@@ -56,7 +56,7 @@ export default {
                 localStorage.removeItem('token');
                 this.$router.push('/login');
             } catch (error) {
-                console.error('Logout error:', error);
+                console.error(this.$t('logouterror'), error);
                 // Handle error (show message, etc.)
             }
         }
