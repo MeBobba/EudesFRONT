@@ -106,12 +106,12 @@
                             <textarea v-model="newPostContent" class="w-full p-4 border border-gray-300 rounded-lg"
                                 placeholder="What's on your mind?"></textarea>
                         </div>
-                        <div v-if="currentTab === 'gif'">
+                        <div v-if="currentTab === 'gif'" class="relative">
                             <textarea v-model="newPostContent" class="w-full p-4 border border-gray-300 rounded-lg"
                                 placeholder="What's on your mind?"></textarea>
-                            <button @click="toggleGiphyPicker" class="mt-2 bg-blue-500 text-white p-2 rounded-lg">Search
-                                GIF</button>
-                            <div v-if="showGiphyPicker" class="absolute z-10 giphy-picker-container">
+                            <button ref="gifButton" @click="toggleGiphyPicker"
+                                class="mt-2 bg-blue-500 text-white p-2 rounded-lg">Search GIF</button>
+                            <div v-if="showGiphyPicker" class="giphy-picker-container">
                                 <input v-model="giphySearchQuery" @input="searchGiphy" placeholder="Search GIFs"
                                     class="p-2 border rounded-lg mb-2">
                                 <div class="giphy-results">
@@ -213,7 +213,8 @@ export default {
             showEditModal: false,
             selectedPost: null,
             editPostContent: '',
-            showPostMenu: null, // Ajoutez cette ligne
+            showPostMenu: null,
+            lastPostTime: 0,  // Ajoutez cette ligne
         };
     },
     async created() {
@@ -281,6 +282,14 @@ export default {
             }
         },
         async createPost() {
+            const currentTime = Date.now();
+            const timeSinceLastPost = currentTime - this.lastPostTime;
+
+            if (timeSinceLastPost < 15000) {  // 15 secondes
+                alert('Please wait 15 seconds before posting again.');
+                return;
+            }
+
             try {
                 const token = localStorage.getItem('token');
                 if (!token) {
@@ -303,6 +312,8 @@ export default {
 
                 this.resetPostForm();
                 this.isValidVideoUrl = true;
+
+                this.lastPostTime = currentTime;  // Met à jour le dernier timestamp de post
             } catch (error) {
                 if (error.response && error.response.status === 429) {
                     alert('Please wait 15 seconds before posting again.');
@@ -396,6 +407,16 @@ export default {
         },
         toggleGiphyPicker() {
             this.showGiphyPicker = !this.showGiphyPicker;
+            if (this.showGiphyPicker) {
+                this.$nextTick(() => {
+                    const gifButton = this.$refs.gifButton;
+                    const pickerContainer = this.$el.querySelector('.giphy-picker-container');
+                    if (gifButton && pickerContainer) {
+                        const offsetTop = gifButton.offsetTop - pickerContainer.offsetHeight - 10; // 10px de marge
+                        pickerContainer.style.top = `${offsetTop}px`;
+                    }
+                });
+            }
         },
         addEmoji(event) {
             if (event.detail && event.detail.unicode) {
@@ -589,10 +610,16 @@ export default {
 
 .emoji-picker-container {
     bottom: 40px;
+    z-index: 9999;
+    /* Assurez-vous que ce soit plus élevé que les autres éléments */
 }
 
+
 .giphy-picker-container {
-    top: 40px;
+    position: absolute;
+    bottom: calc(100% + 10px);
+    /* Place juste au-dessus du bouton avec un petit espace */
+    left: 0;
     background: white;
     padding: 10px;
     border: 1px solid #ccc;
@@ -600,6 +627,11 @@ export default {
     width: 300px;
     max-height: 400px;
     overflow-y: scroll;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    z-index: 10;
+    /* Assurez-vous qu'il soit au-dessus des autres éléments */
+    min-height: 100px;
+    /* Hauteur minimale pour afficher la barre de recherche sans la couper */
 }
 
 .giphy-result img {
