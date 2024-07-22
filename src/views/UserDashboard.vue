@@ -2,7 +2,7 @@
     <div :class="containerClass" class="min-h-screen">
         <AppHeader :logoImage="logoImage" :headerImage="headerImage" @toggleDarkMode="toggleDarkMode"
             @logout="logout" />
-        <div class="container mx-auto px-4 py-8 mt-4">
+        <div class="container mx-auto px-4 py-8 mt-4 animate-fade-in">
             <UserProfile v-if="!isLoading && !error" :user="user" :isDarkMode="isDarkMode" />
             <ErrorMessage v-if="error" :message="errorMessage" />
             <div class="flex flex-col lg:flex-row mt-8">
@@ -69,7 +69,7 @@
                     </div>
 
                     <div v-for="post in posts" :key="post.id"
-                        class="mb-8 p-4 bg-white dark:bg-gray-800 rounded-lg shadow-md">
+                        class="mb-8 p-4 bg-white dark:bg-gray-800 rounded-lg shadow-md animate-fade-in">
                         <div class="flex items-center justify-between mb-4">
                             <div class="flex items-center">
                                 <img :src="getUserAvatar(post.look)"
@@ -91,11 +91,6 @@
                                         class="block px-4 py-2 text-sm text-red-500 hover:bg-gray-100 dark:hover:bg-gray-700">Delete</button>
                                 </div>
                             </div>
-                            <AppModal v-if="showEditModal" @close="showEditModal = false" title="Edit Post">
-                                <textarea v-model="editPostContent"
-                                    class="w-full p-4 border border-gray-300 rounded-lg mb-4"></textarea>
-                                <button @click="savePost" class="bg-blue-500 text-white p-2 rounded-lg">Save</button>
-                            </AppModal>
                         </div>
                         <p class="mb-4" v-html="parsePostContent(post.content)"></p>
                         <img v-if="post.image" :src="post.image" alt="Post Image"
@@ -116,7 +111,7 @@
                             <div v-show="post.showComments" class="mt-4">
                                 <h4 class="font-semibold mb-2">Comments</h4>
                                 <div v-for="comment in post.comments" :key="comment.id"
-                                    class="mb-2 flex justify-between">
+                                    class="mb-2 flex justify-between animate-fade-in">
                                     <div class="flex items-center">
                                         <img :src="getUserAvatar(comment.look)"
                                             class="rounded-full border-2 border-blue-500 p-1 bg-white"
@@ -147,7 +142,7 @@
                 </div>
 
                 <div class="w-full lg:w-1/3 lg:pl-8 mt-8 lg:mt-0">
-                    <div :class="sidebarClass" class="p-4 rounded-lg shadow-md mb-8">
+                    <div :class="sidebarClass" class="p-4 rounded-lg shadow-md mb-8 animate-fade-in">
                         <h2 class="text-2xl font-bold mb-4">Suggestions For You</h2>
                         <div v-for="suggestion in suggestions" :key="suggestion.id" class="flex items-center mb-4">
                             <img :src="getUserAvatar(suggestion.look)"
@@ -158,7 +153,7 @@
                             </div>
                         </div>
                     </div>
-                    <div :class="sidebarClass" class="p-4 rounded-lg shadow-md">
+                    <div :class="sidebarClass" class="p-4 rounded-lg shadow-md animate-fade-in">
                         <h2 class="text-2xl font-bold mb-4">Photos</h2>
                         <div class="grid grid-cols-3 gap-2">
                             <div v-for="photo in photos" :key="photo.id">
@@ -170,10 +165,12 @@
             </div>
         </div>
         <AppFooter :logoImage="logoImage" />
+        <AppModal v-if="showEditModal" @close="showEditModal = false" title="Edit Post">
+            <textarea v-model="editPostContent" class="w-full p-4 border border-gray-300 rounded-lg mb-4"></textarea>
+            <button @click="savePost" class="bg-blue-500 text-white p-2 rounded-lg">Save</button>
+        </AppModal>
     </div>
 </template>
-
-
 
 <script>
 import axios from 'axios';
@@ -181,7 +178,7 @@ import AppHeader from '../components/AppHeader.vue';
 import AppFooter from '../components/AppFooter.vue';
 import UserProfile from '../components/UserProfile.vue';
 import ErrorMessage from '../components/ErrorMessage.vue';
-import AppModal from '../components/AppModal.vue'; // Ajoutez cette ligne
+import AppModal from '../components/AppModal.vue';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { faHeart, faComment, faTrashAlt, faSmile, faImage, faPencilAlt, faVideo, faEllipsisV } from '@fortawesome/free-solid-svg-icons';
@@ -230,7 +227,7 @@ export default {
             showEditModal: false,
             selectedPost: null,
             editPostContent: '',
-            lastPostTime: 0, // Ajoutez cette ligne pour stocker le dernier temps de publication
+            lastPostTime: 0,
         };
     },
     computed: {
@@ -366,12 +363,15 @@ export default {
             }
         },
         async createPost() {
-            try {
-                if (!this.canPost()) {
-                    alert('Please wait 15 seconds before posting again.');
-                    return;
-                }
+            const currentTime = Date.now();
+            const timeSinceLastPost = currentTime - this.lastPostTime;
 
+            if (timeSinceLastPost < 15000) {
+                alert('Please wait 15 seconds before posting again.');
+                return;
+            }
+
+            try {
                 const token = localStorage.getItem('token');
                 if (!token) {
                     throw new Error('No token found');
@@ -396,8 +396,7 @@ export default {
                 this.postVisibility = 'public';
                 this.isValidVideoUrl = true;
 
-                // Mettez à jour le dernier temps de publication
-                this.lastPostTime = Math.floor(Date.now() / 1000);
+                this.lastPostTime = currentTime;
             } catch (error) {
                 if (error.response && error.response.status === 429) {
                     alert('Please wait 15 seconds before posting again.');
@@ -460,7 +459,7 @@ export default {
                 });
                 if (response.status === 200) {
                     this.posts = this.posts.filter(post => post.id !== postId);
-                    this.showPostMenu = null;  // Ajoutez cette ligne
+                    this.showPostMenu = null;
                 } else {
                     throw new Error('Failed to delete post');
                 }
@@ -485,13 +484,7 @@ export default {
                 const data = response.data;
                 post.userLike = data.userLike;
                 post.likesCount = data.likesCount;
-                const likeIcon = this.$el.querySelector(`#post-${post.id} .fa-heart`);
-                if (likeIcon) {
-                    likeIcon.classList.add('animate-like');
-                    setTimeout(() => {
-                        likeIcon.classList.remove('animate-like');
-                    }, 500);
-                }
+                this.animateLike(post.id);
             } catch (error) {
                 console.error('Error liking post:', error);
             }
@@ -502,7 +495,6 @@ export default {
         canDeleteComment(comment) {
             return this.user.rank >= 5 || comment.user_id === this.user.id;
         },
-        // Ajoutez cette méthode pour vérifier si l'utilisateur peut éditer le post
         canEditPost(post) {
             return this.user.rank >= 5 || post.user_id === this.user.id;
         },
@@ -510,7 +502,7 @@ export default {
             this.selectedPost = post;
             this.editPostContent = post.content;
             this.showEditModal = true;
-            this.showPostMenu = null;  // Ajoutez cette ligne
+            this.showPostMenu = null;
         },
         canPost() {
             const currentTime = Math.floor(Date.now() / 1000);
@@ -698,10 +690,8 @@ export default {
     width: 300px;
     max-height: 400px;
     overflow-y: scroll;
-    /* Remplacez 'bottom: 40px;' par 'top: -300px;' pour positionner le conteneur correctement */
     top: -300px;
 }
-
 
 .giphy-result img {
     cursor: pointer;
@@ -716,5 +706,19 @@ export default {
 .slide-fade-leave-to {
     transform: translateY(10px);
     opacity: 0;
+}
+
+@keyframes fade-in {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+.animate-fade-in {
+    animation: fade-in 0.5s ease-in-out;
 }
 </style>

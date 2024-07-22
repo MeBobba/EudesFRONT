@@ -1,5 +1,5 @@
 <template>
-    <div :class="{ 'bg-gray-900 text-white': isDarkMode, 'bg-gray-100 text-black': !isDarkMode }" class="min-h-screen">
+    <div :class="containerClass" class="min-h-screen transition-all">
         <AppHeader :logoImage="logoImage" :headerImage="headerImage" @toggleDarkMode="toggleDarkMode"
             @logout="logout" />
         <div class="container mx-auto px-4 py-8">
@@ -10,9 +10,9 @@
             <div v-if="user.rank >= 5" class="mb-6">
                 <button @click="showAddModal" class="bg-green-500 text-white px-4 py-2 rounded-lg">Add News</button>
             </div>
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 animate-fade-in">
                 <div v-for="article in paginatedArticles" :key="article.id"
-                    class="relative bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
+                    class="relative bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden transition-transform hover:scale-105">
                     <router-link :to="{ name: 'ArticleDetail', params: { id: article.id } }" class="block">
                         <img v-if="article.image" :src="article.image" alt="Article Image"
                             class="w-full h-48 object-cover">
@@ -82,7 +82,7 @@ export default {
     data() {
         return {
             headerImage: require('@/assets/images/skeleton/header.png'),
-            logoImage: require('@/assets/images/skeleton/logo.gif'), // Remplacez par votre propre image
+            logoImage: require('@/assets/images/skeleton/logo.gif'),
             isDarkMode: false,
             articles: [],
             filteredArticles: [],
@@ -102,6 +102,12 @@ export default {
         };
     },
     computed: {
+        containerClass() {
+            return {
+                'bg-gray-900 text-white': this.isDarkMode,
+                'bg-gray-100 text-black': !this.isDarkMode
+            };
+        },
         totalPages() {
             return Math.ceil(this.filteredArticles.length / this.articlesPerPage);
         },
@@ -243,5 +249,23 @@ img {
 
 button:disabled {
     cursor: not-allowed;
+}
+
+.transition-all {
+    transition: all 0.3s ease;
+}
+
+.animate-fade-in {
+    animation: fade-in 0.5s ease-in-out;
+}
+
+@keyframes fade-in {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
 }
 </style>

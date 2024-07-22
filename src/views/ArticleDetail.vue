@@ -1,11 +1,12 @@
 <template>
-    <div :class="{ 'bg-gray-900 text-white': isDarkMode, 'bg-gray-100 text-black': !isDarkMode }" class="min-h-screen">
+    <div :class="containerClass" class="min-h-screen transition-all">
         <AppHeader :logoImage="logoImage" :headerImage="headerImage" @toggleDarkMode="toggleDarkMode"
             @logout="logout" />
         <div class="container mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
             <!-- Article Content -->
             <div class="lg:col-span-2">
-                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
+                <div
+                    class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden transition-transform hover:scale-105">
                     <img v-if="article.image" :src="article.image" alt="Article Image" class="w-full h-64 object-cover">
                     <div class="p-4">
                         <h1 class="text-3xl font-bold mb-2">{{ article.title }}</h1>
@@ -14,8 +15,7 @@
                         <!-- Like and Comment Section -->
                         <div class="flex items-center mb-4">
                             <button @click="toggleLike(article)" class="mr-4 like-button">
-                                <font-awesome-icon :icon="['fas', 'heart']"
-                                    :class="{ 'text-red-500': article.userLike, 'text-gray-500': !article.userLike }" />
+                                <font-awesome-icon :icon="['fas', 'heart']" :class="likeIconClass(article)" />
                                 <span class="ml-2">{{ article.likesCount }}</span>
                             </button>
                             <button @click="toggleComments(article)" class="flex items-center">
@@ -29,7 +29,7 @@
                                 <div v-for="comment in article.comments" :key="comment.id"
                                     class="mb-2 flex justify-between">
                                     <div class="flex items-center">
-                                        <img :src="`http://www.habbo.com/habbo-imaging/avatarimage?figure=${comment.look}&direction=3&head_direction=3&gesture=nor&action=null&size=s&headonly=1&img_format=gif`"
+                                        <img :src="getAvatarUrl(comment.look)"
                                             class="rounded-full border-2 border-blue-500 p-1 bg-white"
                                             alt="User Profile">
                                         <div class="ml-2">
@@ -312,6 +312,15 @@ export default {
         },
         closeModal() {
             this.showModal = false;
+        },
+        getAvatarUrl(look) {
+            return `http://www.habbo.com/habbo-imaging/avatarimage?figure=${look}&direction=3&head_direction=3&gesture=nor&action=null&size=s&headonly=1&img_format=gif`;
+        },
+        likeIconClass(article) {
+            return {
+                'text-red-500': article.userLike,
+                'text-gray-500': !article.userLike
+            };
         }
     }
 };
@@ -378,5 +387,9 @@ img {
 .slide-fade-leave-to {
     transform: translateY(10px);
     opacity: 0;
+}
+
+.transition-all {
+    transition: all 0.3s ease;
 }
 </style>

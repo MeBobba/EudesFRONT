@@ -1,11 +1,11 @@
 <template>
     <div :class="{ 'bg-gray-800 text-white': isDarkMode, 'bg-white text-black': !isDarkMode }"
-        class="w-full p-4 bg-cover bg-center rounded-lg shadow-md relative"
+        class="w-full p-4 bg-cover bg-center rounded-lg shadow-md relative transition-all"
         :style="{ backgroundImage: `url(${user.coverImage || backgroundImage})` }">
-        <div class="absolute inset-0 bg-black opacity-50 rounded-lg"></div>
+        <div class="absolute inset-0 bg-black opacity-50 rounded-lg transition-opacity duration-300"></div>
         <div class="relative flex flex-col sm:flex-row items-center justify-between">
             <div
-                class="relative w-24 h-24 sm:w-32 sm:h-32 bg-yellow-500 rounded-full overflow-hidden border-2 border-gray-300 flex items-center justify-center z-10">
+                class="relative w-24 h-24 sm:w-32 sm:h-32 bg-yellow-500 rounded-full overflow-hidden border-2 border-gray-300 flex items-center justify-center z-10 transition-transform hover:scale-105">
                 <img v-if="user && user.profileImage" :src="user.profileImage" :alt="user.username" />
                 <img v-else-if="user && user.look"
                     :src="`http://www.habbo.com/habbo-imaging/avatarimage?figure=${user.look}&direction=3&head_direction=3&gesture=nor&action=null&size=l&headonly=0&img_format=gif`"
@@ -13,10 +13,11 @@
                 <div v-if="isCurrentUser" class="absolute top-0 right-0 flex space-x-1 z-20">
                     <label class="cursor-pointer relative z-20">
                         <input type="file" accept="image/*" @change="uploadProfileImage" class="hidden" />
-                        <fa-icon :icon="['fas', 'camera']" class="bg-blue-500 text-white rounded-full p-2" />
+                        <fa-icon :icon="['fas', 'camera']"
+                            class="bg-blue-500 text-white rounded-full p-2 transition-transform hover:scale-110" />
                     </label>
                     <button v-if="user.profileImage" @click="resetProfileImage"
-                        class="bg-red-500 text-white rounded-full p-2 z-20">
+                        class="bg-red-500 text-white rounded-full p-2 z-20 transition-transform hover:scale-110">
                         <fa-icon :icon="['fas', 'times']" />
                     </button>
                 </div>
@@ -35,24 +36,24 @@
                     </div>
                     <div class="text-center text-white relative">
                         <span class="font-bold">{{ user.points }}</span>
-                        <div class="text-gray-300">{{ $t('pixels') }}</div>
+                        <div class="text-gray-300">{{ $t('points') }}</div>
                     </div>
                 </div>
             </div>
             <div class="mt-4 sm:mt-0 flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4">
                 <router-link v-if="isCurrentUser" to="/settings"
-                    class="px-4 py-2 bg-blue-500 text-white rounded-lg relative text-center">{{ $t('settings')
-                    }}</router-link>
+                    class="px-4 py-2 bg-blue-500 text-white rounded-lg relative text-center transition-transform hover:scale-105">{{
+                    $t('settings') }}</router-link>
                 <router-link v-if="isCurrentUser" to="/client"
-                    class="px-4 py-2 bg-green-500 text-white rounded-lg relative text-center">{{ $t('play')
-                    }}</router-link>
+                    class="px-4 py-2 bg-green-500 text-white rounded-lg relative text-center transition-transform hover:scale-105">{{
+                    $t('play') }}</router-link>
             </div>
         </div>
         <div class="relative mt-4 text-center sm:text-left">
             <p class="text-gray-300">{{ user.motto }}</p>
         </div>
-        <div class="relative grid grid-cols-2 sm:grid-cols-3 gap-4 mt-6">
-            <div v-for="post in user.posts" :key="post.id" class="relative">
+        <div class="relative grid grid-cols-2 sm:grid-cols-3 gap-4 mt-6 animate-fade-in">
+            <div v-for="post in user.posts" :key="post.id" class="relative transition-transform hover:scale-105">
                 <img :src="post.image" alt="EudesCMS" class="w-full h-32 sm:h-48 object-cover rounded-lg" />
                 <div
                     class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
@@ -64,10 +65,11 @@
         <div v-if="isCurrentUser" class="relative mt-4">
             <label class="cursor-pointer absolute top-0 right-0 flex space-x-1">
                 <input type="file" accept="image/*" @change="uploadCoverImage" class="hidden" />
-                <fa-icon :icon="['fas', 'camera']" class="bg-blue-500 text-white rounded-full p-2" />
+                <fa-icon :icon="['fas', 'camera']"
+                    class="bg-blue-500 text-white rounded-full p-2 transition-transform hover:scale-110" />
             </label>
             <button v-if="user.coverImage" @click="resetCoverImage"
-                class="absolute top-0 right-0 mt-2 bg-red-500 text-white px-2 py-1 rounded-lg">
+                class="absolute top-0 right-0 mt-2 bg-red-500 text-white px-2 py-1 rounded-lg transition-transform hover:scale-110">
                 <fa-icon :icon="['fas', 'times']" />
             </button>
         </div>
@@ -89,15 +91,15 @@
 </template>
 
 <script>
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { library } from '@fortawesome/fontawesome-svg-core'
-import { faHeart, faCamera, faTimes } from '@fortawesome/free-solid-svg-icons'
-import backgroundImage from '@/assets/images/skeleton/topbg.png'
-import axios from 'axios'
-import AWS from 'aws-sdk'
-import AppModal from '../components/AppModal.vue'
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+import { library } from '@fortawesome/fontawesome-svg-core';
+import { faHeart, faCamera, faTimes } from '@fortawesome/free-solid-svg-icons';
+import backgroundImage from '@/assets/images/skeleton/topbg.png';
+import axios from 'axios';
+import AWS from 'aws-sdk';
+import AppModal from '../components/AppModal.vue';
 
-library.add(faHeart, faCamera, faTimes)
+library.add(faHeart, faCamera, faTimes);
 
 export default {
     components: {
@@ -120,7 +122,7 @@ export default {
             uploadInProgress: false,
             uploadMessage: '',
             uploadError: false,
-        }
+        };
     },
     async created() {
         const userId = this.$route.params.userId || 'me';
@@ -283,7 +285,7 @@ export default {
             }
         }
     }
-}
+};
 </script>
 
 <style scoped>
@@ -354,5 +356,31 @@ export default {
 
 .text-red-500 {
     color: #ef4444;
+}
+
+.transition-transform {
+    transition: transform 0.3s ease-in-out;
+}
+
+.transition-opacity {
+    transition: opacity 0.3s ease-in-out;
+}
+
+.transition-all {
+    transition: all 0.3s ease-in-out;
+}
+
+@keyframes fade-in {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+.animate-fade-in {
+    animation: fade-in 0.5s ease-in-out;
 }
 </style>
