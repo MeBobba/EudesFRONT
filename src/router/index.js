@@ -15,9 +15,10 @@ import GameDetail from '../views/GameDetail.vue';
 import AppMusics from '../views/AppMusics.vue';
 import AppBoutique from '../views/AppBoutique.vue';
 import AppLottery from '../views/AppLottery.vue';
-
+import AppPixels from '../views/AppPixels.vue';
 import AppPrivacy from '../views/AppPrivacy.vue';
 import AppTerms from '../views/AppTerms.vue';
+import AppTopstory from '../views/AppTopstory.vue';
 
 const routes = [
     { path: '/', redirect: '/login' },
@@ -33,7 +34,9 @@ const routes = [
     { path: '/news', component: AppNews, meta: { requiresAuth: true } },
     { path: '/boutique', component: AppBoutique, meta: { requiresAuth: true } },
     { path: '/lottery', component: AppLottery, meta: { requiresAuth: true } },
+    { path: '/pixels', component: AppPixels, meta: { requiresAuth: true } },
     { path: '/dashboard/:userId', component: UserDashboard, meta: { requiresAuth: true } },
+    { path: '/topstories', component: AppTopstory, meta: { requiresAuth: true } },
     { path: '/dashboard', redirect: `/dashboard/me` },
     { path: '/404', component: AppError404 },
     { path: '/500', component: AppError500 },

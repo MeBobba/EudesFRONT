@@ -63,9 +63,6 @@ export default {
 </script>
 
 <style scoped>
-.footer-logo {
-    width: 100px;
-}
 
 .nav-link {
     @apply text-lg hover:text-blue-500 transition duration-300;

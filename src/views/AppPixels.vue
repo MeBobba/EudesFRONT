@@ -15,20 +15,20 @@
             </nav>
             <div class="banner bg-primary text-white p-16 rounded-lg shadow-lg mb-8 flex items-center justify-center relative overflow-hidden"
                 :style="{ backgroundImage: `url(${bannerBackground})`, backgroundSize: 'cover', backgroundPosition: 'center' }">
-                <h1 class="text-5xl font-extrabold tracking-tight text-white">Welcome to Our Boutique</h1>
+                <h1 class="text-5xl font-extrabold tracking-tight text-white">Welcome to Pixel Converter</h1>
             </div>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-8">
-                <!-- Carte du générateur de crédits -->
+                <!-- Carte du générateur de pixels -->
                 <div
-                    class="credit-generator-card bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 text-white rounded-lg shadow-lg p-6 text-center transform transition-transform hover:scale-105">
-                    <h2 class="text-3xl font-semibold mb-4">Generate Credits</h2>
-                    <p class="mb-4">If you have less than 10k credits, you can generate 10k more credits.</p>
-                    <button @click="generateCredits" :disabled="user.credits >= 10000"
-                        :class="{ 'bg-gray-400 cursor-not-allowed': user.credits >= 10000, 'bg-primary text-white': user.credits < 10000 }"
+                    class="pixel-generator-card bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 text-white rounded-lg shadow-lg p-6 text-center transform transition-transform hover:scale-105">
+                    <h2 class="text-3xl font-semibold mb-4">Generate Pixels</h2>
+                    <p class="mb-4">If you have less than 10k pixels, you can generate 10k more pixels.</p>
+                    <button @click="generatePixels" :disabled="user.pixels >= 10000"
+                        :class="{ 'bg-gray-400 cursor-not-allowed': user.pixels >= 10000, 'bg-primary text-white': user.pixels < 10000 }"
                         class="py-2 px-4 rounded-lg transition duration-300">
-                        Generate Credits
+                        Generate Pixels
                     </button>
-                    <p v-if="creditMessage" class="mt-4">{{ creditMessage }}</p>
+                    <p v-if="pixelMessage" class="mt-4">{{ pixelMessage }}</p>
                 </div>
                 <!-- Carte du portefeuille -->
                 <div
@@ -65,7 +65,7 @@ export default {
                 credits: 0,
                 pixels: 0
             },
-            creditMessage: '',
+            pixelMessage: '',
             bannerBackground
         };
     },
@@ -92,23 +92,23 @@ export default {
                 console.error('Error fetching user data:', error);
             }
         },
-        async generateCredits() {
-            if (this.user.credits < 10000) {
+        async generatePixels() {
+            if (this.user.pixels < 10000) {
                 try {
                     const token = localStorage.getItem('token');
                     const apiUrl = process.env.VUE_APP_API_URL || 'http://localhost:3000';
-                    const response = await axios.post(`${apiUrl}/generate-credits`, {}, {
+                    const response = await axios.post(`${apiUrl}/generate-pixels`, {}, {
                         headers: {
                             'x-access-token': token
                         }
                     });
-                    this.user.credits += response.data.generatedCredits;
-                    this.creditMessage = '10k credits have been added to your account.';
+                    this.user.pixels += response.data.generatedPixels;
+                    this.pixelMessage = '10k pixels have been added to your account.';
                 } catch (error) {
-                    console.error('Error generating credits:', error);
+                    console.error('Error generating pixels:', error);
                 }
             } else {
-                this.creditMessage = 'You have enough credits.';
+                this.pixelMessage = 'You have enough pixels.';
             }
         }
     },
@@ -212,12 +212,12 @@ nav li {
     background: rgba(0, 0, 0, 0.5);
 }
 
-.credit-generator-card,
+.pixel-generator-card,
 .wallet-card {
     transition: transform 0.3s ease;
 }
 
-.credit-generator-card:hover,
+.pixel-generator-card:hover,
 .wallet-card:hover {
     transform: scale(1.05);
 }

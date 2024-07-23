@@ -57,7 +57,13 @@
                         required></textarea>
                 </div>
                 <div class="mb-4">
-                    <label class="block text-gray-700 dark:text-gray-200">Image URL</label>
+                    <label class="block text-gray-700 dark:text-gray-200">Image URL (<router-link to="/topstories" custom>
+                            <template v-slot="{ href, navigate }">
+                                <a :href="href" @click="navigate" target="_blank"
+                                    class="hover:text-gray-900 mb-4 sm:mb-0">here</a>
+                            </template>
+                        </router-link>
+                        )</label>
                     <input v-model="form.image" type="text" class="w-full p-2 border border-gray-300 rounded-lg" />
                 </div>
                 <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-lg">Submit</button>
