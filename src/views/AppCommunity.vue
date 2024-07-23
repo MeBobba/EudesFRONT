@@ -476,7 +476,7 @@ export default {
             }
             return '';
         },
-        getAvatarUrl(look, size = 'm') {
+        getAvatarUrl(look, size = 's') {
             return `http://www.habbo.com/habbo-imaging/avatarimage?figure=${look}&direction=3&head_direction=3&gesture=nor&action=null&size=${size}&headonly=1&img_format=gif`;
         },
         canDeletePost(post) {

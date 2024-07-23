@@ -604,7 +604,7 @@ export default {
             this.isValidVideoUrl = true;
         },
         getUserAvatar(look) {
-            return `http://www.habbo.com/habbo-imaging/avatarimage?figure=${look}&direction=3&head_direction=3&gesture=nor&action=null&size=m&headonly=1&img_format=gif`;
+            return `http://www.habbo.com/habbo-imaging/avatarimage?figure=${look}&direction=3&head_direction=3&gesture=nor&action=null&size=s&headonly=1&img_format=gif`;
         },
         parsePostContent(content) {
             return content.replace(/<img src="(.*?)" alt="GIF">/g, '<img src="$1" alt="GIF">');
