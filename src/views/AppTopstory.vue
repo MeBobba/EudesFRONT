@@ -23,10 +23,11 @@
                         </div>
                     </div>
                 </div>
-                <div v-if="totalPages > 1" class="flex justify-center mt-8 space-x-4">
-                    <button @click="prevPage" :disabled="currentPage === 1"
+                <div class="flex justify-center items-center mt-8 space-x-4">
+                    <button @click="prevPage" :disabled="isFirstPage"
                         class="bg-blue-500 text-white px-4 py-2 rounded-lg transition-transform transform hover:scale-105">Previous</button>
-                    <button @click="nextPage" :disabled="currentPage === totalPages"
+                    <span class="text-lg">{{ currentPage }} / {{ totalPages }}</span>
+                    <button @click="nextPage" :disabled="isLastPage"
                         class="bg-blue-500 text-white px-4 py-2 rounded-lg transition-transform transform hover:scale-105">Next</button>
                 </div>
             </div>
