@@ -20,7 +20,8 @@
                             <button @click="closeAlert" class="text-black font-bold">&times;</button>
                         </div>
                     </div>
-                    <h2 class="text-2xl font-semibold mb-4">Select Your Numbers</h2>
+                    <h2 class="text-2xl font-semibold mb-4 flex items-center"><span class="mr-2">🔢</span>Select Your
+                        Numbers</h2>
                     <div class="grid grid-cols-6 gap-4 mb-4" :class="{ 'blur-sm': showAlert }">
                         <button v-for="number in 49" :key="number"
                             :class="['number-button', selectedNumbers.includes(number) ? 'selected' : '', drawnNumbers.includes(number) ? 'drawn' : '']"
@@ -61,16 +62,20 @@
                 </div>
                 <div class="w-full lg:w-1/3 lg:ml-8 mt-8 lg:mt-0">
                     <div
-                        class="prizes-section bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 text-white p-6 rounded-lg shadow-lg transition-transform transform hover:scale-105 animate-fade-in">
-                        <h2 class="text-2xl font-semibold mb-4">Prizes to Win</h2>
+                        class="prizes-section bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 text-white p-8 rounded-lg shadow-lg transition-transform transform hover:scale-105 animate-fade-in">
+                        <h2 class="text-2xl font-semibold mb-4 flex items-center"><span class="mr-2">🎁</span>Prizes to
+                            Win</h2>
                         <ul class="prize-list">
-                            <li>Points multiplied by: 1, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 100</li>
+                            <li v-for="multiplier in [1, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 100]" :key="multiplier"
+                                class="prize-item">
+                                <span class="prize-icon">🏆</span> Points multiplied by: {{ multiplier }}
+                            </li>
                         </ul>
                     </div>
                     <div
                         class="last-members-section bg-gradient-to-r from-blue-400 via-indigo-500 to-purple-500 text-white p-6 rounded-lg shadow-lg transition-transform transform hover:scale-105 animate-fade-in mt-8">
-                        <h2 class="text-2xl font-semibold mb-4">Last Plays (<span v-if="probability !== null">{{
-                            probability }}%</span><span v-else>Soon</span>)</h2>
+                        <h2 class="text-2xl font-semibold mb-4 flex items-center"><span class="mr-2">🏅</span>Last Wins
+                            (<span v-if="probability !== null">{{ probability }}%</span><span v-else>Soon</span>)</h2>
                         <div class="last-members-list-container">
                             <ul class="last-members-list">
                                 <li v-for="member in lastMembers" :key="member.id"
@@ -307,20 +312,13 @@ export default {
 </script>
 
 <style scoped>
-/* Styles */
 :root {
     --primary-color: #3490dc;
-    /* Bleu vif */
     --secondary-color: #ff6f61;
-    /* Rouge corail */
     --background-color-light: #f5f5f5;
-    /* Gris clair */
     --background-color-dark: #2c3e50;
-    /* Bleu nuit */
     --text-color-light: #2c3e50;
-    /* Bleu nuit */
     --text-color-dark: #ecf0f1;
-    /* Blanc cassé */
     --border-radius: 10px;
     --shadow-color: rgba(0, 0, 0, 0.1);
 }
@@ -355,10 +353,7 @@ body {
 }
 
 .fade-enter,
-.fade-leave-to
-
-/* .fade-leave-active in <2.1.8 */
-    {
+.fade-leave-to {
     opacity: 0;
 }
 
@@ -373,7 +368,6 @@ body {
     transition: background-color 0.3s ease;
     background-image: url('@/assets/images/skeleton/lottery-banner.png');
     min-height: 300px;
-    /* Augmenter la hauteur de la bannière */
 }
 
 .banner:hover {
@@ -428,7 +422,6 @@ body {
 }
 
 @keyframes bounce {
-
     0%,
     20%,
     50%,
@@ -450,24 +443,40 @@ body {
     transition: transform 0.3s ease-in-out;
     background: linear-gradient(to right, #fbd786, #f7797d);
     color: white;
+    padding: 2rem;
+    border-radius: var(--border-radius);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.prize-list-container {
+    max-height: 200px;
+    overflow-y: auto;
 }
 
 .prize-list {
     list-style: none;
     padding: 0;
+    margin: 0;
 }
 
-.prize-list li {
+.prize-item {
     background-color: rgba(0, 0, 0, 0.1);
     padding: 0.75rem;
     margin-bottom: 0.5rem;
     border-radius: var(--border-radius);
+    display: flex;
+    align-items: center;
     transition: transform 0.3s ease, background-color 0.3s ease;
 }
 
-.prize-list li:hover {
+.prize-item:hover {
     transform: translateY(-2px);
     background-color: rgba(0, 0, 0, 0.2);
+}
+
+.prize-icon {
+    margin-right: 1rem;
+    font-size: 1.5rem;
 }
 
 .last-members-section {
@@ -478,7 +487,6 @@ body {
 
 .last-members-list-container {
     max-height: 300px;
-    /* Limitez la hauteur à 300px, ajustez si nécessaire */
     overflow-y: auto;
     scrollbar-width: thin;
     scrollbar-color: var(--primary-color) var(--background-color);
@@ -549,3 +557,4 @@ body {
     margin-left: 1rem;
 }
 </style>
+
