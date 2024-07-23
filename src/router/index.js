@@ -16,6 +16,9 @@ import AppMusics from '../views/AppMusics.vue';
 import AppBoutique from '../views/AppBoutique.vue';
 import AppLottery from '../views/AppLottery.vue';
 
+import AppPrivacy from '../views/AppPrivacy.vue';
+import AppTerms from '../views/AppTerms.vue';
+
 const routes = [
     { path: '/', redirect: '/login' },
     { path: '/login', component: UserLogin, meta: { guest: true } },
@@ -34,6 +37,8 @@ const routes = [
     { path: '/dashboard', redirect: `/dashboard/me` },
     { path: '/404', component: AppError404 },
     { path: '/500', component: AppError500 },
+    { path: '/privacy', component: AppPrivacy },
+    { path: '/terms', component: AppTerms },
     { path: '/error/:statusCode/:message', component: AppError, props: true },
     { path: '/articles/:id', name: 'ArticleDetail', component: ArticleDetail, meta: { requiresAuth: true } },
     { path: '/:catchAll(.*)', redirect: '/404' }

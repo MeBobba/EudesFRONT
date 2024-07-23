@@ -15,22 +15,27 @@
 
                 <!-- Regular Menu - Desktop -->
                 <nav class="hidden sm:flex sm:items-center sm:space-x-4 w-full">
-                    <ul class="flex justify-center space-x-4 w-full"> <!-- Utilisation de w-full -->
+                    <ul class="flex justify-center space-x-4 w-full">
                         <li><router-link to="/" class="nav-link" active-class="active"
-                                exact-active-class="exact-active">{{ $t('home') }}</router-link></li>
+                                exact-active-class="exact-active">{{
+                                    $t('home') }}</router-link></li>
                         <li><router-link to="/community" class="nav-link" active-class="active"
-                                exact-active-class="exact-active">{{ $t('community') }}</router-link>
-                        </li>
+                                exact-active-class="exact-active">{{
+                                    $t('community') }}</router-link></li>
                         <li><router-link to="/games" class="nav-link" active-class="active"
-                                exact-active-class="exact-active">{{ $t('games') }}</router-link></li>
+                                exact-active-class="exact-active">{{
+                                    $t('games') }}</router-link></li>
                         <li><router-link to="/staff" class="nav-link" active-class="active"
-                                exact-active-class="exact-active">{{ $t('staff') }}</router-link></li>
+                                exact-active-class="exact-active">{{
+                                    $t('staff') }}</router-link></li>
                         <li><router-link to="/boutique" class="nav-link" active-class="active"
-                                exact-active-class="exact-active">Shop</router-link></li>
+                                exact-active-class="exact-active">Shop
+                            </router-link></li>
                         <li><router-link to="/news" class="nav-link" active-class="active"
-                                exact-active-class="exact-active">{{ $t('news') }}</router-link></li>
+                                exact-active-class="exact-active">{{
+                                    $t('news') }}</router-link></li>
                     </ul>
-                    <div class="relative flex space-x-4 ml-auto"> <!-- Flex pour aligner les boutons -->
+                    <div class="relative flex space-x-4 ml-auto">
                         <input type="text" v-model="searchQuery" @input="searchUsers"
                             :placeholder="$t('searchPlaceholder')" class="p-2 sm:px-3 md:px-4 border rounded-lg">
                         <div v-if="searchResults.length"
@@ -207,6 +212,18 @@ export default {
             const newLocale = event.target.value;
             this.$i18n.locale = newLocale;
             localStorage.setItem('locale', newLocale);
+        },
+        toggleMenu() {
+            this.isMenuOpen = !this.isMenuOpen;
+        },
+        toggleDarkMode() {
+            this.isDarkMode = !this.isDarkMode;
+            document.documentElement.classList.toggle('dark', this.isDarkMode);
+        },
+        clearSearch() {
+            this.searchQuery = '';
+            this.searchResults = [];
+            this.isMenuOpen = false; // Close menu after selecting an item
         }
     },
     created() {
