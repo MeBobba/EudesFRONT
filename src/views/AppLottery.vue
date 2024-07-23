@@ -9,9 +9,9 @@
             </div>
             <div class="flex flex-wrap lg:flex-nowrap">
                 <div
-                    :class="['lottery-section w-full lg:w-2/3 bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 text-white p-8 rounded-lg shadow-lg transition-transform transform hover:scale-105 animate-fade-in relative', { 'opacity-50': showAlert }]">
+                    :class="['lottery-section w-full lg:w-2/3 bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 text-white p-8 rounded-lg shadow-lg transition-transform transform hover:scale-105 animate-fade-in relative']">
                     <div v-if="showAlert"
-                        class="alert absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-yellow-400 text-black p-4 rounded-lg shadow-lg w-full max-w-xl">
+                        class="alert absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-yellow-400 text-black p-4 rounded-lg shadow-lg w-full max-w-xl z-50">
                         <div class="flex justify-between items-center">
                             <div>
                                 <h3 class="text-xl font-semibold">{{ alertMessage.title }}</h3>
@@ -24,27 +24,73 @@
                     <div class="grid grid-cols-6 gap-4 mb-4" :class="{ 'blur-sm': showAlert }">
                         <button v-for="number in 49" :key="number"
                             :class="['number-button', selectedNumbers.includes(number) ? 'selected' : '', drawnNumbers.includes(number) ? 'drawn' : '']"
-                            @click="toggleNumber(number)">
+                            @click="toggleNumber(number)" :disabled="showAlert">
                             {{ number }}
                         </button>
                     </div>
                     <div class="flex justify-between mt-4">
-                        <button @click="selectAuto" :disabled="points < 150" class="action-button w-1/2 mr-2">
-                            Select Auto
-                        </button>
-                        <button @click="submitNumbers" :disabled="points < 150" class="action-button w-1/2 ml-2">
-                            Submit
-                        </button>
+                        <button @click="selectAuto" :disabled="points < 150 || showAlert"
+                            class="action-button w-1/2 mr-2">Select Auto</button>
+                        <button @click="submitNumbers" :disabled="points < 150 || showAlert"
+                            class="action-button w-1/2 ml-2">Submit</button>
+                    </div>
+                    <div class="mt-4">
+                        <label for="betAmount" class="block text-white">Enter your bet amount (150-1000 points):</label>
+                        <div class="flex items-center mt-2">
+                            <input type="number" id="betAmount" v-model.number="betAmount" min="150" max="1000"
+                                class="w-1/2 p-2 text-black" :disabled="showAlert || points < 150" />
+                            <div class="w-1/2 ml-4">
+                                <div class="relative pt-1">
+                                    <div class="flex mb-2 items-center justify-between">
+                                        <div>
+                                            <span
+                                                class="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full text-white bg-pink-600">
+                                                {{ betChance }}%
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="overflow-hidden h-2 mb-4 text-xs flex rounded bg-pink-200">
+                                        <div :style="{ width: betChance + '%' }"
+                                            class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-pink-500">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div
-                    class="prizes-section w-full lg:w-1/3 bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 text-white p-6 rounded-lg shadow-lg transition-transform transform hover:scale-105 animate-fade-in lg:ml-8 mt-8 lg:mt-0">
-                    <h2 class="text-2xl font-semibold mb-4">Prizes to Win</h2>
-                    <ul class="prize-list">
-                        <li>5,000,000 Credits</li>
-                        <li>5,000,000 Pixels</li>
-                        <li>150 Points</li>
-                    </ul>
+                <div class="w-full lg:w-1/3 lg:ml-8 mt-8 lg:mt-0">
+                    <div
+                        class="prizes-section bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 text-white p-6 rounded-lg shadow-lg transition-transform transform hover:scale-105 animate-fade-in">
+                        <h2 class="text-2xl font-semibold mb-4">Prizes to Win</h2>
+                        <ul class="prize-list">
+                            <li>Points multiplied by: 1, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 100</li>
+                        </ul>
+                    </div>
+                    <div
+                        class="last-members-section bg-gradient-to-r from-blue-400 via-indigo-500 to-purple-500 text-white p-6 rounded-lg shadow-lg transition-transform transform hover:scale-105 animate-fade-in mt-8">
+                        <h2 class="text-2xl font-semibold mb-4">Last Plays (<span v-if="probability !== null">{{
+                            probability }}%</span><span v-else>Soon</span>)</h2>
+                        <div class="last-members-list-container">
+                            <ul class="last-members-list">
+                                <li v-for="member in lastMembers" :key="member.id"
+                                    class="flex items-center justify-between p-4 rounded-lg bg-black bg-opacity-20">
+                                    <div class="flex items-center">
+                                        <img v-if="member.profileImage" :src="member.profileImage"
+                                            :alt="member.username" class="avatar" />
+                                        <img v-else-if="member.look"
+                                            :src="`http://www.habbo.com/habbo-imaging/avatarimage?figure=${member.look}&direction=3&head_direction=3&gesture=nor&action=null&size=s&headonly=1&img_format=gif`"
+                                            :alt="member.username" class="avatar" />
+                                        <div class="ml-4">
+                                            <div class="font-bold">{{ member.username }}</div>
+                                            <div class="text-sm">Bet: {{ member.betAmount }} <br />Reward: {{
+                                                member.rewardAmount }}</div>
+                                        </div>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -77,11 +123,23 @@ export default {
             alertMessage: {
                 title: '',
                 body: ''
-            }
+            },
+            lastMembers: [],
+            probability: null,
+            currentUser: {},
+            betAmount: 150, // Initial bet amount
+            betChance: 15 // Initial bet chance
         };
     },
     mounted() {
         this.fetchUserPoints();
+        this.fetchLastMembers();
+        this.fetchCurrentUser();
+    },
+    watch: {
+        betAmount(newValue) {
+            this.updateBetChance(newValue);
+        }
     },
     methods: {
         toggleDarkMode() {
@@ -102,6 +160,37 @@ export default {
                 this.points = response.data.points;
             } catch (error) {
                 console.error('Error fetching user points:', error);
+            }
+        },
+        async fetchLastMembers() {
+            try {
+                const apiUrl = process.env.VUE_APP_API_URL || 'http://localhost:3000';
+                const response = await axios.get(`${apiUrl}/last-members`);
+                this.lastMembers = response.data;
+                this.calculateProbability();
+            } catch (error) {
+                console.error('Error fetching last members:', error);
+            }
+        },
+        async fetchCurrentUser() {
+            try {
+                const apiUrl = process.env.VUE_APP_API_URL || 'http://localhost:3000';
+                const token = localStorage.getItem('token');
+                const response = await axios.get(`${apiUrl}/profile/me`, {
+                    headers: { 'x-access-token': token }
+                });
+                this.currentUser = response.data;
+            } catch (error) {
+                console.error('Error fetching current user:', error);
+            }
+        },
+        calculateProbability() {
+            if (this.lastMembers.length < 10) {
+                this.probability = null;
+            } else {
+                const total = this.lastMembers.length;
+                const winners = this.lastMembers.filter(member => member.rewardAmount > 0).length;
+                this.probability = ((winners / total) * 100).toFixed(2);
             }
         },
         toggleNumber(number) {
@@ -134,7 +223,7 @@ export default {
                 this.showAlertMessage('Error', 'Please select exactly 6 numbers.');
                 return;
             }
-            if (this.points < 150) {
+            if (this.points < this.betAmount) {
                 this.showAlertMessage('Error', 'You do not have enough points to play.');
                 return;
             }
@@ -142,19 +231,23 @@ export default {
                 const apiUrl = process.env.VUE_APP_API_URL || 'http://localhost:3000';
                 const token = localStorage.getItem('token');
                 const response = await axios.post(`${apiUrl}/lottery`, {
-                    selectedNumbers: this.selectedNumbers
+                    selectedNumbers: this.selectedNumbers,
+                    betAmount: this.betAmount
                 }, {
                     headers: { 'x-access-token': token }
                 });
                 if (response.data.success) {
-                    this.points -= 150; // Update points after successful submission
-                    this.animateDrawnNumbers(response.data.drawnNumbers);
-                    this.reward = response.data.reward;
-                    if (this.reward) {
-                        this.showAlertMessage('Congratulations!', `You've won ${this.reward.amount} ${this.reward.type}!`);
-                    } else {
-                        this.showAlertMessage('Sorry', 'You didn\'t win this time. Try again!');
-                    }
+                    this.points -= this.betAmount; // Update points after successful submission
+                    this.animateDrawnNumbers(response.data.drawnNumbers).then(() => {
+                        this.reward = response.data.reward;
+                        const user = this.currentUser || { username: 'Unknown', profileImage: null, look: null };
+                        this.addToLastMembers(user, this.betAmount, this.reward ? this.reward.amount : 0);
+                        if (this.reward.amount > 0) {
+                            this.showAlertMessage('Congratulations!', `You've won ${this.reward.amount} points!`);
+                        } else {
+                            this.showAlertMessage('Sorry', 'You didn\'t win this time. Try again!');
+                        }
+                    });
                 } else {
                     this.showAlertMessage('Error', response.data.message);
                 }
@@ -173,16 +266,24 @@ export default {
                     }, index * 500); // delay of 500ms for each number
                 });
             };
-            drawnNumbers.reduce((p, number, index) => {
+            return drawnNumbers.reduce((p, number, index) => {
                 return p.then(() => animateNumber(number, index));
-            }, Promise.resolve()).then(() => {
-                // Show alert only after the animation is done
-                if (this.reward) {
-                    this.showAlertMessage('Congratulations!', `You've won ${this.reward.amount} ${this.reward.type}!`);
-                } else {
-                    this.showAlertMessage('Sorry', 'You didn\'t win this time. Try again!');
-                }
-            });
+            }, Promise.resolve());
+        },
+        addToLastMembers(user, betAmount, rewardAmount) {
+            const newMember = {
+                id: Date.now(),
+                username: user.username,
+                betAmount,
+                rewardAmount,
+                profileImage: user.profileImage,
+                look: user.look
+            };
+            this.lastMembers.unshift(newMember);
+            if (this.lastMembers.length > 10) {
+                this.lastMembers.pop();
+            }
+            this.calculateProbability();
         },
         showAlertMessage(title, body) {
             this.alertMessage.title = title;
@@ -194,12 +295,19 @@ export default {
             this.selectedNumbers = [];
             this.drawnNumbers = [];
             this.reward = null;
+        },
+        formatProbability(probability) {
+            return typeof probability === 'number' ? probability.toFixed(2) : 'N/A';
+        },
+        updateBetChance(betAmount) {
+            this.betChance = Math.round(((betAmount - 150) / (1000 - 150)) * 70); // Facteur de chance limité à 70%
         }
     }
 };
 </script>
 
 <style scoped>
+/* Styles */
 :root {
     --primary-color: #3490dc;
     /* Bleu vif */
@@ -362,6 +470,53 @@ body {
     background-color: rgba(0, 0, 0, 0.2);
 }
 
+.last-members-section {
+    transition: transform 0.3s ease-in-out;
+    background: linear-gradient(to right, #5f2c82, #49a09d);
+    color: white;
+}
+
+.last-members-list-container {
+    max-height: 300px;
+    /* Limitez la hauteur à 300px, ajustez si nécessaire */
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--primary-color) var(--background-color);
+}
+
+.last-members-list-container::-webkit-scrollbar {
+    width: 8px;
+}
+
+.last-members-list-container::-webkit-scrollbar-thumb {
+    background-color: var(--primary-color);
+    border-radius: 10px;
+}
+
+.last-members-list-container::-webkit-scrollbar-track {
+    background-color: var(--background-color);
+}
+
+.last-members-list {
+    list-style: none;
+    padding: 0;
+}
+
+.last-members-list li {
+    background-color: rgba(0, 0, 0, 0.1);
+    padding: 0.75rem;
+    margin-bottom: 0.5rem;
+    border-radius: var(--border-radius);
+    transition: transform 0.3s ease, background-color 0.3s ease;
+    display: flex;
+    align-items: center;
+}
+
+.last-members-list li:hover {
+    transform: translateY(-2px);
+    background-color: rgba(0, 0, 0, 0.2);
+}
+
 .action-button {
     background-color: var(--primary-color);
     color: white;
@@ -385,5 +540,12 @@ body {
 
 .alert {
     z-index: 10;
+}
+
+.avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-left: 1rem;
 }
 </style>
