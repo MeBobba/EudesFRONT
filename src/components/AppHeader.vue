@@ -48,16 +48,16 @@
                                 </li>
                             </ul>
                         </div>
-                        <button @click="toggleDarkMode" class="toggle-dark-mode-btn">
+                        <!-- <button @click="toggleDarkMode" class="toggle-dark-mode-btn">
                             <fa-icon :icon="isDarkMode ? 'sun' : 'moon'" />
-                        </button>
-                        <button @click="logout" class="logout-btn">{{ $t('logout') }}</button>
+                        </button> -->
                         <select v-model="selectedLanguage" @change="changeLanguage"
                             class="language-selector custom-select">
                             <option value="en">English</option>
                             <option value="fr">Français</option>
                             <option value="it">Italiano</option>
                         </select>
+                        <button @click="logout" class="logout-btn">{{ $t('logout') }}</button>
                     </div>
                 </nav>
 
@@ -104,16 +104,16 @@
                     </ul>
 
                     <div class="flex space-x-4 mt-4">
-                        <button @click="toggleDarkMode" class="toggle-dark-mode-btn w-full">
+                        <!--<button @click="toggleDarkMode" class="toggle-dark-mode-btn w-full">
                             <fa-icon :icon="isDarkMode ? 'sun' : 'moon'" />
-                        </button>
-                        <button @click="logout" class="logout-btn w-full">{{ $t('logout') }}</button>
+                        </button>-->
                         <select v-model="selectedLanguage" @change="changeLanguage"
                             class="language-selector custom-select">
                             <option value="en" class="custom-option">English</option>
                             <option value="fr" class="custom-option">Français</option>
                             <option value="it" class="custom-option">Italiano</option>
                         </select>
+                        <button @click="logout" class="logout-btn w-full">{{ $t('logout') }}</button>
                     </div>
                 </div>
 
@@ -123,12 +123,12 @@
 </template>
 
 <script>
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
-import { library } from '@fortawesome/fontawesome-svg-core';
-import { faSun, faMoon } from '@fortawesome/free-solid-svg-icons';
+//import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+//import { library } from '@fortawesome/fontawesome-svg-core';
+//import { faSun, faMoon } from '@fortawesome/free-solid-svg-icons';
 import axios from 'axios';
 
-library.add(faSun, faMoon);
+//library.add(faSun, faMoon);
 
 export default {
     props: {
@@ -142,7 +142,7 @@ export default {
         }
     },
     components: {
-        'fa-icon': FontAwesomeIcon
+        //'fa-icon': FontAwesomeIcon
     },
     data() {
         return {
