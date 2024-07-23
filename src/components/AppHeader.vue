@@ -52,7 +52,8 @@
                             <fa-icon :icon="isDarkMode ? 'sun' : 'moon'" />
                         </button>
                         <button @click="logout" class="logout-btn">{{ $t('logout') }}</button>
-                        <select v-model="selectedLanguage" @change="changeLanguage" class="language-selector">
+                        <select v-model="selectedLanguage" @change="changeLanguage"
+                            class="language-selector custom-select">
                             <option value="en">English</option>
                             <option value="fr">Français</option>
                             <option value="it">Italiano</option>
@@ -107,10 +108,11 @@
                             <fa-icon :icon="isDarkMode ? 'sun' : 'moon'" />
                         </button>
                         <button @click="logout" class="logout-btn w-full">{{ $t('logout') }}</button>
-                        <select v-model="selectedLanguage" @change="changeLanguage" class="language-selector w-full">
-                            <option value="en">English</option>
-                            <option value="fr">Français</option>
-                            <option value="it">Italiano</option>
+                        <select v-model="selectedLanguage" @change="changeLanguage"
+                            class="language-selector custom-select">
+                            <option value="en" class="custom-option">English</option>
+                            <option value="fr" class="custom-option">Français</option>
+                            <option value="it" class="custom-option">Italiano</option>
                         </select>
                     </div>
                 </div>
@@ -274,5 +276,32 @@ export default {
 
 .language-selector {
     @apply border px-2 py-1 rounded-lg;
+}
+
+.custom-select {
+    appearance: none;
+    padding: 0.5rem 1.5rem;
+    border-radius: 0.375rem;
+    background-image: url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns="http://www.w3.org/2000/svg" width="1rem" height="1rem" viewBox="0 0 4 5"%3e%3cpath fill="%23343a40" d="M2 0L0 2h4zm0 5L0 3h4z"/%3e%3c/svg%3e');
+    background-repeat: no-repeat;
+    background-position: right 0.5rem center;
+    background-size: 1rem;
+    font-size: 1rem;
+    color: #495057;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    cursor: pointer;
+}
+
+.custom-select:focus {
+    outline: 0;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.custom-option {
+    @apply text-gray-700 bg-white hover:bg-gray-100;
+}
+
+.custom-option:focus {
+    @apply bg-blue-100;
 }
 </style>
