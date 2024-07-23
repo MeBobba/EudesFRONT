@@ -48,7 +48,7 @@
 import AppHeader from '../components/AppHeader.vue';
 import AppFooter from '../components/AppFooter.vue';
 import axios from 'axios';
-import backgroundImage from '@/assets/images/skeleton/topbg.png';
+import backgroundImage from '@/assets/images/skeleton/topbg.webp';
 
 export default {
     components: {
@@ -57,8 +57,8 @@ export default {
     },
     data() {
         return {
-            headerImage: require('@/assets/images/skeleton/header.png'),
-            logoImage: require('@/assets/images/skeleton/logo.gif'),
+            headerImage: require('@/assets/images/skeleton/header.webp'),
+            logoImage: require('@/assets/images/skeleton/logo.webp'),
             isDarkMode: false,
             staffSections: [],
             backgroundImage,

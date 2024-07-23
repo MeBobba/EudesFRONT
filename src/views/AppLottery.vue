@@ -3,6 +3,16 @@
         <AppHeader :logoImage="logoImage" :headerImage="headerImage" @toggleDarkMode="toggleDarkMode"
             @logout="logout" />
         <div class="container mx-auto px-4 py-8 animate-fade-in">
+            <nav class="bg-primary text-white p-4 rounded-lg shadow-md mb-8">
+                <ul class="flex justify-around space-x-4">
+                    <li><router-link to="/boutique" class="nav-link">Home</router-link></li>
+                    <li><router-link to="/pixels" class="nav-link">Pixel Converter</router-link></li>
+                    <li><router-link to="/lottery" class="nav-link">Lotto</router-link></li>
+                    <li><router-link to="/tokens" class="nav-link">Buy Tokens</router-link></li>
+                    <li><router-link to="/badges" class="nav-link">Buy Badges</router-link></li>
+                    <li><router-link to="/furni" class="nav-link">Buy Furni</router-link></li>
+                </ul>
+            </nav>
             <div class="banner bg-primary text-white p-16 rounded-lg shadow-lg mb-8 flex items-center justify-center"
                 :style="{ backgroundImage: `url(${bannerBackground})`, backgroundSize: 'cover', backgroundPosition: 'center' }">
                 <h1 class="text-4xl font-bold">Try Your Luck in the Lottery!</h1>
@@ -107,7 +117,7 @@
 import AppHeader from '../components/AppHeader.vue';
 import AppFooter from '../components/AppFooter.vue';
 import axios from 'axios';
-import bannerBackground from '@/assets/images/skeleton/lottery-banner.png'; // Remplacez par l'image de votre choix
+import bannerBackground from '@/assets/images/skeleton/lottery-banner.webp'; // Remplacez par l'image de votre choix
 
 export default {
     components: {
@@ -116,8 +126,8 @@ export default {
     },
     data() {
         return {
-            headerImage: require('@/assets/images/skeleton/header.png'),
-            logoImage: require('@/assets/images/skeleton/logo.gif'),
+            headerImage: require('@/assets/images/skeleton/header.webp'),
+            logoImage: require('@/assets/images/skeleton/logo.webp'),
             isDarkMode: false,
             selectedNumbers: [],
             drawnNumbers: [],
@@ -366,7 +376,7 @@ body {
     background-color: var(--primary-color);
     color: var(--text-color-dark);
     transition: background-color 0.3s ease;
-    background-image: url('@/assets/images/skeleton/lottery-banner.png');
+    background-image: url('@/assets/images/skeleton/lottery-banner.webp');
     min-height: 300px;
 }
 
@@ -422,6 +432,7 @@ body {
 }
 
 @keyframes bounce {
+
     0%,
     20%,
     50%,
@@ -557,4 +568,3 @@ body {
     margin-left: 1rem;
 }
 </style>
-

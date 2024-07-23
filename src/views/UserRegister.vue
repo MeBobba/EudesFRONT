@@ -4,7 +4,7 @@
             <div
                 class="bg-white rounded-lg shadow-lg flex flex-col md:flex-row w-full max-w-4xl overflow-hidden transform transition-all duration-500 ease-in-out hover:scale-105">
                 <div class="w-full md:w-1/2">
-                    <img src="@/assets/images/logreg/uk_party_frontpage_image.gif" alt="Register Image"
+                    <img src="@/assets/images/logreg/uk_party_frontpage_image.webp" alt="Register Image"
                         class="w-full h-full object-cover md:rounded-l-lg">
                 </div>
                 <div class="w-full md:w-1/2 p-8">
@@ -70,7 +70,7 @@
 <script>
 import axios from 'axios';
 import crypto from 'crypto-browserify';
-import backgroundImage from '@/assets/images/skeleton/bg.png';
+import backgroundImage from '@/assets/images/skeleton/bg.webp';
 
 export default {
     name: 'UserRegister',

@@ -24,7 +24,7 @@
                     </form>
                 </div>
                 <div class="w-full md:w-1/2 relative">
-                    <img src="@/assets/images/logreg/filler_ad.png" alt="Login Image"
+                    <img src="@/assets/images/logreg/filler_ad.webp" alt="Login Image"
                         class="w-full h-full object-cover md:rounded-r-lg cursor-pointer" @click="handlePwaButtonClick">
                     <div class="absolute inset-0 flex items-center justify-center">
                         <div class="absolute inset-0 bg-transparent"></div>
@@ -46,7 +46,7 @@
 <script>
 import axios from 'axios';
 import crypto from 'crypto-browserify';
-import backgroundImage from '@/assets/images/skeleton/bg.png';
+import backgroundImage from '@/assets/images/skeleton/bg.webp';
 
 export default {
     name: 'UserLogin',

@@ -94,7 +94,7 @@
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { faHeart, faCamera, faTimes } from '@fortawesome/free-solid-svg-icons';
-import backgroundImage from '@/assets/images/skeleton/topbg.png';
+import backgroundImage from '@/assets/images/skeleton/topbg.webp';
 import axios from 'axios';
 import AWS from 'aws-sdk';
 import AppModal from '../components/AppModal.vue';

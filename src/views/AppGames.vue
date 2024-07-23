@@ -68,8 +68,8 @@ export default {
     },
     data() {
         return {
-            headerImage: require('@/assets/images/skeleton/header.png'),
-            logoImage: require('@/assets/images/skeleton/logo.gif'),
+            headerImage: require('@/assets/images/skeleton/header.webp'),
+            logoImage: require('@/assets/images/skeleton/logo.webp'),
             isDarkMode: false,
             games: [],
             currentPage: 1,
