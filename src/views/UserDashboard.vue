@@ -604,7 +604,7 @@ export default {
         },
         parsePostContent(content) {
             const gifRegex = /<img src="(.*?)" alt="GIF">/g;
-            return content.replace(gifRegex, '<img src="$1" alt="GIF" class="w-full h-48 object-cover rounded-lg mb-4">');
+            return content.replace(gifRegex, '<img src="$1" alt="GIF" class="h-48 object-cover rounded-lg mb-4">');
         },
         async applyWordFilter(content) {
             try {
