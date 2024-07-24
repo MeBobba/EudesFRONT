@@ -79,7 +79,6 @@
                 <i class="fas fa-user control-icon mx-2" @click="showBioModal"></i>
             </div>
         </div>
-        <AppFooter :footerLogo="footerLogo" />
         <div v-if="showModal" class="modal fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center">
             <div class="modal-content bg-white p-4 rounded-lg w-3/4 max-w-lg max-h-screen overflow-y-auto">
                 <pre class="whitespace-pre-wrap font-ubuntu text-sm" v-html="modalContent"></pre>
@@ -93,14 +92,12 @@
 <script>
 import axios from 'axios';
 import AppHeader from '../components/AppHeader.vue';
-import AppFooter from '../components/AppFooter.vue';
 import _ from 'lodash';
 
 export default {
     name: 'AppMusics',
     components: {
         AppHeader,
-        AppFooter
     },
     data() {
         return {
@@ -121,7 +118,6 @@ export default {
             modalTitle: '',
             modalContent: '',
             headerImage: require('@/assets/images/skeleton/header.webp'),
-            footerLogo: require('@/assets/images/skeleton/footerlogo.png'),
             logoImage: require('@/assets/images/skeleton/logo.png'),
             cache: {},
             player: null,

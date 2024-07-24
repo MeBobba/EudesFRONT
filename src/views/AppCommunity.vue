@@ -37,9 +37,9 @@
                         </div>
                         <div class="mb-4" v-html="parsePostContent(post.content)"></div>
                         <img v-if="post.image" :src="post.image" alt="EudesCMS"
-                            class="w-full h-48 object-cover rounded-lg mb-4" loading="lazy">
-                        <iframe v-if="post.video" :src="getVideoEmbedUrl(post.video)" frameborder="0" allowfullscreen
-                            class="w-full h-48 mb-4"></iframe>
+                            class="w-full object-cover rounded-lg mb-4" loading="lazy">
+                        <iframe width="100%" height="500" v-if="post.video" :src="getVideoEmbedUrl(post.video)" frameborder="0" allowfullscreen
+                            class="w-full mb-4"></iframe>
                         <div class="flex items-center">
                             <button @click="toggleLike(post)" class="mr-4 like-button">
                                 <fa-icon :icon="['fas', 'heart']"
