@@ -554,7 +554,7 @@ export default {
         },
 
         addGifToPost(gifUrl) {
-            this.newPostContent += `<img src="${gifUrl}" alt="GIF">`;
+            this.newPostContent += `[img]${gifUrl}[/img]`;
             this.showGiphyPicker = false;
         },
         addEmoji(event) {
@@ -602,9 +602,13 @@ export default {
         getUserAvatar(look) {
             return `http://www.habbo.com/habbo-imaging/avatarimage?figure=${look}&direction=3&head_direction=3&gesture=nor&action=null&size=s&headonly=1&img_format=gif`;
         },
+        htmlToText(html) {
+          return html.replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        },
         parsePostContent(content) {
-            const gifRegex = /<img src="(.*?)" alt="GIF">/g;
-            return content.replace(gifRegex, '<img src="$1" alt="GIF" class="h-48 object-cover rounded-lg mb-4">');
+          content = this.htmlToText(content);
+          const gifRegex = /\[img\](.*?)\[\/img\]/g;
+          return content.replace(gifRegex, '<img src="$1" alt="GIF" class="h-48 object-cover rounded-lg mb-4">');
         },
         async applyWordFilter(content) {
             try {

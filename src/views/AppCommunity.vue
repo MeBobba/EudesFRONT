@@ -441,7 +441,7 @@ export default {
             }
         },
         addGifToPost(gifUrl) {
-            this.newPostContent += `<img src="${gifUrl}" alt="GIF">`;
+            this.newPostContent += `[img alt="GIF"]${gifUrl}[img]`;
             this.showGiphyPicker = false;
         },
         validateVideoUrl() {
@@ -454,9 +454,13 @@ export default {
             this.newPostVideo = '';
             this.isValidVideoUrl = true;
         },
+        htmlToText(html) {
+          return html.replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        },
         parsePostContent(content) {
-            const gifRegex = /<img src="(.*?)" alt="GIF">/g;
-            return content.replace(gifRegex, '<img src="$1" alt="GIF" h-48 object-cover rounded-lg mb-4">');
+          content = this.htmlToText(content);
+          const gifRegex = /\[img\](.*?)\[\/img\]/g;
+          return content.replace(gifRegex, '<img src="$1" alt="GIF" class="h-48 object-cover rounded-lg mb-4">');
         },
         formatDate(dateString) {
             const options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
