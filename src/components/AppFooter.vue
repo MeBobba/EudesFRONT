@@ -4,7 +4,7 @@
         <div class="container mx-auto py-6 px-6 flex flex-col sm:flex-row justify-between items-center">
             <div class="flex items-center mb-4 sm:mb-0">
                 <router-link to="/" class="hover:text-gray-900 flex items-center space-x-3">
-                    <img width="50" :src="footerLogo" alt="EudesCMS" class="footer-logo">
+                    <img width="50" :src="footerLogo" alt="EudesCMS" class="footer-logo" loading="lazy">
                     <div>
                         <p>EudesCMS</p>
                         <p>RELEASE24072024</p>
@@ -23,11 +23,6 @@
 </template>
 
 <script>
-import { library } from '@fortawesome/fontawesome-svg-core';
-import { faSun, faMoon } from '@fortawesome/free-solid-svg-icons';
-
-library.add(faSun, faMoon);
-
 export default {
     props: {
         logoImage: {

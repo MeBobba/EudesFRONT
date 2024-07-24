@@ -2,7 +2,7 @@
     <div :class="containerClass" class="min-h-screen">
         <AppHeader :logoImage="logoImage" :headerImage="headerImage" @toggleDarkMode="toggleDarkMode"
             @logout="logout" />
-        <div class="container mx-auto px-4 py-8 mt-4 animate-fade-in">
+        <div class="container mx-auto px-4 py-8 mt-4">
             <UserProfile v-if="!isLoading && !error" :user="user" :isDarkMode="isDarkMode" />
             <ErrorMessage v-if="error" :message="errorMessage" />
             <div class="flex flex-col lg:flex-row mt-8">
@@ -35,7 +35,7 @@
                                     <div v-for="gif in giphyResults" :key="gif.id" class="giphy-result"
                                         @click="addGifToPost(gif.images.fixed_height.url)">
                                         <img :src="gif.images.fixed_height.url" alt="GIF"
-                                            class="w-full h-16 object-cover rounded-lg mb-2">
+                                            class="w-full h-16 object-cover rounded-lg mb-2" loading="lazy">
                                     </div>
                                 </div>
                             </div>
@@ -69,11 +69,12 @@
                     </div>
 
                     <div v-for="post in posts" :key="post.id"
-                        class="mb-8 p-4 bg-white dark:bg-gray-800 rounded-lg shadow-md animate-fade-in">
+                        class="mb-8 p-4 bg-white dark:bg-gray-800 rounded-lg shadow-md">
                         <div class="flex items-center justify-between mb-4">
                             <div class="flex items-center">
                                 <img :src="getUserAvatar(post.look)"
-                                    class="rounded-full border-2 border-blue-500 bg-white" :alt="post.username">
+                                    class="rounded-full border-2 border-blue-500 bg-white" :alt="post.username"
+                                    loading="lazy">
                                 <div class="ml-4">
                                     <h3 class="font-semibold">{{ post.username }}</h3>
                                     <p class="text-gray-600">{{ formatDate(post.created_at) }}</p>
@@ -94,7 +95,7 @@
                         </div>
                         <p class="mb-4" v-html="parsePostContent(post.content)"></p>
                         <img v-if="post.image" :src="post.image" alt="Post Image"
-                            class="w-full h-48 object-cover rounded-lg mb-4">
+                            class="w-full h-48 object-cover rounded-lg mb-4" loading="lazy">
                         <iframe v-if="post.video" :src="getVideoEmbedUrl(post.video)" frameborder="0" allowfullscreen
                             class="w-full h-48 mb-4"></iframe>
                         <div class="flex items-center">
@@ -111,11 +112,11 @@
                             <div v-show="post.showComments" class="mt-4">
                                 <h4 class="font-semibold mb-2">Comments</h4>
                                 <div v-for="comment in post.comments" :key="comment.id"
-                                    class="mb-2 flex justify-between animate-fade-in">
+                                    class="mb-2 flex justify-between">
                                     <div class="flex items-center">
                                         <img :src="getUserAvatar(comment.look)"
                                             class="rounded-full border-2 border-blue-500 p-1 bg-white"
-                                            alt="User Profile">
+                                            alt="User Profile" loading="lazy">
                                         <div class="ml-2">
                                             <p class="font-semibold">{{ comment.username }}</p>
                                             <p>{{ comment.content }}</p>
@@ -142,22 +143,24 @@
                 </div>
 
                 <div class="w-full lg:w-1/3 lg:pl-8 mt-8 lg:mt-0">
-                    <div :class="sidebarClass" class="p-4 rounded-lg shadow-md mb-8 animate-fade-in">
+                    <div :class="sidebarClass" class="p-4 rounded-lg shadow-md mb-8">
                         <h2 class="text-2xl font-bold mb-4">Suggestions For You</h2>
                         <div v-for="suggestion in suggestions" :key="suggestion.id" class="flex items-center mb-4">
                             <img :src="getUserAvatar(suggestion.look)"
-                                class="w-12 h-12 rounded-full border-2 border-gray-300" alt="Suggestion Profile">
+                                class="w-12 h-12 rounded-full border-2 border-gray-300" alt="Suggestion Profile"
+                                loading="lazy">
                             <div class="ml-4">
                                 <h3 class="font-semibold">{{ suggestion.username }}</h3>
                                 <button class="mt-1 bg-blue-500 text-white p-1 rounded-lg">Follow</button>
                             </div>
                         </div>
                     </div>
-                    <div :class="sidebarClass" class="p-4 rounded-lg shadow-md animate-fade-in">
+                    <div :class="sidebarClass" class="p-4 rounded-lg shadow-md">
                         <h2 class="text-2xl font-bold mb-4">Photos</h2>
                         <div class="grid grid-cols-3 gap-2">
                             <div v-for="photo in photos" :key="photo.id">
-                                <img :src="photo.url" alt="Photo" class="w-full h-24 object-cover rounded-lg">
+                                <img :src="photo.url" alt="Photo" class="w-full h-24 object-cover rounded-lg"
+                                    loading="lazy">
                             </div>
                         </div>
                     </div>
@@ -262,11 +265,9 @@ export default {
         await this.fetchUserData(userId);
         await this.fetchPosts(userId);
         await this.fetchUserPhotos(userId);
-        this.checkBanInterval = setInterval(this.checkIfBanned, 5000);
         window.addEventListener('scroll', this.handleScroll);
     },
     beforeUnmount() {
-        clearInterval(this.checkBanInterval);
         window.removeEventListener('scroll', this.handleScroll);
     },
     watch: {
@@ -485,7 +486,6 @@ export default {
                 const data = response.data;
                 post.userLike = data.userLike;
                 post.likesCount = data.likesCount;
-                this.animateLike(post.id);
             } catch (error) {
                 console.error('Error liking post:', error);
             }
@@ -504,11 +504,6 @@ export default {
             this.editPostContent = post.content;
             this.showEditModal = true;
             this.showPostMenu = null;
-        },
-        canPost() {
-            const currentTime = Math.floor(Date.now() / 1000);
-            const timeDifference = currentTime - this.lastPostTime;
-            return timeDifference >= 15;
         },
         async savePost() {
             try {
@@ -608,7 +603,8 @@ export default {
             return `http://www.habbo.com/habbo-imaging/avatarimage?figure=${look}&direction=3&head_direction=3&gesture=nor&action=null&size=s&headonly=1&img_format=gif`;
         },
         parsePostContent(content) {
-            return content.replace(/<img src="(.*?)" alt="GIF">/g, '<img src="$1" alt="GIF">');
+            const gifRegex = /<img src="(.*?)" alt="GIF">/g;
+            return content.replace(gifRegex, '<img src="$1" alt="GIF" class="w-full h-48 object-cover rounded-lg mb-4">');
         },
         async applyWordFilter(content) {
             try {
@@ -680,10 +676,13 @@ export default {
 
 .emoji-picker-container {
     bottom: 40px;
+    z-index: 9999;
 }
 
 .giphy-picker-container {
-    bottom: 40px;
+    position: absolute;
+    bottom: calc(100% + 10px);
+    left: 0;
     background: white;
     padding: 10px;
     border: 1px solid #ccc;
@@ -691,7 +690,9 @@ export default {
     width: 300px;
     max-height: 400px;
     overflow-y: scroll;
-    top: -300px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    z-index: 10;
+    min-height: 100px;
 }
 
 .giphy-result img {

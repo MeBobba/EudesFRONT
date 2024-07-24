@@ -1,7 +1,7 @@
 <template>
     <div>
         <div class="header-image-container">
-            <img :src="headerImage" alt="Header Image" class="header-image">
+            <img :src="headerImage" alt="Header Image" class="header-image" loading="lazy">
         </div>
         <header :class="{ 'bg-gray-900 text-white': isDarkMode, 'bg-white text-black': !isDarkMode }"
             class="shadow sticky top-0 z-50">
@@ -10,7 +10,7 @@
 
                 <!-- Logo - Hidden on mobile menu -->
                 <router-link to="/" class="hover:text-gray-900 hidden sm:block">
-                    <img :src="logoImage" alt="Logo">
+                    <img :src="logoImage" alt="Logo" loading="lazy">
                 </router-link>
 
                 <!-- Regular Menu - Desktop -->
@@ -29,8 +29,7 @@
                                 exact-active-class="exact-active">{{
                                     $t('staff') }}</router-link></li>
                         <li><router-link to="/boutique" class="nav-link" active-class="active"
-                                exact-active-class="exact-active">Shop
-                            </router-link></li>
+                                exact-active-class="exact-active">{{ $t('shop') }}</router-link></li>
                         <li><router-link to="/news" class="nav-link" active-class="active"
                                 exact-active-class="exact-active">{{
                                     $t('news') }}</router-link></li>
@@ -48,9 +47,6 @@
                                 </li>
                             </ul>
                         </div>
-                        <!-- <button @click="toggleDarkMode" class="toggle-dark-mode-btn">
-                            <fa-icon :icon="isDarkMode ? 'sun' : 'moon'" />
-                        </button> -->
                         <select v-model="selectedLanguage" @change="changeLanguage"
                             class="language-selector custom-select">
                             <option value="en">English</option>
@@ -104,9 +100,6 @@
                     </ul>
 
                     <div class="flex space-x-4 mt-4">
-                        <!--<button @click="toggleDarkMode" class="toggle-dark-mode-btn w-full">
-                            <fa-icon :icon="isDarkMode ? 'sun' : 'moon'" />
-                        </button>-->
                         <select v-model="selectedLanguage" @change="changeLanguage"
                             class="language-selector custom-select">
                             <option value="en" class="custom-option">English</option>
@@ -123,12 +116,7 @@
 </template>
 
 <script>
-//import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
-//import { library } from '@fortawesome/fontawesome-svg-core';
-//import { faSun, faMoon } from '@fortawesome/free-solid-svg-icons';
 import axios from 'axios';
-
-//library.add(faSun, faMoon);
 
 export default {
     props: {
@@ -140,9 +128,6 @@ export default {
             type: String,
             required: true
         }
-    },
-    components: {
-        //'fa-icon': FontAwesomeIcon
     },
     data() {
         return {

@@ -2,16 +2,17 @@
     <div :class="{ 'bg-gray-900 text-white': isDarkMode, 'bg-gray-100 text-black': !isDarkMode }" class="min-h-screen">
         <AppHeader :logoImage="logoImage" :headerImage="headerImage" @toggleDarkMode="toggleDarkMode"
             @logout="logout" />
-        <div class="container mx-auto px-4 py-8 flex flex-col lg:flex-row animate-fade-in">
+        <div class="container mx-auto px-4 py-8 flex flex-col lg:flex-row">
             <div class="w-full lg:w-2/3 lg:pr-8">
                 <div v-if="error" class="text-red-500">{{ errorMessage }}</div>
                 <div v-else>
                     <div v-for="post in posts" :key="post.id"
-                        class="mb-8 p-4 bg-white dark:bg-gray-800 rounded-lg shadow-md animate-fade-in">
+                        class="mb-8 p-4 bg-white dark:bg-gray-800 rounded-lg shadow-md">
                         <div class="flex items-center justify-between mb-4">
                             <div class="flex items-center">
                                 <img :src="getAvatarUrl(post.look)"
-                                    class="rounded-full border-2 border-blue-500 bg-white" :alt="post.username">
+                                    class="rounded-full border-2 border-blue-500 bg-white" :alt="post.username"
+                                    loading="lazy">
                                 <div class="ml-4">
                                     <h3 class="font-semibold">
                                         <router-link :to="`/dashboard/${user.id}`">{{ post.username }}</router-link>
@@ -27,16 +28,16 @@
                                     class="absolute right-0 bg-white dark:bg-gray-800 rounded shadow-md z-10">
                                     <button v-if="canEditPost(post)" @click="editPost(post)"
                                         class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700">{{
-                                        $t('edit') }}</button>
+                                            $t('edit') }}</button>
                                     <button @click="deletePost(post.id)"
                                         class="block px-4 py-2 text-sm text-red-500 hover:bg-gray-100 dark:hover:bg-gray-700">{{
-                                        $t('delete') }}</button>
+                                            $t('delete') }}</button>
                                 </div>
                             </div>
                         </div>
                         <div class="mb-4" v-html="parsePostContent(post.content)"></div>
                         <img v-if="post.image" :src="post.image" alt="EudesCMS"
-                            class="w-full h-48 object-cover rounded-lg mb-4">
+                            class="w-full h-48 object-cover rounded-lg mb-4" loading="lazy">
                         <iframe v-if="post.video" :src="getVideoEmbedUrl(post.video)" frameborder="0" allowfullscreen
                             class="w-full h-48 mb-4"></iframe>
                         <div class="flex items-center">
@@ -54,11 +55,11 @@
                             <div v-show="post.showComments" class="mt-4">
                                 <h4 class="font-semibold mb-2">{{ $t('comments') }}</h4>
                                 <div v-for="comment in post.comments" :key="comment.id"
-                                    class="mb-2 flex justify-between animate-fade-in">
+                                    class="mb-2 flex justify-between">
                                     <div class="flex items-center">
                                         <img :src="getAvatarUrl(comment.look, 's')"
                                             class="rounded-full border-2 border-blue-500 p-1 bg-white"
-                                            alt="User Profile">
+                                            alt="User Profile" loading="lazy">
                                         <div class="ml-2">
                                             <p class="font-semibold">{{ comment.username }}</p>
                                             <p>{{ comment.content }}</p>
@@ -89,13 +90,13 @@
                     class="p-4 rounded-lg shadow-md mb-8">
                     <div class="mb-4">
                         <div class="tabs">
-                            <button :class="{ active: currentTab === 'text' }" @click="currentTab = 'text'">
+                            <button :class="{ active: currentTab === 'text' }" @click="selectTab('text')">
                                 <fa-icon icon="pencil-alt" />
                             </button>
-                            <button :class="{ active: currentTab === 'gif' }" @click="currentTab = 'gif'">
+                            <button :class="{ active: currentTab === 'gif' }" @click="selectTab('gif')">
                                 <fa-icon icon="image" />
                             </button>
-                            <button :class="{ active: currentTab === 'video' }" @click="currentTab = 'video'">
+                            <button :class="{ active: currentTab === 'video' }" @click="selectTab('video')">
                                 <fa-icon icon="video" />
                             </button>
                         </div>
@@ -115,7 +116,7 @@
                                     <div v-for="gif in giphyResults" :key="gif.id" class="giphy-result"
                                         @click="addGifToPost(gif.images.fixed_height.url)">
                                         <img :src="gif.images.fixed_height.url" alt="GIF"
-                                            class="w-full h-16 object-cover rounded-lg mb-2">
+                                            class="w-full h-16 object-cover rounded-lg mb-2" loading="lazy">
                                     </div>
                                 </div>
                             </div>
@@ -150,7 +151,7 @@
                 </div>
                 <div v-for="card in exampleCards" :key="card.id"
                     :class="{ 'bg-gray-800 text-white': isDarkMode, 'bg-white text-black': !isDarkMode }"
-                    class="p-4 rounded-lg shadow-md mb-8 animate-fade-in">
+                    class="p-4 rounded-lg shadow-md mb-8">
                     <h2 class="text-2xl font-bold mb-4">{{ card.title }}</h2>
                     <p>{{ card.content }}</p>
                 </div>
@@ -396,7 +397,6 @@ export default {
                 const data = response.data;
                 post.userLike = data.userLike;
                 post.likesCount = data.likesCount;
-                this.animateLike(post.id);
             } catch (error) {
                 console.error('Error liking post:', error);
             }
@@ -548,15 +548,6 @@ export default {
                 return content;
             }
         },
-        animateLike(postId) {
-            const likeIcon = this.$el.querySelector(`#post-${postId} .fa-heart`);
-            if (likeIcon) {
-                likeIcon.classList.add('animate-like');
-                setTimeout(() => {
-                    likeIcon.classList.remove('animate-like');
-                }, 500);
-            }
-        },
         removeComment(commentId) {
             this.posts = this.posts.map(post => {
                 post.comments = post.comments.filter(c => c.id !== commentId);
@@ -643,27 +634,5 @@ export default {
 .slide-fade-leave-to {
     transform: translateY(10px);
     opacity: 0;
-}
-
-@keyframes fade-in {
-    from {
-        opacity: 0;
-    }
-
-    to {
-        opacity: 1;
-    }
-}
-
-.animate-fade-in {
-    animation: fade-in 0.5s ease-in-out;
-}
-
-.transition-transform {
-    transition: transform 0.3s ease-in-out;
-}
-
-.transform:hover {
-    transform: scale(1.05);
 }
 </style>
