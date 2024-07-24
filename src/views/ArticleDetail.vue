@@ -77,7 +77,7 @@
                 </div>
             </div>
         </div>
-        <AppFooter :logoImage="logoImage" />
+        <AppFooter :footerLogo="footerLogo" />
 
         <AppModal v-if="showModal" @close="closeModal" :title="modalTitle">
             <form @submit.prevent="submitForm">
@@ -139,7 +139,8 @@ export default {
             isDarkMode: false,
             user: {},
             headerImage: require('@/assets/images/skeleton/header.webp'),
-            logoImage: require('@/assets/images/skeleton/logo.webp'),
+            footerLogo: require('@/assets/images/skeleton/footerlogo.png'),
+            logoImage: require('@/assets/images/skeleton/logo.png'),
             error: null,
             showModal: false,
             modalTitle: '',

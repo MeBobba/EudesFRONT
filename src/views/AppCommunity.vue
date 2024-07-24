@@ -156,7 +156,7 @@
                 </div>
             </div>
         </div>
-        <AppFooter :logoImage="logoImage" />
+        <AppFooter :footerLogo="footerLogo" />
         <AppModal v-if="showEditModal" @close="showEditModal = false" title="Edit Post">
             <textarea v-model="editPostContent" class="w-full p-4 border border-gray-300 rounded-lg mb-4"></textarea>
             <button @click="savePost" class="bg-blue-500 text-white p-2 rounded-lg">{{ $t('save') }}</button>
@@ -188,7 +188,8 @@ export default {
     data() {
         return {
             headerImage: require('@/assets/images/skeleton/header.webp'),
-            logoImage: require('@/assets/images/skeleton/logo.webp'),
+            footerLogo: require('@/assets/images/skeleton/footerlogo.png'),
+            logoImage: require('@/assets/images/skeleton/logo.png'),
             isDarkMode: false,
             posts: [],
             user: {},

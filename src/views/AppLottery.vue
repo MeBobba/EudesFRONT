@@ -109,7 +109,7 @@
                 </div>
             </div>
         </div>
-        <AppFooter :logoImage="logoImage" />
+        <AppFooter :footerLogo="footerLogo" />
     </div>
 </template>
 
@@ -127,7 +127,8 @@ export default {
     data() {
         return {
             headerImage: require('@/assets/images/skeleton/header.webp'),
-            logoImage: require('@/assets/images/skeleton/logo.webp'),
+            footerLogo: require('@/assets/images/skeleton/footerlogo.png'),
+            logoImage: require('@/assets/images/skeleton/logo.png'),
             isDarkMode: false,
             selectedNumbers: [],
             drawnNumbers: [],

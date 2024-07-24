@@ -28,7 +28,7 @@
                     :class="['bg-blue-500 text-white px-4 py-2 mx-2 rounded-lg transition-transform transform hover:scale-105', { 'disabled:opacity-50': currentPage === totalPages }]">Next</button>
             </div>
         </div>
-        <AppFooter :logoImage="logoImage" />
+        <AppFooter :footerLogo="footerLogo" />
         <AppModal v-if="showModal" @close="closeModal" title="Add New Game">
             <form @submit.prevent="addGame" class="animate-fade-in">
                 <div class="mb-4">
@@ -69,7 +69,8 @@ export default {
     data() {
         return {
             headerImage: require('@/assets/images/skeleton/header.webp'),
-            logoImage: require('@/assets/images/skeleton/logo.webp'),
+            footerLogo: require('@/assets/images/skeleton/footerlogo.png'),
+            logoImage: require('@/assets/images/skeleton/logo.png'),
             isDarkMode: false,
             games: [],
             currentPage: 1,

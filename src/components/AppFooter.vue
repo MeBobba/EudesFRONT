@@ -2,8 +2,14 @@
     <footer :class="{ 'bg-gray-900 text-white': isDarkMode, 'bg-white text-black': !isDarkMode }"
         class="shadow mt-auto">
         <div class="container mx-auto py-6 px-6 flex flex-col sm:flex-row justify-between items-center">
-            <div class="flex space-x-4">
-                <p>EudesCMS <b>RELEASE24072024</b></p>
+            <div class="flex items-center mb-4 sm:mb-0">
+                <router-link to="/" class="hover:text-gray-900 flex items-center space-x-3">
+                    <img width="50" :src="footerLogo" alt="EudesCMS" class="footer-logo">
+                    <div>
+                        <p>EudesCMS</p>
+                        <p>RELEASE24072024</p>
+                    </div>
+                </router-link>
             </div>
             <nav class="flex-1 text-center mb-4 sm:mb-0">
                 <ul class="flex flex-col sm:flex-row justify-center space-y-2 sm:space-y-0 sm:space-x-8">
@@ -25,6 +31,10 @@ library.add(faSun, faMoon);
 export default {
     props: {
         logoImage: {
+            type: String,
+            required: true
+        },
+        footerLogo: {
             type: String,
             required: true
         }
@@ -60,7 +70,6 @@ export default {
 </script>
 
 <style scoped>
-
 .nav-link {
     @apply text-lg hover:text-blue-500 transition duration-300;
 }

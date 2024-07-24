@@ -37,7 +37,7 @@
                     class="mx-2 px-4 py-2 bg-blue-500 text-white rounded-lg disabled:opacity-50">Next</button>
             </div>
         </div>
-        <AppFooter :logoImage="logoImage" />
+        <AppFooter :footerLogo="footerLogo" />
 
         <AppModal v-if="showModal" @close="closeModal" :title="modalTitle">
             <form @submit.prevent="submitForm">
@@ -88,7 +88,8 @@ export default {
     data() {
         return {
             headerImage: require('@/assets/images/skeleton/header.webp'),
-            logoImage: require('@/assets/images/skeleton/logo.webp'),
+            footerLogo: require('@/assets/images/skeleton/footerlogo.png'),
+            logoImage: require('@/assets/images/skeleton/logo.png'),
             isDarkMode: false,
             articles: [],
             filteredArticles: [],

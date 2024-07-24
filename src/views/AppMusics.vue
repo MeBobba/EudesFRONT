@@ -79,7 +79,7 @@
                 <i class="fas fa-user control-icon mx-2" @click="showBioModal"></i>
             </div>
         </div>
-        <AppFooter :logoImage="logoImage" />
+        <AppFooter :footerLogo="footerLogo" />
         <div v-if="showModal" class="modal fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center">
             <div class="modal-content bg-white p-4 rounded-lg w-3/4 max-w-lg max-h-screen overflow-y-auto">
                 <pre class="whitespace-pre-wrap font-ubuntu text-sm" v-html="modalContent"></pre>
@@ -121,7 +121,8 @@ export default {
             modalTitle: '',
             modalContent: '',
             headerImage: require('@/assets/images/skeleton/header.webp'),
-            logoImage: require('@/assets/images/skeleton/logo.webp'),
+            footerLogo: require('@/assets/images/skeleton/footerlogo.png'),
+            logoImage: require('@/assets/images/skeleton/logo.png'),
             cache: {},
             player: null,
             nextPage: 1,

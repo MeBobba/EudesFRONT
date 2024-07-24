@@ -32,7 +32,7 @@
                 </div>
             </div>
         </div>
-        <AppFooter :logoImage="logoImage" />
+        <AppFooter :footerLogo="footerLogo" />
         <div v-if="showCopyNotification"
             class="fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg">
             Link copied to clipboard!
@@ -53,7 +53,8 @@ export default {
     data() {
         return {
             headerImage: require('@/assets/images/skeleton/header.webp'),
-            logoImage: require('@/assets/images/skeleton/logo.webp'),
+            footerLogo: require('@/assets/images/skeleton/footerlogo.png'),
+            logoImage: require('@/assets/images/skeleton/logo.png'),
             isDarkMode: false,
             images: [],
             currentPage: 1,
