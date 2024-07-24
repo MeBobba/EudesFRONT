@@ -3,7 +3,7 @@ import { createI18n } from 'vue-i18n';
 
 const messages = {
     en: {
-        home: 'Home',
+        dashboard: 'Home',
         community: 'Community',
         games: 'Games',
         staff: 'Staff',
@@ -52,7 +52,7 @@ const messages = {
         shop: 'Shop',
     },
     fr: {
-        home: 'Accueil',
+        dashboard: 'Accueil',
         community: 'Communauté',
         games: 'Jeux',
         staff: 'Équipe',
@@ -100,7 +100,7 @@ const messages = {
         shop: 'Boutique',
     },
     it: {
-        home: 'Home',
+        dashboard: 'Home',
         community: 'Comunità',
         games: 'Giochi',
         staff: 'Staff',

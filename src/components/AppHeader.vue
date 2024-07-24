@@ -16,23 +16,18 @@
                 <!-- Regular Menu - Desktop -->
                 <nav class="hidden sm:flex sm:items-center sm:space-x-4 w-full">
                     <ul class="flex justify-center space-x-4 w-full">
-                        <li><router-link to="/" class="nav-link" active-class="active"
-                                exact-active-class="exact-active">{{
-                                    $t('home') }}</router-link></li>
-                        <li><router-link to="/community" class="nav-link" active-class="active"
-                                exact-active-class="exact-active">{{
-                                    $t('community') }}</router-link></li>
-                        <li><router-link to="/games" class="nav-link" active-class="active"
-                                exact-active-class="exact-active">{{
-                                    $t('games') }}</router-link></li>
-                        <li><router-link to="/staff" class="nav-link" active-class="active"
-                                exact-active-class="exact-active">{{
-                                    $t('staff') }}</router-link></li>
-                        <li><router-link to="/boutique" class="nav-link" active-class="active"
-                                exact-active-class="exact-active">{{ $t('shop') }}</router-link></li>
-                        <li><router-link to="/news" class="nav-link" active-class="active"
-                                exact-active-class="exact-active">{{
-                                    $t('news') }}</router-link></li>
+                        <li><router-link to="/dashboard" class="nav-link" active-class="router-link-active"
+                                exact-active-class="exact-router-link-active">{{ $t('dashboard') }}</router-link></li>
+                        <li><router-link to="/community" class="nav-link" active-class="router-link-active"
+                                exact-active-class="exact-router-link-active">{{ $t('community') }}</router-link></li>
+                        <li><router-link to="/games" class="nav-link" active-class="router-link-active"
+                                exact-active-class="exact-router-link-active">{{ $t('games') }}</router-link></li>
+                        <li><router-link to="/staff" class="nav-link" active-class="router-link-active"
+                                exact-active-class="exact-router-link-active">{{ $t('staff') }}</router-link></li>
+                        <li><router-link to="/boutique" class="nav-link" active-class="router-link-active"
+                                exact-active-class="exact-router-link-active">{{ $t('shop') }}</router-link></li>
+                        <li><router-link to="/news" class="nav-link" active-class="router-link-active"
+                                exact-active-class="exact-router-link-active">{{ $t('news') }}</router-link></li>
                     </ul>
                     <div class="relative flex space-x-4 ml-auto">
                         <input type="text" v-model="searchQuery" @input="searchUsers"
@@ -86,17 +81,22 @@
                         </ul>
                     </div>
                     <ul class="space-y-2 w-full">
-                        <li><router-link to="/" class="block px-4 py-2 rounded-lg nav-link" active-class="active"
-                                exact-active-class="exact-active">{{ $t('home') }}</router-link></li>
+                        <li><router-link to="/" class="block px-4 py-2 rounded-lg nav-link"
+                                active-class="router-link-active" exact-active-class="exact-router-link-active">{{
+                                    $t('home') }}</router-link></li>
                         <li><router-link to="/community" class="block px-4 py-2 rounded-lg nav-link"
-                                active-class="active" exact-active-class="exact-active">{{ $t('community')
+                                active-class="router-link-active" exact-active-class="exact-router-link-active">{{
+                                    $t('community')
                                 }}</router-link></li>
-                        <li><router-link to="/games" class="block px-4 py-2 rounded-lg nav-link" active-class="active"
-                                exact-active-class="exact-active">{{ $t('games') }}</router-link></li>
-                        <li><router-link to="/staff" class="block px-4 py-2 rounded-lg nav-link" active-class="active"
-                                exact-active-class="exact-active">{{ $t('staff') }}</router-link></li>
-                        <li><router-link to="/news" class="block px-4 py-2 rounded-lg nav-link" active-class="active"
-                                exact-active-class="exact-active">{{ $t('news') }}</router-link></li>
+                        <li><router-link to="/games" class="block px-4 py-2 rounded-lg nav-link"
+                                active-class="router-link-active" exact-active-class="exact-router-link-active">{{
+                                    $t('games') }}</router-link></li>
+                        <li><router-link to="/staff" class="block px-4 py-2 rounded-lg nav-link"
+                                active-class="router-link-active" exact-active-class="exact-router-link-active">{{
+                                    $t('staff') }}</router-link></li>
+                        <li><router-link to="/news" class="block px-4 py-2 rounded-lg nav-link"
+                                active-class="router-link-active" exact-active-class="exact-router-link-active">{{
+                                    $t('news') }}</router-link></li>
                     </ul>
 
                     <div class="flex space-x-4 mt-4">
@@ -114,6 +114,7 @@
         </header>
     </div>
 </template>
+
 
 <script>
 import axios from 'axios';
@@ -256,6 +257,11 @@ export default {
 
 /* Style for active menu link */
 .router-link-active {
+    @apply text-blue-500 font-bold;
+}
+
+/* Optional: exact active class for exact matching */
+.exact-router-link-active {
     @apply text-blue-500 font-bold;
 }
 
