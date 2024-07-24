@@ -2,9 +2,9 @@
     <footer :class="{ 'bg-gray-900 text-white': isDarkMode, 'bg-white text-black': !isDarkMode }"
         class="shadow mt-auto">
         <div class="container mx-auto py-6 px-6 flex flex-col sm:flex-row justify-between items-center">
-            <router-link to="/" class="hover:text-gray-900 mb-4 sm:mb-0">
-                <img :src="logoImage" alt="EudesCMS" class="footer-logo">
-            </router-link>
+            <div class="flex space-x-4">
+                <p>EudesCMS <b>RELEASE24072024</b></p>
+            </div>
             <nav class="flex-1 text-center mb-4 sm:mb-0">
                 <ul class="flex flex-col sm:flex-row justify-center space-y-2 sm:space-y-0 sm:space-x-8">
                     <li><router-link to="/musics" class="nav-link">{{ $t('musics') }}</router-link></li>
@@ -12,9 +12,6 @@
                     <li><router-link to="/terms" class="nav-link">{{ $t('terms') }}</router-link></li>
                 </ul>
             </nav>
-            <div class="flex space-x-4">
-                <p>EudesCMS 0.0.1 2024</p>
-            </div>
         </div>
     </footer>
 </template>
