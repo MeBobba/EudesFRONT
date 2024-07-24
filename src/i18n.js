@@ -49,6 +49,7 @@ const messages = {
         public: 'Public',
         friends: 'Friends',
         post: 'Post',
+        shop: 'Shop',
     },
     fr: {
         home: 'Accueil',
@@ -96,6 +97,7 @@ const messages = {
         public: 'Public',
         friends: 'Amis',
         post: 'Publier',
+        shop: 'Boutique',
     },
     it: {
         home: 'Home',
@@ -143,6 +145,7 @@ const messages = {
         public: 'Pubblico',
         friends: 'Amici',
         post: 'Pubblicare',
+        shop: 'Negozio',
     },
 };
 

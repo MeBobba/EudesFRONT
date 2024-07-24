@@ -25,10 +25,6 @@
 <script>
 export default {
     props: {
-        logoImage: {
-            type: String,
-            required: true
-        },
         footerLogo: {
             type: String,
             required: true
