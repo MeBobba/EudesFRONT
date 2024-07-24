@@ -174,6 +174,7 @@ import { library } from '@fortawesome/fontawesome-svg-core';
 import { faHeart, faComment, faTrashAlt, faSmile, faImage, faPencilAlt, faVideo, faEllipsisV } from '@fortawesome/free-solid-svg-icons';
 import 'emoji-picker-element';
 import AppModal from '../components/AppModal.vue';
+import DOMPurify from "dompurify";
 
 library.add(faHeart, faComment, faTrashAlt, faSmile, faImage, faPencilAlt, faVideo, faEllipsisV);
 
@@ -454,11 +455,9 @@ export default {
             this.newPostVideo = '';
             this.isValidVideoUrl = true;
         },
-        htmlToText(html) {
-          return html.replace(/</g, '&lt;').replace(/>/g, '&gt;')
-        },
         parsePostContent(content) {
-          content = this.htmlToText(content);
+          content = DOMPurify.sanitize(content, { ALLOWED_TAGS: [], ALLOWED_ATTR: [] }); // permet d'echapper proprement le html
+          console.log(content);
           const gifRegex = /\[img\](.*?)\[\/img\]/g;
           return content.replace(gifRegex, '<img src="$1" alt="GIF" class="h-48 object-cover rounded-lg mb-4">');
         },
