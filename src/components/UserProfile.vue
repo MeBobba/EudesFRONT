@@ -21,6 +21,10 @@
                         <fa-icon :icon="['fas', 'times']" />
                     </button>
                 </div>
+                <div class="absolute -top-6 -right-6 bg-white text-black rounded-lg p-2 shadow-md z-9999"
+                    v-if="user.motto">
+                    <p class="text-xs">{{ user.motto }}</p>
+                </div>
             </div>
             <div class="flex-1 mt-4 sm:mt-0 sm:ml-4 text-center sm:text-left">
                 <h2 class="text-xl sm:text-2xl font-semibold text-white relative">{{ user.username }}</h2>
@@ -43,10 +47,10 @@
             <div class="mt-4 sm:mt-0 flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4">
                 <router-link v-if="isCurrentUser" to="/settings"
                     class="px-4 py-2 bg-blue-500 text-white rounded-lg relative text-center transition-transform hover:scale-105">{{
-                    $t('settings') }}</router-link>
+                        $t('settings') }}</router-link>
                 <router-link v-if="isCurrentUser" to="/client"
                     class="px-4 py-2 bg-green-500 text-white rounded-lg relative text-center transition-transform hover:scale-105">{{
-                    $t('play') }}</router-link>
+                        $t('play') }}</router-link>
             </div>
         </div>
         <div class="relative mt-4 text-center sm:text-left">
