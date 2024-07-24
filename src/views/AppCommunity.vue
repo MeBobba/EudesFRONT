@@ -299,6 +299,11 @@ export default {
                 if (!token) {
                     throw new Error('No token found');
                 }
+                // on verifie si le contenu est pas vide
+                if(this.newPostContent.trim() === '') {
+                  alert('Please enter some content before posting.');
+                  return;
+                }
                 const apiUrl = process.env.VUE_APP_API_URL || 'http://localhost:3000';
                 const response = await axios.post(`${apiUrl}/posts`, {
                     content: await this.applyWordFilter(this.newPostContent),
@@ -331,6 +336,12 @@ export default {
                 const token = localStorage.getItem('token');
                 if (!token) {
                     throw new Error('No token found');
+                }
+                // verifie si le contenu du commentaire n'est pas vide
+                const commentContent = (post.newComment || '').trim();
+                if (!commentContent) {
+                  alert('Comment cannot be empty');
+                  return;
                 }
                 const apiUrl = process.env.VUE_APP_API_URL || 'http://localhost:3000';
                 const response = await axios.post(`${apiUrl}/comments`, {
