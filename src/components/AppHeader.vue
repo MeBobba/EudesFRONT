@@ -138,7 +138,6 @@ export default {
             searchResults: [],
             isMenuOpen: false,
             selectedLanguage: localStorage.getItem('locale') || 'en',
-            sessionCheckInterval: null,
         };
     },
     methods: {
@@ -180,23 +179,6 @@ export default {
                 this.$router.push('/login');
             }
         },
-        async checkSession() {
-            const token = localStorage.getItem('token');
-            if (!token) {
-                this.logout();
-            } else {
-                try {
-                    const response = await axios.get(`${process.env.VUE_APP_API_URL || 'http://localhost:3000'}/check-session`, {
-                        headers: { 'x-access-token': token }
-                    });
-                    if (!response.data.valid) {
-                        this.logout();
-                    }
-                } catch (error) {
-                    this.logout();
-                }
-            }
-        },
         changeLanguage(event) {
             const newLocale = event.target.value;
             this.$i18n.locale = newLocale;
@@ -215,12 +197,6 @@ export default {
             this.isMenuOpen = false; // Close menu after selecting an item
         }
     },
-    created() {
-        this.sessionCheckInterval = setInterval(this.checkSession, 60000); // Vérifier la session toutes les 60 secondes
-    },
-    beforeUnmount() {
-        clearInterval(this.sessionCheckInterval);
-    }
 };
 </script>
 

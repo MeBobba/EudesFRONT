@@ -74,64 +74,26 @@ socket.on('maintenance', async (isMaintenance) => {
     }
 });
 
-router.beforeEach(async (to, from, next) => {
-    const isAuthenticated = !!localStorage.getItem('token');
-    const apiUrl = process.env.VUE_APP_API_URL || 'http://localhost:3000';
 
-    try {
-        const response = await axios.get(`${apiUrl}/maintenance-status`);
-        const isMaintenance = response.data.maintenance;
-
-        if (isMaintenance) {
-            if (to.path !== '/maintenance') {
-                if (isAuthenticated) {
-                    const userResponse = await axios.get(`${apiUrl}/dashboard`, {
-                        headers: { 'x-access-token': localStorage.getItem('token') }
-                    });
-                    const userRank = userResponse.data.rank;
-
-                    if (userRank >= 5) {
-                        next();
-                    } else {
-                        await axios.post(`${apiUrl}/logout`, {}, {
-                            headers: { 'x-access-token': localStorage.getItem('token') }
-                        });
-                        localStorage.removeItem('token');
-                        next('/maintenance');
-                    }
-                } else {
-                    next('/maintenance');
-                }
-            } else {
-                next();
-            }
-        } else {
-            if (to.path === '/maintenance') {
-                next('/login');
-            } else if (to.matched.some(record => record.meta.requiresAuth)) {
-                if (!isAuthenticated) {
-                    next('/login');
-                } else {
-                    next();
-                }
-            } else if (to.matched.some(record => record.meta.guest)) {
-                if (isAuthenticated) {
-                    next('/dashboard');
-                } else {
-                    next();
-                }
-            } else {
-                next();
-            }
+async function checkSession() {
+    const token = localStorage.getItem('token');
+    if (!token) {
+        return false;
+    } else {
+        try {
+            const response = await axios.get(`${process.env.VUE_APP_API_URL || 'http://localhost:3000'}/check-session`, {
+                headers: { 'x-access-token': token }
+            });
+            return response.data.valid;
+        } catch (error) {
+            localStorage.removeItem('token'); // enlever le token si la session n'est pas valide
+            return false;
         }
-    } catch (error) {
-        console.error('Error checking maintenance status:', error);
-        next('/error/500/Internal Server Error');
     }
-});
+}
 
 router.beforeEach(async (to, from, next) => {
-    const isAuthenticated = !!localStorage.getItem('token');
+    const isAuthenticated = await checkSession();
     const apiUrl = process.env.VUE_APP_API_URL || 'http://localhost:3000';
 
     try {
