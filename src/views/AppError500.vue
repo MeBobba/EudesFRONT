@@ -3,7 +3,7 @@
         <div class="bg-white p-8 rounded-lg shadow-lg flex flex-col items-center">
             <h1 class="text-6xl font-bold text-gray-800 mb-4">500</h1>
             <p class="text-xl text-gray-600 mb-8">Internal Server Error</p>
-            <router-link to="/" class="text-blue-500 text-lg hover:underline">Go back to EudesCMS</router-link>
+            <router-link to="/" class="text-blue-500 text-lg hover:underline">Go back to MeBobba</router-link>
         </div>
     </div>
 </template>

@@ -58,7 +58,7 @@
         </div>
         <div class="relative grid grid-cols-2 sm:grid-cols-3 gap-4 mt-6 animate-fade-in">
             <div v-for="post in user.posts" :key="post.id" class="relative transition-transform hover:scale-105">
-                <img :src="post.image" alt="EudesCMS" class="w-full h-32 sm:h-48 object-cover rounded-lg" />
+                <img :src="post.image" alt="MeBobba" class="w-full h-32 sm:h-48 object-cover rounded-lg" />
                 <div
                     class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
                     <fa-icon :icon="['fas', 'heart']" class="text-white mr-2" />

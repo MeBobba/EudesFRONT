@@ -36,7 +36,7 @@
                             </div>
                         </div>
                         <div class="mb-4" v-html="parsePostContent(post.content)"></div>
-                        <img v-if="post.image" :src="post.image" alt="EudesCMS"
+                        <img v-if="post.image" :src="post.image" alt="MeBobba"
                             class="w-full object-cover rounded-lg mb-4" loading="lazy">
                         <iframe width="100%" height="500" v-if="post.video" :src="getVideoEmbedUrl(post.video)"
                             frameborder="0" allowfullscreen class="w-full mb-4"></iframe>

@@ -4,9 +4,9 @@
         <div class="container mx-auto py-6 px-6 flex flex-col sm:flex-row justify-between items-center">
             <div class="flex items-center mb-4 sm:mb-0">
                 <router-link to="/" class="hover:text-gray-900 flex items-center space-x-3">
-                    <img width="50" :src="footerLogo" alt="EudesCMS" class="footer-logo" loading="lazy">
+                    <img width="50" :src="footerLogo" alt="MeBobba" class="footer-logo" loading="lazy">
                     <div>
-                        <p>EudesCMS</p>
+                        <p>MeBobba</p>
                         <p>RELEASE24072024</p>
                     </div>
                 </router-link>
