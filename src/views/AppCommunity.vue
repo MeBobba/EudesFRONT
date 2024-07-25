@@ -38,8 +38,8 @@
                         <div class="mb-4" v-html="parsePostContent(post.content)"></div>
                         <img v-if="post.image" :src="post.image" alt="EudesCMS"
                             class="w-full object-cover rounded-lg mb-4" loading="lazy">
-                        <iframe width="100%" height="500" v-if="post.video" :src="getVideoEmbedUrl(post.video)" frameborder="0" allowfullscreen
-                            class="w-full mb-4"></iframe>
+                        <iframe width="100%" height="500" v-if="post.video" :src="getVideoEmbedUrl(post.video)"
+                            frameborder="0" allowfullscreen class="w-full mb-4"></iframe>
                         <div class="flex items-center">
                             <button @click="toggleLike(post)" class="mr-4 like-button">
                                 <fa-icon :icon="['fas', 'heart']"
@@ -300,9 +300,9 @@ export default {
                     throw new Error('No token found');
                 }
                 // on verifie si le contenu est pas vide
-                if(this.newPostContent.trim() === '') {
-                  alert('Please enter some content before posting.');
-                  return;
+                if (this.newPostContent.trim() === '') {
+                    alert('Please enter some content before posting.');
+                    return;
                 }
                 const apiUrl = process.env.VUE_APP_API_URL || 'http://localhost:3000';
                 const response = await axios.post(`${apiUrl}/posts`, {
@@ -340,8 +340,8 @@ export default {
                 // verifie si le contenu du commentaire n'est pas vide
                 const commentContent = (post.newComment || '').trim();
                 if (!commentContent) {
-                  alert('Comment cannot be empty');
-                  return;
+                    alert('Comment cannot be empty');
+                    return;
                 }
                 const apiUrl = process.env.VUE_APP_API_URL || 'http://localhost:3000';
                 const response = await axios.post(`${apiUrl}/comments`, {
@@ -453,7 +453,7 @@ export default {
             }
         },
         addGifToPost(gifUrl) {
-            this.newPostContent += `[img alt="GIF"]${gifUrl}[img]`;
+            this.newPostContent += `[img]${gifUrl}[/img]`;
             this.showGiphyPicker = false;
         },
         validateVideoUrl() {
@@ -467,10 +467,10 @@ export default {
             this.isValidVideoUrl = true;
         },
         parsePostContent(content) {
-          content = DOMPurify.sanitize(content, { ALLOWED_TAGS: [], ALLOWED_ATTR: [] }); // permet d'echapper proprement le html
-          console.log(content);
-          const gifRegex = /\[img\](.*?)\[\/img\]/g;
-          return content.replace(gifRegex, '<img src="$1" alt="GIF" class="h-48 object-cover rounded-lg mb-4">');
+            content = DOMPurify.sanitize(content, { ALLOWED_TAGS: [], ALLOWED_ATTR: [] }); // permet d'echapper proprement le html
+            console.log(content);
+            const gifRegex = /\[img\](.*?)\[\/img\]/g;
+            return content.replace(gifRegex, '<img src="$1" alt="GIF" class="h-48 object-cover rounded-lg mb-4">');
         },
         formatDate(dateString) {
             const options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
