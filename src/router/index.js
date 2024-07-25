@@ -22,6 +22,7 @@ import AppPrivacy from '../views/AppPrivacy.vue';
 import AppTerms from '../views/AppTerms.vue';
 import AppTopstory from '../views/AppTopstory.vue';
 import AppMaintenance from '../views/AppMaintenance.vue';
+import AppJetons from '../views/AppJetons.vue';
 
 const routes = [
     { path: '/', redirect: '/login' },
@@ -40,6 +41,7 @@ const routes = [
     { path: '/pixels', component: AppPixels, meta: { requiresAuth: true } },
     { path: '/dashboard/:userId', component: UserDashboard, meta: { requiresAuth: true } },
     { path: '/topstories', component: AppTopstory, meta: { requiresAuth: true } },
+    { path: '/tokens', component: AppJetons, meta: { requiresAuth: true } },
     { path: '/404', component: AppError404 },
     { path: '/500', component: AppError500 },
     { path: '/privacy', component: AppPrivacy },
