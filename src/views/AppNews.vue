@@ -57,7 +57,8 @@
                         required></textarea>
                 </div>
                 <div class="mb-4">
-                    <label class="block text-gray-700 dark:text-gray-200">Image URL (<router-link to="/topstories" custom>
+                    <label class="block text-gray-700 dark:text-gray-200">Image URL (<router-link to="/topstories"
+                            custom>
                             <template v-slot="{ href, navigate }">
                                 <a :href="href" @click="navigate" target="_blank"
                                     class="hover:text-gray-900 mb-4 sm:mb-0">here</a>
@@ -77,6 +78,7 @@ import axios from 'axios';
 import AppHeader from '../components/AppHeader.vue';
 import AppFooter from '../components/AppFooter.vue';
 import AppModal from '../components/AppModal.vue';
+const moment = require('moment-timezone');
 
 export default {
     name: 'AppNews',
@@ -166,8 +168,17 @@ export default {
             this.currentPage = 1;
         },
         formatDate(dateString) {
-            const options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
-            return new Date(dateString).toLocaleDateString(undefined, options);
+            if (!dateString) return ''; // handle empty date
+
+            const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+            const date = moment(dateString).tz(userTimeZone);
+
+            if (!date.isValid()) {
+                // handle invalid date
+                return 'Invalid Date';
+            }
+
+            return date.format('YYYY-MM-DD HH:mm:ss'); // or any desired format
         },
         nextPage() {
             if (this.currentPage < this.totalPages) this.currentPage++;
@@ -188,12 +199,16 @@ export default {
         async submitForm() {
             try {
                 const apiUrl = process.env.VUE_APP_API_URL || 'http://localhost:3000';
+                const formData = {
+                    ...this.form,
+                    user_id: this.user.id // Ajoutez cet élément
+                };
                 if (this.form.id) {
-                    await axios.put(`${apiUrl}/articles/${this.form.id}`, this.form, {
+                    await axios.put(`${apiUrl}/articles/${this.form.id}`, formData, {
                         headers: { 'x-access-token': localStorage.getItem('token') }
                     });
                 } else {
-                    await axios.post(`${apiUrl}/articles`, this.form, {
+                    await axios.post(`${apiUrl}/articles`, formData, {
                         headers: { 'x-access-token': localStorage.getItem('token') }
                     });
                 }

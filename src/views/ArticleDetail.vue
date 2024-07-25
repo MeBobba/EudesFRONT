@@ -114,6 +114,7 @@ import AppModal from '../components/AppModal.vue';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { faHeart, faComment, faTrashAlt } from '@fortawesome/free-solid-svg-icons';
+const moment = require('moment-timezone');
 
 library.add(faHeart, faComment, faTrashAlt);
 
@@ -274,8 +275,17 @@ export default {
             article.showComments = !article.showComments;
         },
         formatDate(dateString) {
-            const options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
-            return new Date(dateString).toLocaleDateString(undefined, options);
+            if (!dateString) return ''; // handle empty date
+
+            const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+            const date = moment(dateString).tz(userTimeZone);
+
+            if (!date.isValid()) {
+                // handle invalid date
+                return 'Invalid Date';
+            }
+
+            return date.format('YYYY-MM-DD HH:mm:ss'); // or any desired format
         },
         showEditModal(article) {
             this.form = { ...article };
