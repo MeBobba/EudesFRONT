@@ -25,11 +25,11 @@
             <div v-if="totalPages > 1" class="flex justify-center mt-8">
                 <button @click="prevPage" :disabled="currentPage === 1"
                     :class="['bg-blue-500 text-white px-4 py-2 mx-2 rounded-lg transition-transform transform hover:scale-105', { 'disabled:opacity-50': currentPage === 1 }]">{{
-                    $t('previous') }}</button>
+                    $t('previouspage') }}</button>
                 <span class="mx-2">{{ currentPage }} / {{ totalPages }}</span>
                 <button @click="nextPage" :disabled="currentPage === totalPages"
                     :class="['bg-blue-500 text-white px-4 py-2 mx-2 rounded-lg transition-transform transform hover:scale-105', { 'disabled:opacity-50': currentPage === totalPages }]">{{
-                    $t('next') }}</button>
+                    $t('nextpage') }}</button>
             </div>
         </div>
         <AppFooter :footerLogo="footerLogo" />
