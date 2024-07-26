@@ -152,8 +152,11 @@ export default {
         },
         async fetchArticles() {
             try {
+                const token = localStorage.getItem('token');
                 const apiUrl = process.env.VUE_APP_API_URL || 'http://localhost:3000';
-                const response = await axios.get(`${apiUrl}/articles`);
+                const response = await axios.get(`${apiUrl}/articles`, {
+                    headers: { 'x-access-token': token }
+                });
                 this.articles = response.data;
                 this.filteredArticles = this.articles;
             } catch (error) {
