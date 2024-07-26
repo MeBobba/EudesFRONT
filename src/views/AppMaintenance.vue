@@ -102,7 +102,7 @@ export default {
             try {
                 const machineId = crypto.createHash('sha256').update(navigator.userAgent + Date.now().toString()).digest('hex');
                 const apiUrl = process.env.VUE_APP_API_URL || 'http://localhost:3000';
-                const response = await axios.post(`${apiUrl}/login`, {
+                const response = await axios.post(`${apiUrl}/auth/login`, {
                     username: this.username,
                     password: this.password,
                     machine_id: machineId
@@ -119,7 +119,7 @@ export default {
                 } else {
                     this.errorMessage = 'Vous n\'avez pas les permissions nécessaires pour accéder au site pendant la maintenance.';
                     localStorage.removeItem('token');
-                    await axios.post(`${apiUrl}/logout`, {}, {
+                    await axios.post(`${apiUrl}/auth/logout`, {}, {
                         headers: { 'x-access-token': localStorage.getItem('token') }
                     });
                 }

@@ -23,6 +23,8 @@
 </template>
 
 <script>
+import axios from "axios";
+
 export default {
     props: {
         footerLogo: {
@@ -43,12 +45,11 @@ export default {
         async logout() {
             try {
                 const token = localStorage.getItem('token');
-                await fetch('http://localhost:3000/logout', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'x-access-token': token
-                    }
+                await axios.post(`${process.env.VUE_APP_API_URL || 'http://localhost:3000'}/logout`, {}, {
+                  headers: {
+                    'Content-Type': 'application/json',
+                    'x-access-token': token
+                  }
                 });
                 localStorage.removeItem('token');
                 this.$router.push('/login');

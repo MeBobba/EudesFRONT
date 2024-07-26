@@ -64,7 +64,7 @@ socket.on('maintenance', async (isMaintenance) => {
         const token = localStorage.getItem('token');
         if (token) {
             try {
-                await axios.post(`${apiUrl}/logout`, {}, {
+                await axios.post(`${apiUrl}/auth/logout`, {}, {
                     headers: { 'x-access-token': token }
                 });
             } catch (error) {
@@ -83,7 +83,7 @@ async function checkSession() {
         return false;
     } else {
         try {
-            const response = await axios.get(`${process.env.VUE_APP_API_URL || 'http://localhost:3000'}/check-session`, {
+            const response = await axios.get(`${process.env.VUE_APP_API_URL || 'http://localhost:3000'}/auth/check-session`, {
                 headers: { 'x-access-token': token }
             });
             return response.data.valid;
@@ -113,7 +113,7 @@ router.beforeEach(async (to, from, next) => {
                     if (userRank >= 5) {
                         next();
                     } else {
-                        await axios.post(`${apiUrl}/logout`, {}, {
+                        await axios.post(`${apiUrl}/auth/logout`, {}, {
                             headers: { 'x-access-token': localStorage.getItem('token') }
                         });
                         localStorage.removeItem('token');

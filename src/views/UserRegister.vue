@@ -168,7 +168,7 @@ export default {
             try {
                 const machineId = crypto.createHash('sha256').update(navigator.userAgent + Date.now().toString()).digest('hex');
                 const apiUrl = process.env.VUE_APP_API_URL || 'http://localhost:3000';
-                const response = await axios.post(`${apiUrl}/register`, {
+                const response = await axios.post(`${apiUrl}/auth/register`, {
                     username: this.username,
                     password: this.password,
                     mail: this.mail,
