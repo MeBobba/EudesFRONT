@@ -4,7 +4,7 @@
         <div class="text-center">
             <h1 class="text-6xl font-bold mb-4">{{ statusCode }}</h1>
             <p class="text-2xl mb-8">{{ message }}</p>
-            <router-link to="/" class="text-blue-500 hover:underline">Go to Home</router-link>
+            <router-link to="/" class="text-blue-500 hover:underline">{{ $t('gotohome') }}</router-link>
         </div>
     </div>
 </template>

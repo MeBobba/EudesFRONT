@@ -4,6 +4,9 @@ import { createI18n } from 'vue-i18n';
 const messages = {
     en: {
         dashboard: 'Home',
+        gotohome: 'Go to Home',
+        errorfour: 'Sorry, this page isn\'t available.',
+        errorfive: 'Internal Server Error',
         community: 'Community',
         games: 'Games',
         staff: 'Staff',
@@ -51,6 +54,8 @@ const messages = {
         friends: 'Friends',
         post: 'Post',
         shop: 'Shop',
+        previouspage: 'Previous',
+        nextpage: 'Next',
         shopping: {
             welcome: 'Welcome to Our Boutique',
             home: 'Home',
@@ -65,6 +70,11 @@ const messages = {
             errorgeneratecredits: 'Error generating credits:',
             enoughcredits: 'You have enough credits.',
             tenkcredits: '10k credits have been added to your account.',
+        },
+        gamespage: {
+            newgame: 'Add New Game',
+            playgame: 'Play',
+            deletegame: 'Delete',
         },
     },
     fr: {

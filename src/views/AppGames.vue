@@ -5,8 +5,8 @@
         <div class="container mx-auto px-4 py-8 animate-fade-in">
             <div v-if="isAdmin" class="mb-8">
                 <button @click="showAddModal"
-                    class="bg-green-500 text-white px-6 py-2 rounded-lg transition-transform transform hover:scale-105">Add
-                    New Game</button>
+                    class="bg-green-500 text-white px-6 py-2 rounded-lg transition-transform transform hover:scale-105">{{
+                        $t('gamespage.newgame') }}</button>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                 <div v-for="game in paginatedGames" :key="game.id"
@@ -15,39 +15,43 @@
                         class="w-32 h-32 object-cover rounded-full mb-4 animate-fade-in" />
                     <h2 class="text-2xl font-semibold mb-4 text-center">{{ game.title }}</h2>
                     <button @click="playGame(game.id)"
-                        class="bg-blue-500 text-white px-6 py-2 rounded-lg transition-transform transform hover:scale-105">Play</button>
+                        class="bg-blue-500 text-white px-6 py-2 rounded-lg transition-transform transform hover:scale-105">{{
+                            $t('gamespage.playgame') }}</button>
                     <button v-if="isAdmin" @click="deleteGame(game.id)"
-                        class="mt-2 bg-red-500 text-white px-4 py-2 rounded-lg transition-transform transform hover:scale-105">Delete</button>
+                        class="mt-2 bg-red-500 text-white px-4 py-2 rounded-lg transition-transform transform hover:scale-105">{{
+                            $t('gamespage.deletegame') }}</button>
                 </div>
             </div>
             <div v-if="totalPages > 1" class="flex justify-center mt-8">
                 <button @click="prevPage" :disabled="currentPage === 1"
-                    :class="['bg-blue-500 text-white px-4 py-2 mx-2 rounded-lg transition-transform transform hover:scale-105', { 'disabled:opacity-50': currentPage === 1 }]">Previous</button>
+                    :class="['bg-blue-500 text-white px-4 py-2 mx-2 rounded-lg transition-transform transform hover:scale-105', { 'disabled:opacity-50': currentPage === 1 }]">{{
+                    $t('previous') }}</button>
                 <span class="mx-2">{{ currentPage }} / {{ totalPages }}</span>
                 <button @click="nextPage" :disabled="currentPage === totalPages"
-                    :class="['bg-blue-500 text-white px-4 py-2 mx-2 rounded-lg transition-transform transform hover:scale-105', { 'disabled:opacity-50': currentPage === totalPages }]">Next</button>
+                    :class="['bg-blue-500 text-white px-4 py-2 mx-2 rounded-lg transition-transform transform hover:scale-105', { 'disabled:opacity-50': currentPage === totalPages }]">{{
+                    $t('next') }}</button>
             </div>
         </div>
         <AppFooter :footerLogo="footerLogo" />
         <AppModal v-if="showModal" @close="closeModal" title="Add New Game">
-            <form @submit.prevent="addGame" class="animate-fade-in">
+            <form @submit.prevent="addGame" class="animate-fade-in bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg">
                 <div class="mb-4">
-                    <label class="block text-gray-700 dark:text-gray-200">Title</label>
+                    <label class="block text-gray-700 dark:text-gray-200 font-semibold mb-2">Title</label>
                     <input v-model="newGame.title" type="text" required
-                        class="w-full p-2 border border-gray-300 rounded-lg" />
+                        class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none transition-all duration-300" />
                 </div>
                 <div class="mb-4">
-                    <label class="block text-gray-700 dark:text-gray-200">Icon URL</label>
+                    <label class="block text-gray-700 dark:text-gray-200 font-semibold mb-2">Icon URL</label>
                     <input v-model="newGame.icon" type="text" required
-                        class="w-full p-2 border border-gray-300 rounded-lg" />
+                        class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none transition-all duration-300" />
                 </div>
                 <div class="mb-4">
-                    <label class="block text-gray-700 dark:text-gray-200">Source URL</label>
+                    <label class="block text-gray-700 dark:text-gray-200 font-semibold mb-2">Source URL</label>
                     <input v-model="newGame.source" type="text" required
-                        class="w-full p-2 border border-gray-300 rounded-lg" />
+                        class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none transition-all duration-300" />
                 </div>
                 <button type="submit"
-                    class="bg-green-500 text-white px-4 py-2 rounded-lg transition-transform transform hover:scale-105">Add
+                    class="bg-gradient-to-r from-green-400 to-green-600 text-white px-6 py-3 rounded-lg transition-transform transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">Add
                     Game</button>
             </form>
         </AppModal>
