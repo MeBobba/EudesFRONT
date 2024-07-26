@@ -42,10 +42,12 @@
                 </div>
                 <div
                     class="w-1/4 ml-8 bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md transition-transform transform hover:scale-105 animate-fade-in">
-                    <h2 class="text-2xl font-semibold mb-4">Informations importantes</h2>
-                    <p class="text-gray-700 dark:text-gray-300">Voici quelques informations importantes concernant le
-                        staff. Vous trouverez ici des détails sur les rôles, les responsabilités et les dernières mises
-                        à jour.</p>
+                    <h2 class="text-2xl font-semibold mb-4">Important Information</h2>
+                    <p class="text-gray-700 dark:text-gray-300">Welcome to the staff information page. Here, you will
+                        find essential details about our dedicated team members, their roles, and their
+                        responsibilities. Our staff is committed to providing the highest level of service and support.
+                        Stay updated with the latest news, team announcements, and key updates. If you have any
+                        questions or need assistance, feel free to reach out to any of our team members.</p>
                 </div>
             </div>
         </div>

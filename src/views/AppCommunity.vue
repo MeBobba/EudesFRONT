@@ -159,7 +159,8 @@
         </div>
         <AppFooter :footerLogo="footerLogo" />
         <AppModal v-if="showEditModal" @close="showEditModal = false" title="Edit Post">
-            <textarea v-model="editPostContent" class="w-full p-4 border border-gray-300 rounded-lg mb-4"></textarea>
+            <label class="block text-sm font-medium text-gray-700">Content</label>
+            <textarea v-model="editPostContent" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none transition-all duration-300"></textarea>
             <button @click="savePost" class="bg-blue-500 text-white p-2 rounded-lg">{{ $t('save') }}</button>
         </AppModal>
     </div>
