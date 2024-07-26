@@ -10,7 +10,7 @@
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                 <div v-for="game in paginatedGames" :key="game.id"
-                    class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 flex flex-col items-center w-72 mx-auto transition-transform transform hover:scale-105">
+                    class="bg-white rp-6 flex flex-col items-center w-72 mx-auto transition-transform transform hover:scale-105">
                     <img :src="game.icon" alt="Game Icon"
                         class="w-32 h-32 object-cover rounded-full mb-4 animate-fade-in" />
                     <h2 class="text-2xl font-semibold mb-4 text-center">{{ game.title }}</h2>
@@ -25,36 +25,39 @@
             <div v-if="totalPages > 1" class="flex justify-center mt-8">
                 <button @click="prevPage" :disabled="currentPage === 1"
                     :class="['bg-blue-500 text-white px-4 py-2 mx-2 rounded-lg transition-transform transform hover:scale-105', { 'disabled:opacity-50': currentPage === 1 }]">{{
-                    $t('previouspage') }}</button>
+                        $t('previouspage') }}</button>
                 <span class="mx-2">{{ currentPage }} / {{ totalPages }}</span>
                 <button @click="nextPage" :disabled="currentPage === totalPages"
                     :class="['bg-blue-500 text-white px-4 py-2 mx-2 rounded-lg transition-transform transform hover:scale-105', { 'disabled:opacity-50': currentPage === totalPages }]">{{
-                    $t('nextpage') }}</button>
+                        $t('nextpage') }}</button>
             </div>
         </div>
         <AppFooter :footerLogo="footerLogo" />
         <AppModal v-if="showModal" @close="closeModal" title="Add New Game">
-            <form @submit.prevent="addGame" class="animate-fade-in bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg">
-                <div class="mb-4">
-                    <label class="block text-gray-700 dark:text-gray-200 font-semibold mb-2">Title</label>
-                    <input v-model="newGame.title" type="text" required
-                        class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none transition-all duration-300" />
-                </div>
-                <div class="mb-4">
-                    <label class="block text-gray-700 dark:text-gray-200 font-semibold mb-2">Icon URL</label>
-                    <input v-model="newGame.icon" type="text" required
-                        class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none transition-all duration-300" />
-                </div>
-                <div class="mb-4">
-                    <label class="block text-gray-700 dark:text-gray-200 font-semibold mb-2">Source URL</label>
-                    <input v-model="newGame.source" type="text" required
-                        class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none transition-all duration-300" />
-                </div>
-                <button type="submit"
-                    class="bg-gradient-to-r from-green-400 to-green-600 text-white px-6 py-3 rounded-lg transition-transform transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">Add
-                    Game</button>
-            </form>
+            <div class="bg-gray-100 dark:bg-gray-900 p-10 rounded-lg shadow-2xl">
+                <form @submit.prevent="addGame" class="animate-fade-in">
+                    <div class="mb-4">
+                        <label class="block text-gray-700 dark:text-gray-200 font-semibold mb-2">Title</label>
+                        <input v-model="newGame.title" type="text" required
+                            class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none transition-all duration-300" />
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-700 dark:text-gray-200 font-semibold mb-2">Icon URL</label>
+                        <input v-model="newGame.icon" type="text" required
+                            class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none transition-all duration-300" />
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-700 dark:text-gray-200 font-semibold mb-2">Source URL</label>
+                        <input v-model="newGame.source" type="text" required
+                            class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none transition-all duration-300" />
+                    </div>
+                    <button type="submit"
+                        class="bg-gradient-to-r from-green-400 to-green-600 text-white px-6 py-3 rounded-lg transition-transform transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">Add
+                        Game</button>
+                </form>
+            </div>
         </AppModal>
+
     </div>
 </template>
 
