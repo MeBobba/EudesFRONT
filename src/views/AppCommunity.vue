@@ -159,9 +159,9 @@
         </div>
         <AppFooter :footerLogo="footerLogo" />
         <AppModal v-if="showEditModal" @close="showEditModal = false" title="Edit Post">
-            <label class="block text-sm font-medium text-gray-700">Content</label>
+            <label class="block text-sm font-medium text-gray-700">Contents</label>
             <textarea v-model="editPostContent" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none transition-all duration-300"></textarea>
-            <button @click="savePost" class="bg-blue-500 text-white p-2 rounded-lg">{{ $t('save') }}</button>
+            <button @click="savePost" class="bg-gradient-to-r from-green-400 to-green-600 text-white px-6 py-3 rounded-lg transition-transform transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">{{ $t('save') }}</button>
         </AppModal>
     </div>
 </template>
