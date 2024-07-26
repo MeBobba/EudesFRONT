@@ -37,7 +37,7 @@
                                             <p>{{ comment.content }}</p>
                                         </div>
                                     </div>
-                                    <button v-if="comment.user_id === user.id" @click="deleteComment(comment.id)"
+                                    <button v-if="comment.user_id === user.id" @click="deleteComment(article.id, comment.id)"
                                         class="text-red-500">
                                         <font-awesome-icon icon="trash-alt" />
                                     </button>
@@ -240,14 +240,14 @@ export default {
                 }
             }
         },
-        async deleteComment(commentId) {
+        async deleteComment(articleId, commentId) {
             try {
                 const token = localStorage.getItem('token');
                 if (!token) {
                     throw new Error('No token found');
                 }
                 const apiUrl = process.env.VUE_APP_API_URL || 'http://localhost:3000';
-                await axios.delete(`${apiUrl}/article-comments/${commentId}`, {
+                await axios.delete(`${apiUrl}/articles/${articleId}/comments/${commentId}`, {
                     headers: { 'x-access-token': token }
                 });
                 this.article.comments = this.article.comments.filter(comment => comment.id !== commentId);
