@@ -10,7 +10,7 @@
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                 <div v-for="game in paginatedGames" :key="game.id"
-                    class="bg-white rp-6 flex flex-col items-center w-72 mx-auto transition-transform transform hover:scale-105">
+                    class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 flex flex-col items-center w-72 mx-auto transition-transform transform hover:scale-105">
                     <img :src="game.icon" alt="Game Icon"
                         class="w-32 h-32 object-cover rounded-full mb-4 animate-fade-in" />
                     <h2 class="text-2xl font-semibold mb-4 text-center">{{ game.title }}</h2>
@@ -34,7 +34,7 @@
         </div>
         <AppFooter :footerLogo="footerLogo" />
         <AppModal v-if="showModal" @close="closeModal" title="Add New Game">
-            <div class="bg-gray-100 dark:bg-gray-900 p-10 rounded-lg shadow-2xl">
+            <div class="p-5">
                 <form @submit.prevent="addGame" class="animate-fade-in">
                     <div class="mb-4">
                         <label class="block text-gray-700 dark:text-gray-200 font-semibold mb-2">Title</label>
