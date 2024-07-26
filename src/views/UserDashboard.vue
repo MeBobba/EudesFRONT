@@ -444,7 +444,7 @@ export default {
         }
 
         const apiUrl = process.env.VUE_APP_API_URL || 'http://localhost:3000';
-        const response = await axios.post(`${apiUrl}/comments`, {
+        const response = await axios.post(`${apiUrl}/posts/comments`, {
           postId: post.id,
           content: await this.applyWordFilter(commentContent)
         }, {
@@ -466,7 +466,7 @@ export default {
           throw new Error('No token found');
         }
         const apiUrl = process.env.VUE_APP_API_URL || 'http://localhost:3000';
-        await axios.delete(`${apiUrl}/comments/${commentId}`, {
+        await axios.delete(`${apiUrl}/posts/comments/${commentId}`, {
           headers: {'x-access-token': token}
         });
         this.posts = this.posts.map(post => {
@@ -505,7 +505,7 @@ export default {
           throw new Error('No token found');
         }
         const apiUrl = process.env.VUE_APP_API_URL || 'http://localhost:3000';
-        const response = await axios.post(`${apiUrl}/likes`, {
+        const response = await axios.post(`${apiUrl}/posts/likes`, {
           postId: post.id,
           isLike: !post.userLike
         }, {

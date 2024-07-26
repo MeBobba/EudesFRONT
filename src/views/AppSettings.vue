@@ -200,7 +200,8 @@ export default {
             if (!confirm('Are you sure you want to delete your account? This action cannot be undone.')) return;
             try {
                 const token = localStorage.getItem('token');
-                await axios.delete(`${process.env.VUE_APP_API_URL}/delete-account`, {
+                const apiUrl = process.env.VUE_APP_API_URL || 'http://localhost:3000'
+                await axios.delete(`${apiUrl}/delete-account`, {
                     headers: { 'x-access-token': token }
                 });
                 localStorage.removeItem('token');
