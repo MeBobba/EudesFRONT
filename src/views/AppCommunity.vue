@@ -263,7 +263,7 @@ export default {
                     throw new Error('No token found');
                 }
                 const apiUrl = process.env.VUE_APP_API_URL || 'http://localhost:3000';
-                const response = await axios.get(`${apiUrl}/posts/public-posts`, {
+                const response = await axios.get(`${apiUrl}/posts/public`, {
                     headers: { 'x-access-token': token },
                     params: { page: this.page, limit: this.limit }
                 });
