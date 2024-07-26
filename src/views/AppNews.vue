@@ -38,26 +38,25 @@
             </div>
         </div>
         <AppFooter :footerLogo="footerLogo" />
-
         <AppModal v-if="showModal" @close="closeModal" :title="modalTitle">
             <form @submit.prevent="submitForm">
                 <div class="mb-4">
-                    <label class="block text-gray-700 dark:text-gray-200">Title</label>
-                    <input v-model="form.title" type="text" class="w-full p-2 border border-gray-300 rounded-lg"
+                    <label class="block text-sm font-medium text-gray-700">Title</label>
+                    <input v-model="form.title" type="text" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none transition-all duration-300"
                         required />
                 </div>
                 <div class="mb-4">
-                    <label class="block text-gray-700 dark:text-gray-200">Summary</label>
-                    <textarea v-model="form.summary" class="w-full p-2 border border-gray-300 rounded-lg"
+                    <label class="block text-sm font-medium text-gray-700">Summary</label>
+                    <textarea v-model="form.summary" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none transition-all duration-300"
                         required></textarea>
                 </div>
                 <div class="mb-4">
-                    <label class="block text-gray-700 dark:text-gray-200">Content</label>
-                    <textarea v-model="form.content" class="w-full p-2 border border-gray-300 rounded-lg"
+                    <label class="block text-sm font-medium text-gray-700">Content</label>
+                    <textarea v-model="form.content" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none transition-all duration-300"
                         required></textarea>
                 </div>
                 <div class="mb-4">
-                    <label class="block text-gray-700 dark:text-gray-200">Image URL (<router-link to="/topstories"
+                    <label class="block text-sm font-medium text-gray-700">Image URL (<router-link to="/topstories"
                             custom>
                             <template v-slot="{ href, navigate }">
                                 <a :href="href" @click="navigate" target="_blank"
@@ -65,9 +64,9 @@
                             </template>
                         </router-link>
                         )</label>
-                    <input v-model="form.image" type="text" class="w-full p-2 border border-gray-300 rounded-lg" />
+                    <input v-model="form.image" type="text" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none transition-all duration-300" />
                 </div>
-                <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-lg">Submit</button>
+                <button type="submit" class="bg-gradient-to-r from-green-400 to-green-600 text-white px-6 py-3 rounded-lg transition-transform transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">Submit</button>
             </form>
         </AppModal>
     </div>
