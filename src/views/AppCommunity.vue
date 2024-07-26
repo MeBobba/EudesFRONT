@@ -152,7 +152,7 @@
                 <div v-for="card in exampleCards" :key="card.id"
                     :class="{ 'bg-gray-800 text-white': isDarkMode, 'bg-white text-black': !isDarkMode }"
                     class="p-4 rounded-lg shadow-md mb-8">
-                    <h2 class="text-2xl font-bold mb-4">{{ card.title }}</h2>
+                    <h2 class="text-2xl font-bold mb-4">{{ card.title }} test</h2>
                     <p>{{ card.content }}</p>
                 </div>
             </div>
