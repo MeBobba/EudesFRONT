@@ -5,38 +5,39 @@
         <div class="container mx-auto px-4 py-8 animate-fade-in">
             <nav class="bg-primary text-white p-4 rounded-lg shadow-md mb-8">
                 <ul class="flex justify-around space-x-4">
-                    <li><router-link to="/boutique" class="nav-link">Home</router-link></li>
-                    <li><router-link to="/pixels" class="nav-link">Pixel Converter</router-link></li>
-                    <li><router-link to="/lottery" class="nav-link">Lotto</router-link></li>
-                    <li><router-link to="/tokens" class="nav-link">Buy Tokens</router-link></li>
-                    <li><router-link to="/badges" class="nav-link">Buy Badges</router-link></li>
-                    <li><router-link to="/furni" class="nav-link">Buy Furni</router-link></li>
+                    <li><router-link to="/boutique" class="nav-link">{{ $t('shopping.home') }}</router-link></li>
+                    <li><router-link to="/pixels" class="nav-link">{{ $t('shopping.pixelconverter') }}</router-link>
+                    </li>
+                    <li><router-link to="/lottery" class="nav-link">{{ $t('shopping.lotto') }}</router-link></li>
+                    <li><router-link to="/tokens" class="nav-link">{{ $t('shopping.buytokens') }}</router-link></li>
+                    <li><router-link to="/badges" class="nav-link">{{ $t('shopping.buybadges') }}</router-link></li>
+                    <li><router-link to="/furni" class="nav-link">{{ $t('shopping.buyfurni') }}</router-link></li>
                 </ul>
             </nav>
             <div class="banner bg-primary text-white p-16 rounded-lg shadow-lg mb-8 flex items-center justify-center relative overflow-hidden"
                 :style="{ backgroundImage: `url(${bannerBackground})`, backgroundSize: 'cover', backgroundPosition: 'center' }">
-                <h1 class="text-5xl font-extrabold tracking-tight text-white">Welcome to Our Boutique</h1>
+                <h1 class="text-5xl font-extrabold tracking-tight text-white">{{ $t('shopping.welcome') }}</h1>
             </div>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-8">
                 <!-- Carte du générateur de crédits -->
                 <div
                     class="credit-generator-card bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 text-white rounded-lg shadow-lg p-6 text-center transform transition-transform hover:scale-105">
-                    <h2 class="text-3xl font-semibold mb-4">Generate Credits</h2>
-                    <p class="mb-4">If you have less than 10k credits, you can generate 10k more credits.</p>
+                    <h2 class="text-3xl font-semibold mb-4">{{ $t('shopping.generatecredits') }}</h2>
+                    <p class="mb-4">{{ $t('shopping.generatecreditsdesc') }}</p>
                     <button @click="generateCredits" :disabled="user.credits >= 10000"
                         :class="{ 'bg-gray-400 cursor-not-allowed': user.credits >= 10000, 'bg-primary text-white': user.credits < 10000 }"
                         class="py-2 px-4 rounded-lg transition duration-300">
-                        Generate Credits
+                        {{ $t('shopping.generatecredits') }}
                     </button>
                     <p v-if="creditMessage" class="mt-4">{{ creditMessage }}</p>
                 </div>
                 <!-- Carte du portefeuille -->
                 <div
                     class="wallet-card bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 text-white rounded-lg shadow-lg p-6 text-center transform transition-transform hover:scale-105">
-                    <h2 class="text-3xl font-semibold mb-4">Your Wallet</h2>
-                    <p class="mb-2"><strong>Points:</strong> {{ user.points }}</p>
-                    <p class="mb-2"><strong>Credits:</strong> {{ user.credits }}</p>
-                    <p class="mb-2"><strong>Pixels:</strong> {{ user.pixels }}</p>
+                    <h2 class="text-3xl font-semibold mb-4">{{ $t('shopping.yourwallet') }}</h2>
+                    <p class="mb-2"><strong>{{ $t('points') }}:</strong> {{ user.points }}</p>
+                    <p class="mb-2"><strong>{{ $t('credits') }}:</strong> {{ user.credits }}</p>
+                    <p class="mb-2"><strong>{{ $t('pixels') }}:</strong> {{ user.pixels }}</p>
                 </div>
             </div>
         </div>
@@ -90,7 +91,7 @@ export default {
                 });
                 this.user = response.data;
             } catch (error) {
-                console.error('Error fetching user data:', error);
+                console.error(this.$t('errorfetchinguserdata'), error);
             }
         },
         async generateCredits() {
@@ -104,12 +105,12 @@ export default {
                         }
                     });
                     this.user.credits += response.data.generatedCredits;
-                    this.creditMessage = '10k credits have been added to your account.';
+                    this.creditMessage = this.$t('shopping.tenkcredits');
                 } catch (error) {
-                    console.error('Error generating credits:', error);
+                    console.error(this.$t('shopping.errorgeneratecredits'), error);
                 }
             } else {
-                this.creditMessage = 'You have enough credits.';
+                this.creditMessage = this.$t('shopping.enoughcredits');
             }
         }
     },

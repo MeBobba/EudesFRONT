@@ -30,7 +30,7 @@ export default {
     left: 0;
     width: 100%;
     height: 100%;
-    background: white;
+    background: radial-gradient(circle, rgba(255,255,255,1) 0%, rgba(229,229,229,1) 100%);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -38,12 +38,15 @@ export default {
 }
 
 .spinner {
-    border: 16px solid #f3f3f3;
-    border-top: 16px solid #3498db;
-    border-radius: 50%;
     width: 120px;
     height: 120px;
-    animation: spin 2s linear infinite;
+    border: 16px solid transparent;
+    border-top: 16px solid #3498db;
+    border-right: 16px solid #f39c12;
+    border-bottom: 16px solid #e74c3c;
+    border-left: 16px solid #9b59b6;
+    border-radius: 50%;
+    animation: spin 2s linear infinite, pulse 1.5s ease-in-out infinite;
 }
 
 @keyframes spin {
@@ -53,6 +56,16 @@ export default {
 
     100% {
         transform: rotate(360deg);
+    }
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    
+    50% {
+        transform: scale(1.1);
     }
 }
 </style>
