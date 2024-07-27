@@ -91,6 +91,7 @@
 
 <script>
 import axios from 'axios';
+import cheerio from 'cheerio';
 import AppHeader from '../components/AppHeader.vue';
 import _ from 'lodash';
 
@@ -416,22 +417,45 @@ export default {
         },
         async fetchLyrics(track) {
             if (!track || !track.name || !track.artists || !track.artists[0].name) return;
+            const trackName = track.name;
+            const artistName = track.artists[0].name;
+            const apiKey = process.env.VUE_APP_GENIUS_API_KEY; // Remplacez par votre clé API Genius
+            const searchUrl = `https://api.genius.com/search?q=${encodeURIComponent(trackName + ' ' + artistName)}&access_token=${apiKey}`;
+
             try {
-                const response = await axios.get('https://api.musixmatch.com/ws/1.1/matcher.lyrics.get', {
-                    params: {
-                        q_track: track.name,
-                        q_artist: track.artists[0].name,
-                        apikey: process.env.VUE_APP_MUSIXMATCH_API_KEY
-                    }
-                });
-                if (response.data.message.body.lyrics) {
-                    this.lyrics = response.data.message.body.lyrics.lyrics_body;
+                // Rechercher le track sur Genius
+                const searchResponse = await axios.get(searchUrl);
+                const hits = searchResponse.data.response.hits;
+                if (hits.length > 0) {
+                    const songId = hits[0].result.id;
+                    const lyricsUrl = `https://api.genius.com/songs/${songId}?access_token=${apiKey}`;
+
+                    // Obtenir les détails du track, y compris les paroles
+                    const lyricsResponse = await axios.get(lyricsUrl);
+                    const lyricsPath = lyricsResponse.data.response.song.url;
+
+                    // Scraper les paroles de la page Genius (nécessite d'utiliser une bibliothèque de scraping côté serveur)
+                    const lyrics = await this.scrapeLyrics(lyricsPath);
+                    this.lyrics = lyrics || 'Lyrics not available.';
                 } else {
                     this.lyrics = 'Lyrics not available.';
                 }
             } catch (error) {
                 console.error('Error fetching lyrics:', error);
                 this.lyrics = 'Network error. Please try again later.';
+            }
+        },
+
+        async scrapeLyrics(url) {
+            try {
+                const response = await axios.get(url);
+                const html = response.data;
+                const $ = cheerio.load(html);
+                const lyrics = $('.lyrics').text().trim();
+                return lyrics;
+            } catch (error) {
+                console.error('Error scraping lyrics:', error);
+                return 'Error fetching lyrics.';
             }
         },
         formatLyrics(lyrics) {
