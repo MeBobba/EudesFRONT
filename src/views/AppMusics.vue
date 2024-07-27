@@ -447,15 +447,22 @@ export default {
         },
         async fetchArtistBio(track) {
             if (!track || !track.artists || !track.artists[0].name) return;
+            const artistName = track.artists[0].name;
+            const apiKey = '3aabc0162ce43b2f1cb78c617ce73fd3'; // Remplacez par votre clé API Last.fm
+            const url = `https://ws.audioscrobbler.com/2.0/?method=artist.getinfo&artist=${encodeURIComponent(artistName)}&api_key=${apiKey}&format=json`;
+
+            console.log(`Fetching artist biography from URL: ${url}`);
+
             try {
-                const response = await axios.get(`https://theaudiodb.com/api/v1/json/1/search.php?s=${encodeURIComponent(track.artists[0].name)}`);
-                if (response.data.artists) {
-                    this.artistBio = response.data.artists[0].strBiographyEN;
+                const response = await axios.get(url);
+                if (response.data && response.data.artist && response.data.artist.bio && response.data.artist.bio.content) {
+                    this.artistBio = response.data.artist.bio.content || 'Biography not available.';
                 } else {
-                    this.artistBio = 'Biography not available.';
+                    this.artistBio = 'Artist not found.';
                 }
             } catch (error) {
                 console.error('Error fetching artist biography:', error);
+                console.error(`Error response data: ${error.response ? error.response.data : 'No response data'}`);
                 this.artistBio = 'Error fetching biography.';
             }
         },
@@ -556,6 +563,38 @@ body {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 20px;
+}
+
+@media (max-width: 1024px) {
+
+    .latest-releases,
+    .search-results {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+
+    .latest-releases,
+    .search-results {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 645px) {
+
+    .latest-releases,
+    .search-results {
+        grid-template-columns: repeat(1, 1fr);
+    }
+}
+
+@media (max-width: 677px) {
+
+    .latest-releases,
+    .search-results {
+        grid-template-columns: repeat(2, 1fr);
+    }
 }
 
 .search-results>div {
