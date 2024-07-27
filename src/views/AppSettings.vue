@@ -181,7 +181,7 @@ export default {
         async downloadData() {
             try {
                 const token = localStorage.getItem('token');
-                const response = await axios.get(`${process.env.VUE_APP_API_URL}/download-data`, {
+                const response = await axios.get(`${process.env.VUE_APP_API_URL}/users/download-data`, {
                     headers: { 'x-access-token': token }
                 });
                 const blob = new Blob([JSON.stringify(response.data, null, 2)], { type: 'application/json' });
