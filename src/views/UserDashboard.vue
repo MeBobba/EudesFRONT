@@ -323,7 +323,7 @@ export default {
           throw new Error('No token found');
         }
         const apiUrl = process.env.VUE_APP_API_URL || 'http://localhost:3000';
-        const url = userId === 'me' ? `${apiUrl}/user-photos/me` : `${apiUrl}/user-photos/${userId}`;
+        const url = userId === 'me' ? `${apiUrl}/users/photos/me` : `${apiUrl}/users/photos/${userId}`;
         const response = await axios.get(url, {
           headers: { 'x-access-token': token }
         });
