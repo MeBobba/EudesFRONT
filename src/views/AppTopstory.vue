@@ -86,7 +86,7 @@ export default {
         async fetchImages() {
             try {
                 const apiUrl = process.env.VUE_APP_API_URL || 'http://localhost:3000';
-                const response = await axios.get(`${apiUrl}/topstory`, {
+                const response = await axios.get(`${apiUrl}/articles/topstory`, {
                     headers: this.getAuthHeaders()
                 });
                 this.images = response.data.map(image => ({
