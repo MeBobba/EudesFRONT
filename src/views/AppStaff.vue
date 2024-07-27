@@ -160,7 +160,7 @@ export default {
             const token = localStorage.getItem('token');
             const apiUrl = process.env.VUE_APP_API_URL || 'http://localhost:3000';
             try {
-                const response = await axios.get(`${apiUrl}/profile/me`, {
+                const response = await axios.get(`${apiUrl}/users/profile/me`, {
                     headers: { 'x-access-token': token }
                 });
                 this.canEditStaff = response.data.rank >= 6;

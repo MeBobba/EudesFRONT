@@ -101,7 +101,7 @@ export default {
         async checkAdmin() {
             try {
                 const apiUrl = process.env.VUE_APP_API_URL || 'http://localhost:3000';
-                const response = await axios.get(`${apiUrl}/profile/me`, {
+                const response = await axios.get(`${apiUrl}/users/profile/me`, {
                     headers: this.getAuthHeaders()
                 });
                 this.isAdmin = response.data.rank >= 5;

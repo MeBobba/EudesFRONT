@@ -195,7 +195,7 @@ export default {
             try {
                 const apiUrl = process.env.VUE_APP_API_URL || 'http://localhost:3000';
                 const token = localStorage.getItem('token');
-                const response = await axios.get(`${apiUrl}/profile/me`, {
+                const response = await axios.get(`${apiUrl}/users/profile/me`, {
                     headers: { 'x-access-token': token }
                 });
                 this.currentUser = response.data;
