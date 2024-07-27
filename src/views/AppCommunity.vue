@@ -160,8 +160,11 @@
         <AppFooter :footerLogo="footerLogo" />
         <AppModal v-if="showEditModal" @close="showEditModal = false" title="Edit Post">
             <label class="block text-sm font-medium text-gray-700">Contents</label>
-            <textarea v-model="editPostContent" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none transition-all duration-300"></textarea>
-            <button @click="savePost" class="bg-gradient-to-r from-green-400 to-green-600 text-white px-6 py-3 rounded-lg transition-transform transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">{{ $t('save') }}</button>
+            <textarea v-model="editPostContent"
+                class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none transition-all duration-300"></textarea>
+            <button @click="savePost"
+                class="bg-gradient-to-r from-green-400 to-green-600 text-white px-6 py-3 rounded-lg transition-transform transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">{{
+                $t('save') }}</button>
         </AppModal>
     </div>
 </template>
@@ -366,10 +369,21 @@ export default {
                     throw new Error('No token found');
                 }
                 const apiUrl = process.env.VUE_APP_API_URL || 'http://localhost:3000';
+
+                // Mettre à jour l'interface utilisateur immédiatement
+                this.posts = this.posts.map(post => {
+                    const commentIndex = post.comments.findIndex(c => c.id === commentId);
+                    if (commentIndex !== -1) {
+                        post.comments.splice(commentIndex, 1); // Supprimer le commentaire
+                        post.commentsCount--; // Décrémenter le compteur de commentaires
+                    }
+                    return post;
+                });
+
+                // Ensuite, faire la requête pour supprimer le commentaire sur le serveur
                 await axios.delete(`${apiUrl}/posts/comments/${commentId}`, {
                     headers: { 'x-access-token': token }
                 });
-                this.removeComment(commentId);
             } catch (error) {
                 console.error('Error deleting comment:', error);
             }
