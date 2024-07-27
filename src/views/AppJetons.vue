@@ -83,7 +83,7 @@ export default {
             try {
                 const apiUrl = process.env.VUE_APP_API_URL || 'http://localhost:3000';
                 const token = localStorage.getItem('token');
-                const response = await axios.post(`${apiUrl}/create-checkout-session`, { packageId }, {
+                const response = await axios.post(`${apiUrl}/payment/create-checkout-session`, { packageId }, {
                     headers: { 'x-access-token': token }
                 });
                 if (response.data.url) {
