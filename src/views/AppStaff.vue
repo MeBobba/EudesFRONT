@@ -43,11 +43,13 @@
                 <div
                     class="w-1/4 ml-8 bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md transition-transform transform hover:scale-105 animate-fade-in">
                     <h2 class="text-2xl font-semibold mb-4">Important Information</h2>
-                    <p class="text-gray-700 dark:text-gray-300">Welcome to the staff information page. Here, you will
-                        find essential details about our dedicated team members, their roles, and their
-                        responsibilities. Our staff is committed to providing the highest level of service and support.
-                        Stay updated with the latest news, team announcements, and key updates. If you have any
-                        questions or need assistance, feel free to reach out to any of our team members.</p>
+                    <p class="text-gray-700 dark:text-gray-300">
+                        Welcome to the staff information page. Here, you will find essential details about our dedicated
+                        team members, their roles, and their responsibilities. Our staff is committed to providing the
+                        highest level of service and support. Stay updated with the latest news, team announcements, and
+                        key updates. If you have any questions or need assistance, feel free to reach out to any of our
+                        team members.
+                    </p>
                 </div>
             </div>
         </div>
@@ -100,6 +102,7 @@ export default {
             logoImage: require('@/assets/images/skeleton/logo.png'),
             isDarkMode: false,
             staffSections: [],
+            rankNames: {}, // Ajouté pour stocker les noms des rangs
             backgroundImage,
             page: 1,
             limit: 20,
@@ -129,8 +132,14 @@ export default {
                     headers: { 'x-access-token': token },
                     params: { page: this.page, limit: this.limit }
                 });
-                if (response.data.length) {
-                    this.staffSections = [...this.staffSections, ...response.data];
+                if (response.data.staffSections.length) {
+                    console.log("Fetched staff data: ", response.data.staffSections);
+                    this.staffSections = response.data.staffSections.filter(section => section.users.some(user => user.rank >= 5));
+                    this.rankNames = response.data.ranks.reduce((acc, rank) => {
+                        acc[rank.level] = rank.rank_name;
+                        return acc;
+                    }, {});
+                    console.log("Filtered sections after fetch: ", this.staffSections);
                     this.page++;
                 } else {
                     this.noMoreData = true;
@@ -155,6 +164,7 @@ export default {
                     headers: { 'x-access-token': token }
                 });
                 this.canEditStaff = response.data.rank >= 6;
+                console.log("User rank checked: ", response.data.rank);
             } catch (error) {
                 console.error('Error checking user rank:', error);
             }
@@ -167,6 +177,35 @@ export default {
             this.showModal = false;
             this.selectedUser = null;
         },
+        updateUserInSections(user) {
+            // Retirer l'utilisateur des sections actuelles
+            this.staffSections.forEach(section => {
+                section.users = section.users.filter(u => u.id !== user.id);
+            });
+
+            // Ajouter l'utilisateur à la section appropriée s'il a un rang >= 5
+            if (user.rank >= 5) {
+                const rankName = this.rankNames[user.rank] || `Rank ${user.rank}`;
+                let section = this.staffSections.find(s => s.rank_name === rankName);
+                if (!section) {
+                    section = { rank_name: rankName, users: [] };
+                    this.staffSections.push(section);
+                }
+                section.users.push(user);
+            }
+
+            // Supprimer les sections vides
+            this.staffSections = this.staffSections.filter(section => section.users.length > 0);
+
+            // Trier les sections par rang
+            this.staffSections.sort((a, b) => {
+                const rankA = parseInt(a.rank_name.split(' ').pop());
+                const rankB = parseInt(b.rank_name.split(' ').pop());
+                return rankA - rankB;
+            });
+
+            console.log("Updated sections after user update: ", this.staffSections);
+        },
         async saveChanges() {
             if (!this.selectedUser) return;
             const token = localStorage.getItem('token');
@@ -175,11 +214,14 @@ export default {
                 await axios.put(`${apiUrl}/users/${this.selectedUser.id}`, this.selectedUser, {
                     headers: { 'x-access-token': token }
                 });
+                this.updateUserInSections(this.selectedUser);
                 this.closeModal();
-                this.fetchStaffData();
             } catch (error) {
                 console.error('Error saving changes:', error);
             }
+        },
+        getRankName(rank) {
+            return this.rankNames[rank] || `Rank ${rank}`;
         }
     },
     created() {
@@ -192,6 +234,7 @@ export default {
     }
 };
 </script>
+
 
 <style scoped>
 @keyframes fade-in {
