@@ -181,7 +181,10 @@ export default {
         async fetchLastMembers() {
             try {
                 const apiUrl = process.env.VUE_APP_API_URL || 'http://localhost:3000';
-                const response = await axios.get(`${apiUrl}/last-members`);
+                const token = localStorage.getItem('token');
+                const response = await axios.get(`${apiUrl}/shop/last-members`, {
+                    headers: { 'x-access-token': token }
+                });
                 this.lastMembers = response.data;
                 this.calculateProbability();
             } catch (error) {
@@ -246,7 +249,7 @@ export default {
             try {
                 const apiUrl = process.env.VUE_APP_API_URL || 'http://localhost:3000';
                 const token = localStorage.getItem('token');
-                const response = await axios.post(`${apiUrl}/lottery`, {
+                const response = await axios.post(`${apiUrl}/shop/lottery`, {
                     selectedNumbers: this.selectedNumbers,
                     betAmount: this.betAmount
                 }, {
