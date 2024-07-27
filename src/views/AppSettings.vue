@@ -25,9 +25,9 @@
                                 <input v-if="field.type !== 'select'" v-model="formData[field.model]" :type="field.type"
                                     :id="field.id"
                                     @blur="field.onBlur ? $options.methods[field.onBlur].call(this) : null"
-                                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" />
+                                    class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none transition-all duration-300" />
                                 <select v-if="field.type === 'select'" v-model="formData[field.model]" :id="field.id"
-                                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                                    class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none transition-all duration-300">
                                     <option v-for="option in field.options" :key="option.value" :value="option.value">{{
                                         option.label }}</option>
                                 </select>
@@ -50,14 +50,14 @@
                         <label for="new_password"
                             class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">New Password</label>
                         <input v-model="formData.newPassword" type="password" id="new_password"
-                            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" />
+                            class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none transition-all duration-300" />
                     </div>
                     <div class="mb-4">
                         <label for="confirm_password"
                             class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">Confirm New
                             Password</label>
                         <input v-model="formData.confirmPassword" type="password" id="confirm_password"
-                            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" />
+                            class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none transition-all duration-300" />
                     </div>
                     <div class="mb-4">
                         <label class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">Google
