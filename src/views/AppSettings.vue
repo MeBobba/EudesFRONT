@@ -201,7 +201,7 @@ export default {
             try {
                 const token = localStorage.getItem('token');
                 const apiUrl = process.env.VUE_APP_API_URL || 'http://localhost:3000'
-                await axios.delete(`${apiUrl}/delete-account`, {
+                await axios.delete(`${apiUrl}/users/delete-account`, {
                     headers: { 'x-access-token': token }
                 });
                 localStorage.removeItem('token');
