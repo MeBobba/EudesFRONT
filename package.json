@@ -22,6 +22,7 @@
     "blockadblock": "^3.2.1",
     "browserify-zlib": "^0.2.0",
     "buffer": "^6.0.3",
+    "cheerio": "^1.0.0-rc.12",
     "core-js": "^3.8.3",
     "crypto": "^1.0.1",
     "crypto-browserify": "^3.12.0",
