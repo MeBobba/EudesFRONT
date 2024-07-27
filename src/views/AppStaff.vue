@@ -61,17 +61,17 @@
                 <div>
                     <label for="rank" class="block text-sm font-medium text-gray-700">Rank</label>
                     <input v-model="selectedUser.rank" type="number" id="rank"
-                        class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all duration-300" />
+                        class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none " />
                 </div>
                 <div>
                     <label for="mail" class="block text-sm font-medium text-gray-700">Email</label>
                     <input v-model="selectedUser.mail" type="email" id="mail"
-                        class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all duration-300" />
+                        class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none " />
                 </div>
                 <div>
                     <label for="motto" class="block text-sm font-medium text-gray-700">Motto</label>
                     <input v-model="selectedUser.motto" type="text" id="motto"
-                        class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all duration-300" />
+                        class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none " />
                 </div>
                 <button @click="saveChanges"
                     class="bg-gradient-to-r from-green-400 to-green-600 text-white px-6 py-3 rounded-lg transition-transform transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">

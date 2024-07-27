@@ -39,17 +39,17 @@
                     <div class="mb-4">
                         <label class="block text-gray-700 dark:text-gray-200 font-semibold mb-2">Title</label>
                         <input v-model="newGame.title" type="text" required
-                            class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all duration-300" />
+                            class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none " />
                     </div>
                     <div class="mb-4">
                         <label class="block text-gray-700 dark:text-gray-200 font-semibold mb-2">Icon URL</label>
                         <input v-model="newGame.icon" type="text" required
-                            class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all duration-300" />
+                            class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none " />
                     </div>
                     <div class="mb-4">
                         <label class="block text-gray-700 dark:text-gray-200 font-semibold mb-2">Source URL</label>
                         <input v-model="newGame.source" type="text" required
-                            class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all duration-300" />
+                            class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none " />
                     </div>
                     <button type="submit"
                         class="bg-gradient-to-r from-green-400 to-green-600 text-white px-6 py-3 rounded-lg transition-transform transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">Add
