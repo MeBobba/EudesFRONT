@@ -84,7 +84,7 @@ export default {
             try {
                 const token = localStorage.getItem('token');
                 const apiUrl = process.env.VUE_APP_API_URL || 'http://localhost:3000';
-                const response = await axios.get(`${apiUrl}/user/wallet`, {
+                const response = await axios.get(`${apiUrl}/users/wallet`, {
                     headers: {
                         'x-access-token': token
                     }

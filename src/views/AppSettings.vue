@@ -169,7 +169,7 @@ export default {
         async updateAccount() {
             try {
                 const token = localStorage.getItem('token');
-                await axios.put(`${process.env.VUE_APP_API_URL}/update-account`, this.formData, {
+                await axios.put(`${process.env.VUE_APP_API_URL}/users/update-account`, this.formData, {
                     headers: { 'x-access-token': token }
                 });
                 alert('Account updated successfully');

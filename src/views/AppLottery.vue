@@ -170,7 +170,7 @@ export default {
             try {
                 const apiUrl = process.env.VUE_APP_API_URL || 'http://localhost:3000';
                 const token = localStorage.getItem('token');
-                const response = await axios.get(`${apiUrl}/user/points`, {
+                const response = await axios.get(`${apiUrl}/users/points`, {
                     headers: { 'x-access-token': token }
                 });
                 this.points = response.data.points;
