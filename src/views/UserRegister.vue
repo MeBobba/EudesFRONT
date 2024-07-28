@@ -158,7 +158,7 @@ export default {
         async getAntiRobotQuestion() {
             try {
                 const apiUrl = process.env.VUE_APP_API_URL || 'http://localhost:3000';
-                const response = await axios.get(`${apiUrl}/anti-robot-question`);
+                const response = await axios.get(`${apiUrl}/auth/anti-robot-question`);
                 this.robotQuestion = response.data;
             } catch (error) {
                 this.errorMessage = 'Error fetching anti-robot question';
