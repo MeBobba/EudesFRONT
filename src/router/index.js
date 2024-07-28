@@ -105,7 +105,7 @@ router.beforeEach(async (to, from, next) => {
         if (isMaintenance) {
             if (to.path !== '/maintenance') {
                 if (isAuthenticated) {
-                    const userResponse = await axios.get(`${apiUrl}/dashboard`, {
+                    const userResponse = await axios.get(`${apiUrl}/users/profile/me`, {
                         headers: { 'x-access-token': localStorage.getItem('token') }
                     });
                     const userRank = userResponse.data.rank;

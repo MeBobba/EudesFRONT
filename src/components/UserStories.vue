@@ -88,7 +88,7 @@ export default {
                     throw new Error('No token found');
                 }
                 const apiUrl = process.env.VUE_APP_API_URL || 'http://localhost:3000';
-                const response = await axios.get(`${apiUrl}/stories/${this.userId}`, {
+                const response = await axios.get(`${apiUrl}/users/stories/${this.userId}`, {
                     headers: { 'x-access-token': token }
                 });
                 this.stories = response.data;

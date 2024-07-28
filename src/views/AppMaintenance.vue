@@ -109,7 +109,7 @@ export default {
                 });
 
                 localStorage.setItem('token', response.data.token);
-                const userResponse = await axios.get(`${apiUrl}/dashboard`, {
+                const userResponse = await axios.get(`${apiUrl}/users/profile/me`, {
                     headers: { 'x-access-token': localStorage.getItem('token') }
                 });
                 const userRank = userResponse.data.rank;

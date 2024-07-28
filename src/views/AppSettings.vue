@@ -286,7 +286,8 @@ export default {
     async created() {
         try {
             const token = localStorage.getItem('token');
-            const response = await axios.get(`${process.env.VUE_APP_API_URL}/dashboard`, {
+            const apiUrl = process.env.VUE_APP_API_URL || 'http://localhost:3000';
+            const response = await axios.get(`${apiUrl}/users/profile/me`, {
                 headers: { 'x-access-token': token }
             });
             this.formData = { ...this.formData, ...response.data };
