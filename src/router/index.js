@@ -99,7 +99,7 @@ router.beforeEach(async (to, from, next) => {
     const apiUrl = process.env.VUE_APP_API_URL || 'http://localhost:3000';
 
     try {
-        const response = await axios.get(`${apiUrl}/maintenance-status`);
+        const response = await axios.get(`${apiUrl}/maintenance/status`);
         const isMaintenance = response.data.maintenance;
 
         if (isMaintenance) {
