@@ -91,7 +91,7 @@ export default {
         async check2FA() {
             try {
                 const apiUrl = process.env.VUE_APP_API_URL || 'http://localhost:3000';
-                const response = await axios.get(`${apiUrl}/check-2fa`, {
+                const response = await axios.get(`${apiUrl}/users/check-2fa`, {
                     params: { username: this.username }
                 });
                 this.is2FAEnabled = response.data.is2FAEnabled;

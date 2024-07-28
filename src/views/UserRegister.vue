@@ -106,7 +106,7 @@ export default {
             if (this.username.length > 3) {
                 try {
                     const apiUrl = process.env.VUE_APP_API_URL || 'http://localhost:3000';
-                    const response = await axios.post(`${apiUrl}/check-username`, { username: this.username });
+                    const response = await axios.post(`${apiUrl}/users/check-username`, { username: this.username });
                     this.usernameError = response.data.exists ? 'Username already exists' : '';
                     this.canProceedToStep2 = !response.data.exists && this.username;
                 } catch (error) {
@@ -122,7 +122,7 @@ export default {
             if (emailRegex.test(this.mail)) {
                 try {
                     const apiUrl = process.env.VUE_APP_API_URL || 'http://localhost:3000';
-                    const response = await axios.post(`${apiUrl}/check-email`, { email: this.mail });
+                    const response = await axios.post(`${apiUrl}/users/check-email`, { email: this.mail });
                     this.emailError = response.data.exists ? 'Email already exists' : '';
                     this.canProceedToStep3 = !response.data.exists && this.password && this.mail && this.password === this.confirmPassword;
                 } catch (error) {

@@ -214,7 +214,7 @@ export default {
         async checkUsernameAvailability() {
             if (this.formData.username) {
                 try {
-                    const response = await axios.post(`${process.env.VUE_APP_API_URL}/check-username`, { username: this.formData.username });
+                    const response = await axios.post(`${process.env.VUE_APP_API_URL}/users/check-username`, { username: this.formData.username });
                     this.usernameExists = response.data.exists;
                 } catch (error) {
                     console.error('Error checking username:', error);
@@ -224,7 +224,7 @@ export default {
         async checkEmailAvailability() {
             if (this.formData.mail) {
                 try {
-                    const response = await axios.post(`${process.env.VUE_APP_API_URL}/check-email`, { email: this.formData.mail });
+                    const response = await axios.post(`${process.env.VUE_APP_API_URL}/users/check-email`, { email: this.formData.mail });
                     this.emailExists = response.data.exists;
                 } catch (error) {
                     console.error('Error checking email:', error);
@@ -234,7 +234,7 @@ export default {
         async enable2FA() {
             try {
                 const token = localStorage.getItem('token');
-                const { data } = await axios.post(`${process.env.VUE_APP_API_URL}/enable-2fa`, {}, {
+                const { data } = await axios.post(`${process.env.VUE_APP_API_URL}/users/enable-2fa`, {}, {
                     headers: { 'x-access-token': token }
                 });
                 this.qrCodeURL = data.dataURL;
@@ -247,7 +247,7 @@ export default {
         async verify2FA() {
             try {
                 const token = localStorage.getItem('token');
-                await axios.post(`${process.env.VUE_APP_API_URL}/verify-2fa`, { token: this.verificationToken }, {
+                await axios.post(`${process.env.VUE_APP_API_URL}/users/verify-2fa`, { token: this.verificationToken }, {
                     headers: { 'x-access-token': token }
                 });
                 this.is2FAEnabled = true;
@@ -261,7 +261,7 @@ export default {
         async disable2FA() {
             try {
                 const token = localStorage.getItem('token');
-                await axios.post(`${process.env.VUE_APP_API_URL}/disable-2fa`, {}, {
+                await axios.post(`${process.env.VUE_APP_API_URL}/users/disable-2fa`, {}, {
                     headers: { 'x-access-token': token }
                 });
                 this.is2FAEnabled = false;
