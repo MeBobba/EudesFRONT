@@ -1,5 +1,6 @@
 <template>
     <div>
+        <IdleTimer />
         <div class="header-image-container">
             <img :src="headerImage" alt="Header Image" class="header-image" loading="lazy">
         </div>
@@ -118,9 +119,12 @@
 
 <script>
 import axios from 'axios';
-
+import IdleTimer from './IdleTimer.vue';
 
 export default {
+    components: {
+        IdleTimer,
+    },
     props: {
         headerImage: {
             type: String,

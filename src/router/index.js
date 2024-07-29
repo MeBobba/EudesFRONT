@@ -23,6 +23,7 @@ import AppTerms from '../views/AppTerms.vue';
 import AppTopstory from '../views/AppTopstory.vue';
 import AppMaintenance from '../views/AppMaintenance.vue';
 import AppJetons from '../views/AppJetons.vue';
+import AppLocker from '../views/AppLocker.vue'; // Ajout de cette ligne
 
 const routes = [
     { path: '/', redirect: '/login' },
@@ -49,6 +50,7 @@ const routes = [
     { path: '/error/:statusCode/:message', component: AppError, props: true },
     { path: '/articles/:id', name: 'ArticleDetail', component: ArticleDetail, meta: { requiresAuth: true } },
     { path: '/maintenance', component: AppMaintenance },
+    { path: '/lock', component: AppLocker, meta: { requiresAuth: true } }, // Ajout de cette ligne
     { path: '/:catchAll(.*)', redirect: '/404' }
 ];
 
@@ -75,7 +77,6 @@ socket.on('maintenance', async (isMaintenance) => {
         router.push('/maintenance');
     }
 });
-
 
 async function checkSession() {
     const token = localStorage.getItem('token');
@@ -128,20 +129,25 @@ router.beforeEach(async (to, from, next) => {
         } else {
             if (to.path === '/maintenance') {
                 next('/login');
-            } else if (to.matched.some(record => record.meta.requiresAuth)) {
-                if (!isAuthenticated) {
-                    next('/login');
-                } else {
-                    next();
-                }
-            } else if (to.matched.some(record => record.meta.guest)) {
-                if (isAuthenticated) {
-                    next('/dashboard');
-                } else {
-                    next();
-                }
             } else {
-                next();
+                const isLocked = localStorage.getItem('isLocked');
+                if (isLocked === 'true' && to.path !== '/lock') {
+                    next('/lock');
+                } else if (to.matched.some(record => record.meta.requiresAuth)) {
+                    if (!isAuthenticated) {
+                        next('/login');
+                    } else {
+                        next();
+                    }
+                } else if (to.matched.some(record => record.meta.guest)) {
+                    if (isAuthenticated) {
+                        next('/dashboard');
+                    } else {
+                        next();
+                    }
+                } else {
+                    next();
+                }
             }
         }
     } catch (error) {

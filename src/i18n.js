@@ -4,6 +4,7 @@ import { createI18n } from 'vue-i18n';
 const messages = {
     en: {
         dashboard: 'Home',
+        downloadapp: 'Télécharger l\'app',
         gotohome: 'Go to Home',
         errorfour: 'Sorry, this page isn\'t available.',
         errorfive: 'Internal Server Error',
@@ -74,6 +75,11 @@ const messages = {
         gamespage: {
             newgame: 'Add New Game',
             playgame: 'Play',
+            deletegame: 'Delete',
+        },
+        lockscreen: {
+            title: 'Compte Vérouillé',
+            unlock: 'Dévérouiller',
             deletegame: 'Delete',
         },
     },
