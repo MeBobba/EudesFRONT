@@ -79,26 +79,30 @@
         </div>
         <AppFooter :footerLogo="footerLogo" />
         <AppModal v-if="showModal" @close="closeModal" :title="modalTitle">
-            <form @submit.prevent="submitForm">
-                <div class="mb-4">
-                    <label class="block text-gray-700 dark:text-gray-200">Title</label>
-                    <input v-model="form.title" type="text" class="w-full p-2 border border-gray-300 rounded-lg"
-                        required />
+            <form @submit.prevent="submitForm" class="max-h-screen">
+                <div class="modal-body">
+                    <div class="mb-4">
+                        <label class="block text-gray-700 dark:text-gray-200">Title</label>
+                        <input v-model="form.title" type="text" class="w-full p-2 border border-gray-300 rounded-lg"
+                            required />
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-700 dark:text-gray-200">Summary</label>
+                        <textarea v-model="form.summary" class="w-full p-2 border border-gray-300 rounded-lg"
+                            required></textarea>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-700 dark:text-gray-200">Content</label>
+                        <div ref="editorContainer" class="w-full p-2 border border-gray-300 rounded-lg" required></div>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-700 dark:text-gray-200">Image URL</label>
+                        <input v-model="form.image" type="text" class="w-full p-2 border border-gray-300 rounded-lg" />
+                    </div>
                 </div>
-                <div class="mb-4">
-                    <label class="block text-gray-700 dark:text-gray-200">Summary</label>
-                    <textarea v-model="form.summary" class="w-full p-2 border border-gray-300 rounded-lg"
-                        required></textarea>
+                <div class="modal-footer">
+                    <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-lg">Submit</button>
                 </div>
-                <div class="mb-4">
-                    <label class="block text-gray-700 dark:text-gray-200">Content</label>
-                    <div ref="editorContainer" class="w-full p-2 border border-gray-300 rounded-lg" required></div>
-                </div>
-                <div class="mb-4">
-                    <label class="block text-gray-700 dark:text-gray-200">Image URL</label>
-                    <input v-model="form.image" type="text" class="w-full p-2 border border-gray-300 rounded-lg" />
-                </div>
-                <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-lg">Submit</button>
             </form>
         </AppModal>
     </div>
@@ -368,7 +372,36 @@ export default {
 
 <style scoped>
 @import '~quill/dist/quill.snow.css';
-/* Ajoutez cette ligne */
+
+.modal-body {
+    max-height: calc(100vh - 200px);
+    overflow-y: auto;
+    padding-right: 1rem;
+    /* pour éviter que le texte touche le bord droit */
+}
+
+.modal-footer {
+    padding-top: 1rem;
+    border-top: 1px solid #eaeaea;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.modal-body::-webkit-scrollbar {
+    width: 8px;
+}
+
+.modal-body::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+.modal-body::-webkit-scrollbar-thumb {
+    background: #888;
+}
+
+.modal-body::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
 
 /* Votre style existant */
 .container {

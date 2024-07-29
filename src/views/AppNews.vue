@@ -39,39 +39,43 @@
         </div>
         <AppFooter :footerLogo="footerLogo" />
         <AppModal v-if="showModal" @close="closeModal" :title="modalTitle">
-            <form @submit.prevent="submitForm">
-                <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700">Title</label>
-                    <input v-model="form.title" type="text"
-                        class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none "
-                        required />
+            <form @submit.prevent="submitForm" class="max-h-screen">
+                <div class="modal-body">
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700">Title</label>
+                        <input v-model="form.title" type="text"
+                            class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                            required />
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700">Summary</label>
+                        <textarea v-model="form.summary"
+                            class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                            required></textarea>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700">Content</label>
+                        <div ref="editorContainer"
+                            class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                            required></div>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700">Image URL (<router-link to="/topstories"
+                                custom>
+                                <template v-slot="{ href, navigate }">
+                                    <a :href="href" @click="navigate" target="_blank"
+                                        class="hover:text-gray-900 mb-4 sm:mb-0">here</a>
+                                </template>
+                            </router-link>
+                            )</label>
+                        <input v-model="form.image" type="text"
+                            class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" />
+                    </div>
                 </div>
-                <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700">Summary</label>
-                    <textarea v-model="form.summary"
-                        class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none "
-                        required></textarea>
+                <div class="modal-footer">
+                    <button type="submit"
+                        class="bg-gradient-to-r from-green-400 to-green-600 text-white px-6 py-3 rounded-lg transition-transform transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">Submit</button>
                 </div>
-                <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700">Content</label>
-                    <div ref="editorContainer"
-                        class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none "
-                        required></div>
-                </div>
-                <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700">Image URL (<router-link to="/topstories"
-                            custom>
-                            <template v-slot="{ href, navigate }">
-                                <a :href="href" @click="navigate" target="_blank"
-                                    class="hover:text-gray-900 mb-4 sm:mb-0">here</a>
-                            </template>
-                        </router-link>
-                        )</label>
-                    <input v-model="form.image" type="text"
-                        class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none " />
-                </div>
-                <button type="submit"
-                    class="bg-gradient-to-r from-green-400 to-green-600 text-white px-6 py-3 rounded-lg transition-transform transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">Submit</button>
             </form>
         </AppModal>
     </div>
@@ -286,7 +290,36 @@ export default {
 
 <style scoped>
 @import '~quill/dist/quill.snow.css';
-/* Ajoutez cette ligne */
+
+.modal-body {
+    max-height: calc(100vh - 200px);
+    overflow-y: auto;
+    padding-right: 1rem;
+    /* pour éviter que le texte touche le bord droit */
+}
+
+.modal-footer {
+    padding-top: 1rem;
+    border-top: 1px solid #eaeaea;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.modal-body::-webkit-scrollbar {
+    width: 8px;
+}
+
+.modal-body::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+.modal-body::-webkit-scrollbar-thumb {
+    background: #888;
+}
+
+.modal-body::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
 
 /* Votre style existant */
 .container {
