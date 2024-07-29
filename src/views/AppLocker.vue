@@ -40,7 +40,7 @@
 
 <script>
 import axios from 'axios';
-import backgroundImage from '@/assets/images/skeleton/bg.webp';
+import backgroundImage from '@/assets/images/skeleton/lockscreen.webp';
 
 export default {
     name: 'AppLocker',

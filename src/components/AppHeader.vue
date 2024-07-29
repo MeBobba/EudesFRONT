@@ -1,14 +1,13 @@
 <template>
-    <div>
+    <div @click="handleClickOutside">
         <IdleTimer />
         <div class="header-image-container">
-            <img :src="headerImage" alt="Header Image" class="header-image" loading="lazy">
+            <img :src="localHeaderImage" alt="Header Image" class="header-image" loading="lazy">
         </div>
         <header :class="{ 'bg-gray-900 text-white': isDarkMode, 'bg-white text-black': !isDarkMode }"
             class="shadow sticky top-0 z-50">
             <div
                 class="container mx-auto py-4 px-4 sm:px-6 md:px-8 lg:px-10 xl:px-12 flex justify-between items-center">
-
                 <!-- Logo - Hidden on mobile menu -->
                 <router-link to="/" class="hover:text-gray-900 hidden sm:block">
                     <img :src="logoImage" alt="Logo" loading="lazy">
@@ -84,20 +83,24 @@
                     <ul class="space-y-2 w-full">
                         <li><router-link to="/" class="block px-4 py-2 rounded-lg nav-link"
                                 active-class="router-link-active" exact-active-class="exact-router-link-active">{{
-                                    $t('home') }}</router-link></li>
+                                    $t('home') }}</router-link>
+                        </li>
                         <li><router-link to="/community" class="block px-4 py-2 rounded-lg nav-link"
                                 active-class="router-link-active" exact-active-class="exact-router-link-active">{{
-                                    $t('community')
-                                }}</router-link></li>
+                                    $t('community') }}</router-link>
+                        </li>
                         <li><router-link to="/games" class="block px-4 py-2 rounded-lg nav-link"
                                 active-class="router-link-active" exact-active-class="exact-router-link-active">{{
-                                    $t('games') }}</router-link></li>
+                                    $t('games') }}</router-link>
+                        </li>
                         <li><router-link to="/staff" class="block px-4 py-2 rounded-lg nav-link"
                                 active-class="router-link-active" exact-active-class="exact-router-link-active">{{
-                                    $t('staff') }}</router-link></li>
+                                    $t('staff') }}</router-link>
+                        </li>
                         <li><router-link to="/news" class="block px-4 py-2 rounded-lg nav-link"
                                 active-class="router-link-active" exact-active-class="exact-router-link-active">{{
-                                    $t('news') }}</router-link></li>
+                                    $t('news') }}</router-link>
+                        </li>
                     </ul>
 
                     <div class="flex space-x-4 mt-4">
@@ -110,16 +113,33 @@
                         <button @click="logout" class="logout-btn w-full">{{ $t('logout') }}</button>
                     </div>
                 </div>
-
             </div>
         </header>
+        <!-- Floating mini-card with cog icon -->
+        <div class="floating-card" @click="toggleModal">
+            <i class="fas fa-cog fa-spin"></i>
+        </div>
+        <!-- Modal -->
+        <transition name="modal">
+            <div v-if="isModalOpen" class="modal-overlay" @click="toggleModal">
+                <div class="modal-content" @click.stop>
+                    <h3 class="modal-title">{{ $t('changeimageheader') }}</h3>
+                    <ul class="image-list">
+                        <li v-for="image in headerImages" :key="image.name" @click="changeHeaderImage(image.path)">
+                            <img :src="image.path" :alt="image.name" class="header-image-option">
+                        </li>
+                    </ul>
+                    <button @click="toggleModal">{{ $t('close') }}</button>
+                </div>
+            </div>
+        </transition>
     </div>
 </template>
-
 
 <script>
 import axios from 'axios';
 import IdleTimer from './IdleTimer.vue';
+import defaultHeaderImage from '@/assets/images/skeleton/topbg.webp'; // Import default header image
 
 export default {
     components: {
@@ -137,10 +157,14 @@ export default {
     },
     data() {
         return {
+            localHeaderImage: this.headerImage, // Use a local data property
             isDarkMode: false,
             searchQuery: '',
             searchResults: [],
             isMenuOpen: false,
+            isModalOpen: false,
+            headerImages: [],
+            drawerTop: 0,
             selectedLanguage: localStorage.getItem('locale') || 'en',
         };
     },
@@ -199,8 +223,53 @@ export default {
             this.searchQuery = '';
             this.searchResults = [];
             this.isMenuOpen = false; // Close menu after selecting an item
+        },
+        async fetchHeaderImages() {
+            try {
+                const apiUrl = process.env.VUE_APP_API_URL || 'http://localhost:3000';
+                const response = await axios.get(`${apiUrl}/headerimages`, {
+                    headers: this.getAuthHeaders()
+                });
+                this.headerImages = response.data.map(image => ({
+                    ...image,
+                    path: `${apiUrl}${image.path}`
+                }));
+            } catch (error) {
+                console.error('Error fetching header images:', error);
+            }
+        },
+        changeHeaderImage(imagePath) {
+            this.localHeaderImage = imagePath; // Update local data property
+            localStorage.setItem('headerImage', imagePath); // Save the selected image in localStorage
+            // Ne pas fermer la modal ici pour test
+        },
+        toggleModal() {
+            this.isModalOpen = !this.isModalOpen;
+        },
+        getAuthHeaders() {
+            const token = localStorage.getItem('token');
+            return token ? { 'x-access-token': token } : {};
+        },
+        handleClickOutside(event) {
+            const modal = this.$refs.modal;
+            if (modal && !modal.contains(event.target)) {
+                this.isModalOpen = false;
+            }
         }
     },
+    mounted() {
+        this.fetchHeaderImages();
+        const savedHeaderImage = localStorage.getItem('headerImage');
+        if (savedHeaderImage) {
+            this.localHeaderImage = savedHeaderImage;
+        } else {
+            this.localHeaderImage = defaultHeaderImage; // Use default image if none is selected
+        }
+        document.addEventListener('click', this.handleClickOutside);
+    },
+    beforeUnmount() {
+        document.removeEventListener('click', this.handleClickOutside);
+    }
 };
 </script>
 
@@ -208,7 +277,6 @@ export default {
 .header-image-container {
     width: 100%;
     height: 200px;
-    /* Adjust the height as needed */
     overflow: hidden;
     position: relative;
 }
@@ -275,5 +343,72 @@ export default {
 
 .custom-option:focus {
     @apply bg-blue-100;
+}
+
+.header-image-changer {
+    position: relative;
+    display: inline-block;
+}
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+}
+
+.modal-content {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    max-width: 500px;
+    width: 100%;
+    position: relative;
+}
+
+.modal-title {
+    font-size: 1.2em;
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+
+.header-image-option {
+    width: 100%;
+    height: auto;
+    cursor: pointer;
+    margin-bottom: 8px;
+    border: 2px solid transparent;
+}
+
+.header-image-option:hover {
+    border: 2px solid #000;
+}
+
+.floating-card {
+    position: fixed;
+    right: 16px;
+    bottom: 50%;
+    transform: translateY(50%);
+    width: 50px;
+    height: 50px;
+    background: white;
+    border-radius: 50%;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    z-index: 2000;
+}
+
+.floating-card i {
+    font-size: 24px;
+    color: #333;
 }
 </style>

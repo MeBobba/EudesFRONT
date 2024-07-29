@@ -3,6 +3,7 @@ import { createI18n } from 'vue-i18n';
 
 const messages = {
     "fr": {
+        "home": "Home",
         "dashboard": "Accueil",
         "downloadapp": "Télécharger l'app",
         "community": "Communauté",
@@ -52,6 +53,7 @@ const messages = {
         "shop": "Boutique",
         "previouspage": "Précédent",
         "nextpage": "Suivant",
+        "changeimageheader": "Change Image Header",
         "shopping": {
             "welcome": "Bienvenue dans notre boutique",
             "home": "Accueil",
@@ -80,6 +82,7 @@ const messages = {
         }
     },
     "it": {
+        "home": "Home",
         "dashboard": "Home",
         "downloadapp": "Scarica l'app",
         "community": "Comunità",
@@ -129,6 +132,7 @@ const messages = {
         "shop": "Negozio",
         "previouspage": "Precedente",
         "nextpage": "Successivo",
+        "changeimageheader": "Change Image Header",
         "shopping": {
             "welcome": "Benvenuto nella nostra boutique",
             "home": "Home",
@@ -157,6 +161,7 @@ const messages = {
         }
     },
     "en": {
+        "home": "Home",
         "dashboard": "Home",
         "downloadapp": "Download App",
         "community": "Community",
@@ -206,6 +211,7 @@ const messages = {
         "shop": "Shop",
         "previouspage": "Previous",
         "nextpage": "Next",
+        "changeimageheader": "Change Image Header",
         "shopping": {
             "welcome": "Welcome to Our Shop",
             "home": "Home",

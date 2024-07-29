@@ -34,7 +34,7 @@ export default {
             this.idleTimeout = setTimeout(() => {
                 this.isIdle = true;
                 this.startCountdown();
-            }, 1 * 60 * 1000); // 1 minute pour tester, ajustez à 5 minutes pour la production
+            }, 5 * 60 * 1000); // 1 minute pour tester, ajustez à 5 minutes pour la production
         },
         resetIdleTimer() {
             clearTimeout(this.idleTimeout);
