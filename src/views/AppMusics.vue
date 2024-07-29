@@ -51,8 +51,8 @@
                 </div>
             </section>
         </div>
-        <div v-if="currentTrack"
-            class="music-player fixed bottom-0 left-0 right-0 bg-gray-800 text-white p-4 flex flex-col sm:flex-row items-center justify-between rounded-t-lg shadow-lg transition-transform duration-300 ease-in-out transform hover:scale-105">
+        <div v-if="currentTrack" :class="['music-player', { minimized: minimized }]"
+            class="fixed bottom-0 left-0 right-0 bg-gray-800 text-white p-4 flex flex-col sm:flex-row items-center justify-between rounded-t-lg shadow-lg">
             <div class="flex items-center mb-4 sm:mb-0">
                 <img :src="currentTrack.album.images[0]?.url || require('@/assets/images/skeleton/no-image.png')"
                     alt="Album cover" class="w-16 h-16 rounded-lg" />
@@ -77,6 +77,8 @@
                     class="volume-slider mx-2" />
                 <i class="fas fa-align-left control-icon mx-2" @click="showLyricsModal"></i>
                 <i class="fas fa-user control-icon mx-2" @click="showBioModal"></i>
+                <i :class="minimized ? 'fas fa-window-maximize' : 'fas fa-window-minimize'" class="control-icon mx-2"
+                    @click="togglePlayerSize"></i>
             </div>
         </div>
         <div v-if="showModal" class="modal fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center">
@@ -88,6 +90,7 @@
         <div ref="youtubePlayer" style="display:none;"></div>
     </div>
 </template>
+
 
 <script>
 import axios from 'axios';
@@ -166,7 +169,7 @@ export default {
             try {
                 await this.fetchSpotifyToken();
                 const response = await this.retryRequest(
-                    'https://api.spotify.com/v1/browse/new-releases?limit=10',
+                    'https://api.spotify.com/v1/browse/new-releases?limit=14',
                     { headers: { Authorization: `Bearer ${this.spotifyToken}` } }
                 );
                 if (response.data && response.data.albums && Array.isArray(response.data.albums.items)) {
@@ -272,6 +275,15 @@ export default {
                 if (fromMounted && this.player.cueVideoById) {
                     this.player.cueVideoById(this.youtubeVideoId);
                 }
+            }
+        },
+        togglePlayerSize() {
+            this.minimized = !this.minimized;
+            const playerElement = document.querySelector('.music-player');
+            if (this.minimized) {
+                playerElement.classList.add('minimized');
+            } else {
+                playerElement.classList.remove('minimized');
             }
         },
         loadYouTubeApi() {
@@ -735,5 +747,14 @@ body {
 
 .volume-icon {
     transition: transform 0.2s ease-in-out;
+}
+
+.music-player.minimized {
+    transform: translateY(calc(100% - 60px));
+    /* Adjust based on your desired minimized height */
+}
+
+.music-player .control-icon {
+    cursor: pointer;
 }
 </style>
