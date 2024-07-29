@@ -116,7 +116,7 @@
             </div>
         </header>
         <!-- Floating mini-card with cog icon -->
-        <div class="floating-card" @click="toggleModal">
+        <div v-if="!isMusicPage" class="floating-card" @click="toggleModal">
             <i class="fas fa-cog fa-spin"></i>
         </div>
         <!-- Modal -->
@@ -167,6 +167,11 @@ export default {
             drawerTop: 0,
             selectedLanguage: localStorage.getItem('locale') || 'en',
         };
+    },
+    computed: {
+        isMusicPage() {
+            return this.$route.path === '/musics';
+        }
     },
     methods: {
         async searchUsers() {

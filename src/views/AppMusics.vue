@@ -12,8 +12,8 @@
                     <div v-for="track in latestTracks" :key="track.id"
                         class="track-item transition-transform duration-300 ease-in-out transform hover:scale-105"
                         @click="playTrack(track)">
-                        <img :src="track.album.images[0]?.url || ''" :alt="track.name" class="w-full h-auto rounded-lg"
-                            v-if="track.album.images.length > 0" />
+                        <img :src="track.album.images[0]?.url || require('@/assets/images/skeleton/no-image.png')"
+                            :alt="track.name" class="w-full h-auto rounded-lg" />
                         <div class="mt-2">
                             <h3 class="text-lg font-medium">{{ track.name }}</h3>
                             <p class="text-sm text-gray-500">{{ track.artists[0].name }}</p>
@@ -29,8 +29,8 @@
                         <div v-for="result in searchResults.tracks" :key="result.id"
                             class="track-item transition-transform duration-300 ease-in-out transform hover:scale-105"
                             @click="playTrack(result)">
-                            <img :src="result.album.images[0]?.url || ''" :alt="result.name"
-                                class="w-full h-auto rounded-lg" v-if="result.album.images.length > 0" />
+                            <img :src="result.album.images[0]?.url || require('@/assets/images/skeleton/no-image.png')"
+                                :alt="result.name" class="w-full h-auto rounded-lg" />
                             <div class="mt-2">
                                 <h3 class="text-lg font-medium">{{ result.name }}</h3>
                                 <p class="text-sm text-gray-500">{{ result.artists[0].name }}</p>
@@ -41,9 +41,9 @@
                     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                         <div v-for="artist in searchResults.artists" :key="artist.id"
                             class="artist-item transition-transform duration-300 ease-in-out transform hover:scale-105">
-                            <img :src="artist.images[0]?.url || ''" :alt="artist.name" class="w-16 h-16 rounded-full"
-                                v-if="artist.images.length > 0" />
-                            <div class="mt-2">
+                            <img :src="artist.images[0]?.url || require('@/assets/images/skeleton/no-image.png')"
+                                :alt="artist.name" class="w-24 h-24 rounded-full mx-auto" />
+                            <div class="mt-2 text-center">
                                 <h3 class="text-lg font-medium">{{ artist.name }}</h3>
                             </div>
                         </div>
@@ -54,8 +54,8 @@
         <div v-if="currentTrack"
             class="music-player fixed bottom-0 left-0 right-0 bg-gray-800 text-white p-4 flex flex-col sm:flex-row items-center justify-between rounded-t-lg shadow-lg transition-transform duration-300 ease-in-out transform hover:scale-105">
             <div class="flex items-center mb-4 sm:mb-0">
-                <img :src="currentTrack.album.images[0]?.url || ''" alt="Album cover" class="w-16 h-16 rounded-lg"
-                    v-if="currentTrack.album.images.length > 0" />
+                <img :src="currentTrack.album.images[0]?.url || require('@/assets/images/skeleton/no-image.png')"
+                    alt="Album cover" class="w-16 h-16 rounded-lg" />
                 <div class="track-info ml-4">
                     <h3 class="text-lg font-medium">{{ currentTrack.name }}</h3>
                     <p class="text-sm text-gray-400">{{ currentTrack.artists[0].name }}</p>
@@ -631,8 +631,8 @@ body {
 }
 
 .artist-item img {
-    width: 100%;
-    height: auto;
+    width: 100px;
+    height: 100px;
     border-radius: 50%;
 }
 
