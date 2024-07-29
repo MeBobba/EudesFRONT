@@ -4,8 +4,8 @@
             @logout="logout" />
         <div class="container mx-auto px-4 py-8 animate-fade-in">
             <h1 class="text-4xl font-bold mb-4">Staff Page</h1>
-            <div class="flex">
-                <div class="flex-grow">
+            <div class="flex flex-col lg:flex-row">
+                <div class="lg:flex-grow">
                     <div v-for="section in staffSections" :key="section.rank_name" class="mb-8">
                         <h2 class="text-2xl font-semibold mb-4">{{ section.rank_name }}</h2>
                         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -41,7 +41,7 @@
                     </div>
                 </div>
                 <div
-                    class="w-1/4 ml-8 bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md transition-transform transform hover:scale-105 animate-fade-in">
+                    class="w-full lg:w-1/4 lg:ml-8 mt-8 lg:mt-0 bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md transition-transform transform hover:scale-105 animate-fade-in">
                     <h2 class="text-2xl font-semibold mb-4">Important Information</h2>
                     <p class="text-gray-700 dark:text-gray-300">
                         Welcome to the staff information page. Here, you will find essential details about our dedicated
@@ -234,7 +234,6 @@ export default {
     }
 };
 </script>
-
 
 <style scoped>
 @keyframes fade-in {
