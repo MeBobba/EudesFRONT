@@ -11,7 +11,7 @@
                     <div class="p-4">
                         <h1 class="text-3xl font-bold mb-2">{{ article.title }}</h1>
                         <p class="text-gray-600 dark:text-gray-400 mb-4">{{ formatDate(article.date) }}</p>
-                        <p class="mb-4">{{ article.content }}</p>
+                        <div class="mb-4" v-html="article.content"></div>
                         <!-- Like and Comment Section -->
                         <div class="flex items-center mb-4">
                             <button @click="toggleLike(article)" class="mr-4 like-button">
@@ -37,8 +37,8 @@
                                             <p>{{ comment.content }}</p>
                                         </div>
                                     </div>
-                                    <button v-if="comment.user_id === user.id" @click="deleteComment(article.id, comment.id)"
-                                        class="text-red-500">
+                                    <button v-if="comment.user_id === user.id"
+                                        @click="deleteComment(article.id, comment.id)" class="text-red-500">
                                         <font-awesome-icon icon="trash-alt" />
                                     </button>
                                 </div>
@@ -78,7 +78,6 @@
             </div>
         </div>
         <AppFooter :footerLogo="footerLogo" />
-
         <AppModal v-if="showModal" @close="closeModal" :title="modalTitle">
             <form @submit.prevent="submitForm">
                 <div class="mb-4">
@@ -93,8 +92,7 @@
                 </div>
                 <div class="mb-4">
                     <label class="block text-gray-700 dark:text-gray-200">Content</label>
-                    <textarea v-model="form.content" class="w-full p-2 border border-gray-300 rounded-lg"
-                        required></textarea>
+                    <div ref="editorContainer" class="w-full p-2 border border-gray-300 rounded-lg" required></div>
                 </div>
                 <div class="mb-4">
                     <label class="block text-gray-700 dark:text-gray-200">Image URL</label>
@@ -108,6 +106,8 @@
 
 <script>
 import axios from 'axios';
+import Quill from 'quill'; // Ajoutez cette ligne
+import 'quill/dist/quill.snow.css'; // Ajoutez cette ligne
 import AppHeader from '../components/AppHeader.vue';
 import AppFooter from '../components/AppFooter.vue';
 import AppModal from '../components/AppModal.vue';
@@ -160,9 +160,31 @@ export default {
         await this.fetchOtherArticles();
     },
     watch: {
-        '$route.params.id': 'fetchArticle'
+        '$route.params.id': 'fetchArticle',
+        showModal(newValue) {
+            if (newValue) {
+                this.$nextTick(() => {
+                    this.initQuill();
+                });
+            }
+        }
     },
     methods: {
+        initQuill() {
+            if (this.$refs.editorContainer) {
+                this.quill = new Quill(this.$refs.editorContainer, {
+                    theme: 'snow'
+                });
+
+                this.quill.on('text-change', () => {
+                    this.form.content = this.quill.root.innerHTML;
+                });
+
+                if (this.form.content) {
+                    this.quill.root.innerHTML = this.form.content;
+                }
+            }
+        },
         toggleDarkMode() {
             this.isDarkMode = !this.isDarkMode;
             document.documentElement.classList.toggle('dark', this.isDarkMode);
@@ -205,7 +227,7 @@ export default {
                 const token = localStorage.getItem('token');
                 const apiUrl = process.env.VUE_APP_API_URL || 'http://localhost:3000';
                 const response = await axios.get(`${apiUrl}/articles`, {
-                  headers: { 'x-access-token': token }
+                    headers: { 'x-access-token': token }
                 });
                 this.otherArticles = response.data.filter(article => article.id !== this.$route.params.id);
             } catch (error) {
@@ -298,12 +320,16 @@ export default {
         async submitForm() {
             try {
                 const apiUrl = process.env.VUE_APP_API_URL || 'http://localhost:3000';
+                const formData = {
+                    ...this.form,
+                    user_id: this.user.id // Ajoutez cet élément
+                };
                 if (this.form.id) {
-                    await axios.put(`${apiUrl}/articles/${this.form.id}`, this.form, {
+                    await axios.put(`${apiUrl}/articles/${this.form.id}`, formData, {
                         headers: { 'x-access-token': localStorage.getItem('token') }
                     });
                 } else {
-                    await axios.post(`${apiUrl}/articles`, this.form, {
+                    await axios.post(`${apiUrl}/articles`, formData, {
                         headers: { 'x-access-token': localStorage.getItem('token') }
                     });
                 }
@@ -341,6 +367,10 @@ export default {
 </script>
 
 <style scoped>
+@import '~quill/dist/quill.snow.css';
+/* Ajoutez cette ligne */
+
+/* Votre style existant */
 .container {
     padding-top: 20px;
     padding-bottom: 20px;

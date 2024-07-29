@@ -42,18 +42,21 @@
             <form @submit.prevent="submitForm">
                 <div class="mb-4">
                     <label class="block text-sm font-medium text-gray-700">Title</label>
-                    <input v-model="form.title" type="text" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none "
+                    <input v-model="form.title" type="text"
+                        class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none "
                         required />
                 </div>
                 <div class="mb-4">
                     <label class="block text-sm font-medium text-gray-700">Summary</label>
-                    <textarea v-model="form.summary" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none "
+                    <textarea v-model="form.summary"
+                        class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none "
                         required></textarea>
                 </div>
                 <div class="mb-4">
                     <label class="block text-sm font-medium text-gray-700">Content</label>
-                    <textarea v-model="form.content" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none "
-                        required></textarea>
+                    <div ref="editorContainer"
+                        class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none "
+                        required></div>
                 </div>
                 <div class="mb-4">
                     <label class="block text-sm font-medium text-gray-700">Image URL (<router-link to="/topstories"
@@ -64,9 +67,11 @@
                             </template>
                         </router-link>
                         )</label>
-                    <input v-model="form.image" type="text" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none " />
+                    <input v-model="form.image" type="text"
+                        class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none " />
                 </div>
-                <button type="submit" class="bg-gradient-to-r from-green-400 to-green-600 text-white px-6 py-3 rounded-lg transition-transform transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">Submit</button>
+                <button type="submit"
+                    class="bg-gradient-to-r from-green-400 to-green-600 text-white px-6 py-3 rounded-lg transition-transform transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">Submit</button>
             </form>
         </AppModal>
     </div>
@@ -74,6 +79,8 @@
 
 <script>
 import axios from 'axios';
+import Quill from 'quill'; // Ajoutez cette ligne
+import 'quill/dist/quill.snow.css'; // Ajoutez cette ligne
 import AppHeader from '../components/AppHeader.vue';
 import AppFooter from '../components/AppFooter.vue';
 import AppModal from '../components/AppModal.vue';
@@ -128,7 +135,31 @@ export default {
         await this.fetchUserData();
         await this.fetchArticles();
     },
+    watch: {
+        showModal(newValue) {
+            if (newValue) {
+                this.$nextTick(() => {
+                    this.initQuill();
+                });
+            }
+        }
+    },
     methods: {
+        initQuill() {
+            if (this.$refs.editorContainer) {
+                this.quill = new Quill(this.$refs.editorContainer, {
+                    theme: 'snow'
+                });
+
+                this.quill.on('text-change', () => {
+                    this.form.content = this.quill.root.innerHTML;
+                });
+
+                if (this.form.content) {
+                    this.quill.root.innerHTML = this.form.content;
+                }
+            }
+        },
         toggleDarkMode() {
             this.isDarkMode = !this.isDarkMode;
             document.documentElement.classList.toggle('dark', this.isDarkMode);
@@ -197,6 +228,11 @@ export default {
             this.form = { ...article };
             this.modalTitle = 'Edit News';
             this.showModal = true;
+            this.$nextTick(() => {
+                if (this.quill) {
+                    this.quill.root.innerHTML = this.form.content || '';
+                }
+            });
         },
         async submitForm() {
             try {
@@ -249,6 +285,10 @@ export default {
 </script>
 
 <style scoped>
+@import '~quill/dist/quill.snow.css';
+/* Ajoutez cette ligne */
+
+/* Votre style existant */
 .container {
     padding-top: 20px;
     padding-bottom: 20px;
