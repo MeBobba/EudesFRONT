@@ -7,7 +7,7 @@
                     <img width="50" :src="footerLogo" alt="MeBobba" class="footer-logo" loading="lazy">
                     <div>
                         <p>MeBobba</p>
-                        <p>RELEASE24072024</p>
+                        <p>RELEASE24072029</p>
                     </div>
                 </router-link>
             </div>
