@@ -74,7 +74,9 @@ const messages = {
         },
         "lockscreen": {
             "title": "Compte Verrouillé",
-            "unlock": "Déverrouiller"
+            "unlock": "Déverrouiller",
+            "warning": "Attention, le verrouillage de ta session se fera dans :",
+            "seconds": "secondes"
         }
     },
     "it": {
@@ -149,7 +151,9 @@ const messages = {
         },
         "lockscreen": {
             "title": "Account Bloccato",
-            "unlock": "Sblocca"
+            "unlock": "Sblocca",
+            "warning": "Si noti che la sessione verrà bloccata in :",
+            "seconds": "secondi"
         }
     },
     "en": {
@@ -224,7 +228,9 @@ const messages = {
         },
         "lockscreen": {
             "title": "Account Locked",
-            "unlock": "Unlock"
+            "unlock": "Unlock",
+            "warning": "Please note that your session will be locked in :",
+            "seconds": "seconds"
         }
     }
 };

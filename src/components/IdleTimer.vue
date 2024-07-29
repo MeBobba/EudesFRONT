@@ -1,7 +1,7 @@
 <template>
     <transition name="fade">
         <div v-if="isIdle" class="fixed top-0 left-0 w-full bg-red-500 text-white p-4 text-center z-50">
-            Attention, le verrouillage de ta session se fera dans : {{ countdown }}
+            {{ $t('lockscreen.warning') }} {{ countdown }} {{ $t('lockscreen.seconds') }}
         </div>
     </transition>
 </template>
