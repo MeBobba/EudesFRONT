@@ -10,7 +10,7 @@
                 class="container mx-auto py-4 px-4 sm:px-6 md:px-8 lg:px-10 xl:px-12 flex justify-between items-center">
                 <!-- Logo - Hidden on mobile menu -->
                 <router-link to="/" class="hover:text-gray-900 hidden sm:block">
-                    <img :src="logoImage" alt="Logo" loading="lazy">
+                    <img :src="logoImage" alt="Logo" class="w-32 sm:w-40 md:w-48" loading="lazy">
                 </router-link>
 
                 <!-- Regular Menu - Desktop -->
@@ -367,9 +367,11 @@ export default {
     background: white;
     padding: 20px;
     border-radius: 8px;
-    max-width: 500px;
+    max-width: 90%;
     width: 100%;
     position: relative;
+    max-height: 80vh;
+    overflow-y: auto;
 }
 
 .modal-title {
@@ -393,8 +395,7 @@ export default {
 .floating-card {
     position: fixed;
     right: 16px;
-    bottom: 50%;
-    transform: translateY(50%);
+    bottom: 16px;
     width: 50px;
     height: 50px;
     background: white;
