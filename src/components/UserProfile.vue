@@ -21,10 +21,6 @@
                         <fa-icon :icon="['fas', 'times']" />
                     </button>
                 </div>
-                <div class="absolute -top-6 -right-6 bg-white text-black rounded-lg p-2 shadow-md z-9999"
-                    v-if="user.motto">
-                    <p class="text-xs">{{ user.motto }}</p>
-                </div>
             </div>
             <div class="flex-1 mt-4 sm:mt-0 sm:ml-4 text-center sm:text-left">
                 <h2 class="text-xl sm:text-2xl font-semibold text-white relative">{{ user.username }}</h2>
