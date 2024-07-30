@@ -3,7 +3,8 @@ import { createI18n } from 'vue-i18n';
 
 const messages = {
     "fr": {
-        "home": "Home",
+        "gotohome" : "Retourner à l'accueil",
+        "home": "Accueil",
         "dashboard": "Accueil",
         "downloadapp": "Télécharger l'app",
         "community": "Communauté",
@@ -69,6 +70,9 @@ const messages = {
             "enoughcredits": "Vous avez suffisamment de crédits.",
             "tenkcredits": "10k crédits ont été ajoutés à votre compte."
         },
+        "errors" : {
+            "four": "L'URL richiesto non è stato trovato su questo server.",
+        },
         "gamespage": {
             "newgame": "Ajouter un Nouveau Jeu",
             "playgame": "Jouer",
@@ -82,6 +86,7 @@ const messages = {
         }
     },
     "it": {
+        "gotohome" : "Torna alla home page",
         "home": "Home",
         "dashboard": "Home",
         "downloadapp": "Scarica l'app",
@@ -148,6 +153,9 @@ const messages = {
             "enoughcredits": "Hai abbastanza crediti.",
             "tenkcredits": "10k crediti sono stati aggiunti al tuo account."
         },
+        "errors" : {
+            "four": "L'URL demandée n'a pas été trouvée sur ce serveur.",
+        },
         "gamespage": {
             "newgame": "Aggiungi Nuovo Gioco",
             "playgame": "Gioca",
@@ -161,6 +169,8 @@ const messages = {
         }
     },
     "en": {
+        "gotohome" : "Back to home page",
+        "errorfour": "The requested URL was not found on this server.",
         "home": "Home",
         "dashboard": "Home",
         "downloadapp": "Download App",
@@ -226,6 +236,9 @@ const messages = {
             "errorgeneratecredits": "Error generating credits:",
             "enoughcredits": "You have enough credits.",
             "tenkcredits": "10k credits have been added to your account."
+        },
+        "errors" : {
+            "four": "The requested URL was not found on this server.",
         },
         "gamespage": {
             "newgame": "Add New Game",

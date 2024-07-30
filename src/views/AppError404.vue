@@ -2,7 +2,7 @@
     <div class="min-h-screen flex items-center justify-center bg-gray-100">
         <div class="bg-white p-8 rounded-lg shadow-lg flex flex-col items-center">
             <h1 class="text-6xl font-bold text-gray-800 mb-4">404</h1>
-            <p class="text-xl text-gray-600 mb-8">{{ $t('errorfour') }}</p>
+            <p class="text-xl text-gray-600 mb-8">{{ $t('errors.four') }}</p>
             <router-link to="/" class="text-blue-500 text-lg hover:underline">{{ $t('gotohome') }}</router-link>
         </div>
     </div>
