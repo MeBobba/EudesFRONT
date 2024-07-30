@@ -143,14 +143,23 @@
         <div class="w-full lg:w-1/3 lg:pl-8 mt-8 lg:mt-0">
           <div :class="sidebarClass" class="p-4 rounded-lg shadow-md mb-8">
             <h2 class="text-2xl font-bold mb-4">Suggestions For You</h2>
-            <div v-for="suggestion in suggestions" :key="suggestion.id" class="flex items-center mb-4">
-              <img :src="getUserAvatar(suggestion.look)" class="w-12 h-12 rounded-full border-2 border-gray-300"
+            <div v-for="suggestion in suggestions" :key="suggestion.id" class="flex items-center mb-4 p-4">
+              <img :src="getUserAvatar(suggestion.look)" class="w-16 h-16 rounded-full border-2 border-gray-300"
                 alt="Suggestion Profile" loading="lazy">
-              <div class="ml-4">
+              <div class="ml-4 flex-grow">
                 <h3 class="font-semibold">{{ suggestion.username }}</h3>
-                <button class="mt-1 bg-blue-500 text-white p-1 rounded-lg">Follow</button>
+                <div class="flex mt-2">
+                  <button v-if="suggestion.request_status === 'not_requested'" @click="followUser(suggestion.id)"
+                    class="bg-blue-500 text-white p-2 rounded-lg mr-2">Follow</button>
+                  <button v-else class="bg-gray-500 text-white p-2 rounded-lg mr-2" disabled>En attente</button>
+                  <router-link :to="`/dashboard/${suggestion.id}`"
+                    class="bg-green-500 text-white p-2 rounded-lg">Visiter</router-link>
+                </div>
+               
               </div>
+              <hr />
             </div>
+
           </div>
           <div :class="sidebarClass" class="p-4 rounded-lg shadow-md">
             <h2 class="text-2xl font-bold mb-4">Photos</h2>
@@ -271,6 +280,7 @@ export default {
     await this.fetchUserData(userId);
     await this.fetchPosts(userId);
     await this.fetchUserPhotos(userId);
+    await this.fetchSuggestions();
     window.addEventListener('scroll', this.handleScroll);
   },
   beforeUnmount() {
@@ -284,6 +294,7 @@ export default {
         this.fetchUserData(userId);
         this.fetchPosts(userId);
         this.fetchUserPhotos(userId);
+        this.fetchSuggestions();
       },
       immediate: true
     }
@@ -368,6 +379,21 @@ export default {
       const bottomOfWindow = window.innerHeight + window.scrollY >= document.documentElement.offsetHeight;
       if (bottomOfWindow && !this.loading && !this.noMorePosts) {
         this.fetchPosts();
+      }
+    },
+    async fetchSuggestions() {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          throw new Error('No token found');
+        }
+        const apiUrl = process.env.VUE_APP_API_URL || 'http://localhost:3000';
+        const response = await axios.get(`${apiUrl}/users/suggestions`, {
+          headers: { 'x-access-token': token }
+        });
+        this.suggestions = response.data;
+      } catch (error) {
+        console.error('Error fetching suggestions:', error);
       }
     },
     async createPost() {
@@ -660,6 +686,24 @@ export default {
     },
     selectTab(tab) {
       this.currentTab = tab;
+    },
+    async followUser(userId) {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          throw new Error('No token found');
+        }
+        const apiUrl = process.env.VUE_APP_API_URL || 'http://localhost:3000';
+        await axios.post(`${apiUrl}/users/follow`, { userId }, {
+          headers: { 'x-access-token': token }
+        });
+        const userIndex = this.suggestions.findIndex(user => user.id === userId);
+        if (userIndex !== -1) {
+          this.suggestions[userIndex].request_status = 'pending';
+        }
+      } catch (error) {
+        console.error('Error following user:', error);
+      }
     }
   }
 };
@@ -668,6 +712,93 @@ export default {
 <style scoped>
 .like-button .fa-heart.animate-like {
   animation: like-animation 0.5s;
+}
+
+.suggestions-card {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  padding: 1rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.suggestion-item {
+  display: flex;
+  align-items: center;
+  padding: 0.5rem;
+  border-bottom: 1px solid var(--color-border);
+  transition: background-color 0.3s;
+}
+
+.suggestion-item:hover {
+  background-color: var(--color-bg-hover);
+}
+
+.suggestion-avatar {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 9999px;
+  border: 2px solid var(--color-border);
+}
+
+.suggestion-info {
+  margin-left: 1rem;
+  flex-grow: 1;
+}
+
+.suggestion-username {
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.suggestion-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.suggestion-button {
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.suggestion-button.follow {
+  background-color: var(--color-primary);
+  color: #fff;
+}
+
+.suggestion-button.pending {
+  background-color: var(--color-muted);
+  color: #fff;
+}
+
+.suggestion-button.visit {
+  background-color: var(--color-secondary);
+  color: #fff;
+}
+
+/* Define your color variables */
+:root {
+  --color-bg: #fff;
+  --color-text: #333;
+  --color-border: #ccc;
+  --color-bg-hover: #f9f9f9;
+  --color-primary: #3490dc;
+  --color-secondary: #38c172;
+  --color-muted: #6c757d;
+}
+
+/* Dark mode */
+:root.dark {
+  --color-bg: #1f2937;
+  --color-text: #e5e7eb;
+  --color-border: #4b5563;
+  --color-bg-hover: #374151;
+  --color-primary: #2563eb;
+  --color-secondary: #22c55e;
+  --color-muted: #9ca3af;
 }
 
 @keyframes like-animation {

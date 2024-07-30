@@ -15,13 +15,14 @@
                                     loading="lazy">
                                 <div class="ml-4">
                                     <h3 class="font-semibold">
-                                        <router-link :to="`/dashboard/${user.id}`">{{ post.username }}</router-link>
+                                        <router-link :to="`/dashboard/${post.user_id}`">{{ post.username }}</router-link>
                                     </h3>
                                     <p class="text-gray-600">{{ formatDate(post.created_at) }}</p>
                                 </div>
                             </div>
                             <div class="relative">
-                                <button @click="togglePostMenu(post.id)" class="text-gray-500">
+                                <button v-if="canEditPost(post) || canDeletePost(post)" @click="togglePostMenu(post.id)"
+                                    class="text-gray-500">
                                     <fa-icon icon="ellipsis-v" />
                                 </button>
                                 <div v-if="showPostMenu === post.id"
@@ -29,7 +30,7 @@
                                     <button v-if="canEditPost(post)" @click="editPost(post)"
                                         class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700">{{
                                             $t('edit') }}</button>
-                                    <button @click="deletePost(post.id)"
+                                    <button v-if="canDeletePost(post)" @click="deletePost(post.id)"
                                         class="block px-4 py-2 text-sm text-red-500 hover:bg-gray-100 dark:hover:bg-gray-700">{{
                                             $t('delete') }}</button>
                                 </div>
@@ -164,7 +165,7 @@
                 class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none "></textarea>
             <button @click="savePost"
                 class="bg-gradient-to-r from-green-400 to-green-600 text-white px-6 py-3 rounded-lg transition-transform transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">{{
-                $t('save') }}</button>
+                    $t('save') }}</button>
         </AppModal>
     </div>
 </template>
