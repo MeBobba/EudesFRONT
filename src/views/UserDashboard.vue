@@ -112,7 +112,9 @@
             <transition name="slide-fade">
               <div v-show="post.showComments" class="mt-4">
                 <h4 class="font-semibold mb-2">Comments</h4>
-                <div v-for="comment in post.comments" :key="comment.id"
+                <div
+                  v-for="comment in post.comments.slice().sort((a, b) => new Date(a.created_at) - new Date(b.created_at))"
+                  :key="comment.id"
                   :class="{ 'flex justify-end': comment.user_id === user.id, 'flex justify-start': comment.user_id !== user.id }">
                   <div class="flex items-center relative">
                     <div v-if="comment.user_id !== user.id" class="mr-2">
@@ -139,7 +141,8 @@
                 </div>
                 <textarea v-model="post.newComment" :placeholder="$t('addcomment')"
                   class="w-full p-2 border border-gray-300 rounded-lg"></textarea>
-                <button @click="addComment(post)" class="mt-2 bg-blue-500 text-white p-2 rounded-lg">{{ $t('comment')
+                <button @click="addComment(post)" class="mt-2 bg-blue-500 text-white p-2 rounded-lg">{{
+                  $t('comment')
                   }}</button>
               </div>
             </transition>
