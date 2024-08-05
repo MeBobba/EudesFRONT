@@ -112,18 +112,30 @@
             <transition name="slide-fade">
               <div v-show="post.showComments" class="mt-4">
                 <h4 class="font-semibold mb-2">Comments</h4>
-                <div v-for="comment in post.comments" :key="comment.id" class="mb-2 flex items-end justify-between">
-                  <div class="flex items-center">
-                    <img :src="getAvatarUrl(comment.look, 's')"
-                      class="rounded-full border-2 border-blue-500 p-1 bg-white mr-2" alt="User Profile" loading="lazy">
-                    <div class="comment-bubble">
-                      <p class="font-semibold text-sm">{{ comment.username }}</p>
-                      <p class="text-sm">{{ comment.content }}</p>
+                <div v-for="comment in post.comments" :key="comment.id"
+                  :class="{ 'flex justify-end': comment.user_id === user.id, 'flex justify-start': comment.user_id !== user.id }">
+                  <div class="flex items-center relative">
+                    <div v-if="comment.user_id !== user.id" class="mr-2">
+                      <img :src="getAvatarUrl(comment.look, 's')"
+                        class="rounded-full border-2 border-blue-500 p-1 bg-white" alt="User Profile" loading="lazy">
+                    </div>
+                    <div
+                      :class="{ 'comment-bubble self-comment': comment.user_id === user.id, 'comment-bubble other-comment': comment.user_id !== user.id }">
+                      <button v-if="canDeleteComment(comment)" @click="deleteComment(comment.id)" class="delete-button">
+                        <fa-icon icon="times" />
+                      </button>
+                      <div class="flex items-center justify-between w-full">
+                        <div>
+                          <p class="font-semibold text-sm">{{ comment.username }}</p>
+                          <p class="text-sm">{{ comment.content }}</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div v-if="comment.user_id === user.id" class="ml-2">
+                      <img :src="getAvatarUrl(comment.look, 's')"
+                        class="rounded-full border-2 border-blue-500 p-1 bg-white" alt="User Profile" loading="lazy">
                     </div>
                   </div>
-                  <button v-if="canDeleteComment(comment)" @click="deleteComment(comment.id)" class="text-red-500">
-                    <fa-icon icon="trash-alt" />
-                  </button>
                 </div>
                 <textarea v-model="post.newComment" :placeholder="$t('addcomment')"
                   class="w-full p-2 border border-gray-300 rounded-lg"></textarea>
@@ -886,23 +898,51 @@ export default {
 }
 
 .comment-bubble {
-  background-color: #E0F7FA;
-  /* Couleur de la bulle de commentaire */
-  color: #000;
-  /* Couleur du texte de la bulle */
   padding: 8px 12px;
   border-radius: 18px;
-  max-width: 75%;
+  width: 75%;
+  /* Définir une largeur fixe pour les bulles */
   word-wrap: break-word;
   font-size: 0.875rem;
   line-height: 1.25rem;
+  margin-bottom: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+  /* Assurez-vous que la bulle soit en position relative */
 }
 
-.dark .comment-bubble {
-  background-color: #2D3748;
-  /* Couleur de la bulle en mode sombre */
-  color: #E5E7EB;
-  /* Couleur du texte en mode sombre */
+.self-comment {
+  background-color: #007AFF;
+  /* Couleur de la bulle de l'utilisateur */
+  color: white;
+  /* Couleur du texte de la bulle de l'utilisateur */
+  align-self: flex-end;
+  text-align: right;
+}
+
+.other-comment {
+  background-color: #E5E5EA;
+  /* Couleur de la bulle des autres utilisateurs */
+  color: black;
+  /* Couleur du texte de la bulle des autres utilisateurs */
+  align-self: flex-start;
+  text-align: left;
+}
+
+.dark .self-comment {
+  background-color: #007AFF;
+  /* Couleur de la bulle de l'utilisateur en mode sombre */
+  color: white;
+  /* Couleur du texte de la bulle de l'utilisateur en mode sombre */
+}
+
+.dark .other-comment {
+  background-color: #3A3A3C;
+  /* Couleur de la bulle des autres utilisateurs en mode sombre */
+  color: white;
+  /* Couleur du texte de la bulle des autres utilisateurs en mode sombre */
 }
 
 .comment-bubble p {
@@ -910,5 +950,57 @@ export default {
   line-height: 1.25;
 }
 
+.delete-button {
+  position: absolute;
+  top: -10px;
+  /* Positionner le bouton croix en haut */
+  right: -10px;
+  /* Positionner le bouton croix à droite */
+  background-color: #FF3B30;
+  border: none;
+  color: white;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  padding: 0;
+}
 
+.delete-button:hover {
+  background-color: #D32F2F;
+}
+
+.dark .delete-button {
+  background-color: #FF3B30;
+}
+
+.dark .delete-button:hover {
+  background-color: #D32F2F;
+}
+
+/* Adaptabilité responsive */
+@media (max-width: 600px) {
+  .comment-bubble {
+    width: 100%;
+    /* Faire en sorte que les bulles prennent toute la largeur sur petits écrans */
+    border-radius: 12px;
+    /* Ajuster le border-radius pour petits écrans */
+  }
+
+  .delete-button {
+    width: 16px;
+    height: 16px;
+    top: -8px;
+    right: -8px;
+  }
+
+  .comment-bubble p {
+    font-size: 0.75rem;
+    /* Réduire la taille de la police pour petits écrans */
+  }
+}
 </style>
