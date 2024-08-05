@@ -15,7 +15,8 @@
                                     loading="lazy">
                                 <div class="ml-4">
                                     <h3 class="font-semibold">
-                                        <router-link :to="`/dashboard/${post.user_id}`">{{ post.username }}</router-link>
+                                        <router-link :to="`/dashboard/${post.user_id}`">{{ post.username
+                                            }}</router-link>
                                     </h3>
                                     <p class="text-gray-600">{{ formatDate(post.created_at) }}</p>
                                 </div>
@@ -56,14 +57,14 @@
                             <div v-show="post.showComments" class="mt-4">
                                 <h4 class="font-semibold mb-2">{{ $t('comments') }}</h4>
                                 <div v-for="comment in post.comments" :key="comment.id"
-                                    class="mb-2 flex justify-between">
+                                    class="mb-2 flex items-end justify-between">
                                     <div class="flex items-center">
                                         <img :src="getAvatarUrl(comment.look, 's')"
-                                            class="rounded-full border-2 border-blue-500 p-1 bg-white"
+                                            class="rounded-full border-2 border-blue-500 p-1 bg-white mr-2"
                                             alt="User Profile" loading="lazy">
-                                        <div class="ml-2">
-                                            <p class="font-semibold">{{ comment.username }}</p>
-                                            <p>{{ comment.content }}</p>
+                                        <div class="comment-bubble">
+                                            <p class="font-semibold text-sm">{{ comment.username }}</p>
+                                            <p class="text-sm">{{ comment.content }}</p>
                                         </div>
                                     </div>
                                     <button v-if="canDeleteComment(comment)" @click="deleteComment(comment.id)"
@@ -664,5 +665,30 @@ export default {
 .slide-fade-leave-to {
     transform: translateY(10px);
     opacity: 0;
+}
+
+.comment-bubble {
+    background-color: #E0F7FA;
+    /* Couleur de la bulle de commentaire */
+    color: #000;
+    /* Couleur du texte de la bulle */
+    padding: 8px 12px;
+    border-radius: 18px;
+    max-width: 75%;
+    word-wrap: break-word;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+}
+
+.dark .comment-bubble {
+    background-color: #2D3748;
+    /* Couleur de la bulle en mode sombre */
+    color: #E5E7EB;
+    /* Couleur du texte en mode sombre */
+}
+
+.comment-bubble p {
+    margin: 0;
+    line-height: 1.25;
 }
 </style>
