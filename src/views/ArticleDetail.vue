@@ -1,5 +1,6 @@
 <template>
-    <div :class="{ 'bg-gray-900 text-white': isDarkMode, 'bg-gray-100 text-black': !isDarkMode }" class="min-h-screen transition-all">
+    <div :class="{ 'bg-gray-900 text-white': isDarkMode, 'bg-gray-100 text-black': !isDarkMode }"
+        class="min-h-screen transition-all">
         <AppHeader :logoImage="logoImage" :headerImage="headerImage" @toggleDarkMode="toggleDarkMode"
             @logout="logout" />
         <div class="container mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -11,7 +12,7 @@
                     <div class="p-4">
                         <h1 class="text-3xl font-bold mb-2">{{ article.title }}</h1>
                         <p class="text-gray-600 dark:text-gray-400 mb-4">{{ formatDate(article.date) }}</p>
-                        <div class="mb-4" v-html="article.content"></div>
+                        <div class="mb-4" v-html="article.content" style="word-break: break-word;"></div>
                         <!-- Like and Comment Section -->
                         <div class="flex items-center mb-4">
                             <button @click="toggleLike(article)" class="mr-4 like-button">
@@ -372,6 +373,11 @@ export default {
 
 <style scoped>
 @import '~quill/dist/quill.snow.css';
+
+.article-content p {
+    word-break: break-word;
+    /* Ajoutez cette ligne */
+}
 
 .modal-body {
     max-height: calc(100vh - 200px);
