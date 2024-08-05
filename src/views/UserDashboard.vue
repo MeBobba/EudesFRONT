@@ -903,54 +903,53 @@ export default {
 .comment-bubble {
   padding: 8px 12px;
   border-radius: 18px;
-  width: 75%;
-  /* Définir une largeur fixe pour les bulles */
+  max-width: 75%;
   word-wrap: break-word;
+  word-break: break-word;
+  overflow-wrap: break-word;
   font-size: 0.875rem;
   line-height: 1.25rem;
   margin-bottom: 5px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+  display: block;
   position: relative;
-  /* Assurez-vous que la bulle soit en position relative */
+  white-space: normal;
 }
 
 .self-comment {
   background-color: #007AFF;
-  /* Couleur de la bulle de l'utilisateur */
   color: white;
-  /* Couleur du texte de la bulle de l'utilisateur */
   align-self: flex-end;
   text-align: right;
+  margin-left: auto;
+  /* Ajouté pour forcer l'alignement à droite */
 }
 
 .other-comment {
   background-color: #E5E5EA;
-  /* Couleur de la bulle des autres utilisateurs */
   color: black;
-  /* Couleur du texte de la bulle des autres utilisateurs */
   align-self: flex-start;
   text-align: left;
+  margin-right: auto;
+  /* Ajouté pour forcer l'alignement à gauche */
 }
 
 .dark .self-comment {
   background-color: #007AFF;
-  /* Couleur de la bulle de l'utilisateur en mode sombre */
   color: white;
-  /* Couleur du texte de la bulle de l'utilisateur en mode sombre */
 }
 
 .dark .other-comment {
   background-color: #3A3A3C;
-  /* Couleur de la bulle des autres utilisateurs en mode sombre */
   color: white;
-  /* Couleur du texte de la bulle des autres utilisateurs en mode sombre */
 }
 
 .comment-bubble p {
   margin: 0;
   line-height: 1.25;
+  word-wrap: break-word;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  white-space: normal;
 }
 
 .delete-button {
