@@ -27,9 +27,26 @@
                         <h2 class="text-3xl font-bold mb-6 text-center text-gray-800">Step 2: Confidential Information
                         </h2>
                         <form class="space-y-4" @submit.prevent="nextStep">
-                            <input v-model="password" type="password" placeholder="Password" required
-                                class="input-field w-full p-3 border border-gray-300 rounded focus:outline-none focus:border-red-300 animate-input-fade">
-                            <input v-model="confirmPassword" type="password" placeholder="Confirm Password" required
+                            <div class="relative">
+                                <input :type="showPassword ? 'text' : 'password'" v-model="password"
+                                    @input="validatePasswords" placeholder="Password" required
+                                    class="input-field w-full p-3 border border-gray-300 rounded focus:outline-none focus:border-red-300 animate-input-fade">
+                                <button type="button" @click="togglePasswordVisibility"
+                                    class="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5">
+                                    <font-awesome-icon :icon="showPassword ? 'eye-slash' : 'eye'"
+                                        class="h-6 text-gray-700"></font-awesome-icon>
+                                </button>
+                            </div>
+                            <div class="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-2">
+                                <button type="button" @click="generatePassword"
+                                    class="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 transition duration-300 ease-in-out">Generate</button>
+                                <button type="button" @click="copyPassword"
+                                    class="w-full bg-green-500 text-white p-2 rounded hover:bg-green-600 transition duration-300 ease-in-out">Copy</button>
+                            </div>
+                            <div v-if="passwordStrengthMessage" class="text-sm" :class="passwordStrengthClass">{{
+                                passwordStrengthMessage }}</div>
+                            <input :type="showPassword ? 'text' : 'password'" v-model="confirmPassword"
+                                @input="validatePasswords" placeholder="Confirm Password" required
                                 class="input-field w-full p-3 border border-gray-300 rounded focus:outline-none focus:border-red-300 animate-input-fade">
                             <p v-if="passwordError" class="text-red-500 text-sm animate-fade-in">{{ passwordError }}</p>
                             <input v-model="mail" @input="checkEmail" type="email" placeholder="Email" required
@@ -71,9 +88,17 @@
 import axios from 'axios';
 import crypto from 'crypto-browserify';
 import backgroundImage from '@/assets/images/skeleton/bg.webp';
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+import { library } from '@fortawesome/fontawesome-svg-core';
+import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
+
+library.add(faEye, faEyeSlash);
 
 export default {
     name: 'UserRegister',
+    components: {
+        'font-awesome-icon': FontAwesomeIcon
+    },
     data() {
         return {
             step: 1,
@@ -91,7 +116,10 @@ export default {
             robotQuestion: {
                 question: '',
                 answer: null
-            }
+            },
+            showPassword: false,
+            passwordStrengthMessage: '',
+            passwordStrengthClass: ''
         };
     },
     computed: {
@@ -137,10 +165,46 @@ export default {
             if (this.password !== this.confirmPassword) {
                 this.passwordError = 'Passwords do not match';
                 this.canProceedToStep3 = false;
+            } else if (!this.isStrongPassword(this.password)) {
+                this.passwordError = 'Password is not strong enough';
+                this.passwordStrengthMessage = 'Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character.';
+                this.passwordStrengthClass = 'text-red-500';
+                this.canProceedToStep3 = false;
             } else {
                 this.passwordError = '';
+                this.passwordStrengthMessage = 'Strong password';
+                this.passwordStrengthClass = 'text-green-500';
                 this.canProceedToStep3 = this.mail && !this.emailError;
             }
+        },
+        isStrongPassword(password) {
+            const strongPasswordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,}$/;
+            return strongPasswordRegex.test(password);
+        },
+        generatePassword() {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*';
+            let password = '';
+            do {
+                password = '';
+                for (let i = 0; i < 12; i++) {
+                    password += chars.charAt(Math.floor(Math.random() * chars.length));
+                }
+            } while (!this.isStrongPassword(password)); // Ensure generated password is strong
+            this.password = password;
+            this.confirmPassword = password;
+            this.validatePasswords();
+        },
+        copyPassword() {
+            const textarea = document.createElement('textarea');
+            textarea.value = this.password;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+            alert('Password copied to clipboard');
+        },
+        togglePasswordVisibility() {
+            this.showPassword = !this.showPassword;
         },
         async nextStep() {
             if (this.step === 1 && this.canProceedToStep2) {
