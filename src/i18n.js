@@ -83,7 +83,7 @@ const messages = {
             "unlock": "Déverrouiller",
             "warning": "Attention, le verrouillage de ta session se fera dans :",
             "seconds": "secondes"
-        }
+        },
     },
     "it": {
         "gotohome" : "Torna alla home page",

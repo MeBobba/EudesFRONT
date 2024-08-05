@@ -144,7 +144,7 @@
           <div :class="sidebarClass" class="p-4 rounded-lg shadow-md mb-8">
             <h2 class="text-2xl font-bold mb-4">Suggestions For You</h2>
             <div v-for="suggestion in suggestions" :key="suggestion.id" class="flex items-center mb-4 p-4">
-              <img :src="getUserAvatar(suggestion.look)" class="w-16 h-16 rounded-full border-2 border-gray-300"
+              <img :src="getUserAvatar(suggestion.look)" class="w-10 h-10 rounded-full border-2 border-gray-300"
                 alt="Suggestion Profile" loading="lazy">
               <div class="ml-4 flex-grow">
                 <h3 class="font-semibold">{{ suggestion.username }}</h3>

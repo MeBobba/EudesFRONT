@@ -42,7 +42,6 @@
                 </div>
                 <div v-if="currentTab === 'privacy'">
                     <h2 class="text-xl font-bold mb-4">Privacy Settings</h2>
-                    <!-- Privacy settings form -->
                 </div>
                 <div v-if="currentTab === 'security'">
                     <h2 class="text-xl font-bold mb-4">Security Settings</h2>
@@ -73,6 +72,19 @@
                                 Google Authenticator</button>
                         </div>
                     </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">Face ID</label>
+                        <div v-if="!isFaceIdEnabled">
+                            <button @click="openFaceIdModal"
+                                class="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors duration-300">Enable
+                                Face ID</button>
+                        </div>
+                        <div v-if="isFaceIdEnabled">
+                            <button @click="disableFaceId"
+                                class="bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-700 transition-colors duration-300">Disable
+                                Face ID</button>
+                        </div>
+                    </div>
                 </div>
                 <div class="mt-8">
                     <button @click="downloadData"
@@ -94,6 +106,16 @@
                     class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" />
                 <button @click="verify2FA"
                     class="mt-4 bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors duration-300">Verify</button>
+            </div>
+        </Modal>
+        <Modal v-if="showFaceIdModal" @close="closeFaceIdModal" title="Enable Face ID">
+            <div class="text-center">
+                <div class="relative inline-block">
+                    <video ref="video" class="w-full h-auto rounded-md" autoplay muted></video>
+                    <div class="absolute inset-0 border-4 border-blue-500"></div> <!-- Zone de cadrage -->
+                </div>
+                <button @click="captureFaceId"
+                    class="mt-4 bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors duration-300">Capture</button>
             </div>
         </Modal>
     </div>
@@ -137,6 +159,8 @@ export default {
             usernameExists: false,
             emailExists: false,
             is2FAEnabled: false,
+            isFaceIdEnabled: false,
+            showFaceIdModal: false,
             qrCodeURL: '',
             verificationToken: '',
             tabs: [
@@ -238,7 +262,7 @@ export default {
                     headers: { 'x-access-token': token }
                 });
                 this.qrCodeURL = data.dataURL;
-                this.secret = data.secret; // Store the secret for later use
+                this.secret = data.secret;
             } catch (error) {
                 console.error('Error enabling 2FA:', error);
                 alert('Failed to enable 2FA');
@@ -270,6 +294,68 @@ export default {
                 alert('Failed to disable 2FA');
             }
         },
+        openFaceIdModal() {
+            this.showFaceIdModal = true;
+            this.startVideo();
+        },
+        closeFaceIdModal() {
+            this.showFaceIdModal = false;
+            this.stopVideo();
+        },
+        async startVideo() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                this.$refs.video.srcObject = stream;
+                this.$refs.video.play();
+            } catch (error) {
+                console.error('Error accessing camera:', error);
+                alert('Failed to access camera');
+            }
+        },
+        stopVideo() {
+            const stream = this.$refs.video.srcObject;
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+                this.$refs.video.srcObject = null;
+            }
+        },
+        async captureFaceId() {
+            try {
+                const canvas = document.createElement('canvas');
+                const video = this.$refs.video;
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                const image = canvas.toDataURL('image/jpeg');
+
+                console.log('Image Base64 length:', image.length);
+
+                const apiUrl = process.env.VUE_APP_API_URL || 'http://localhost:3000';
+                await axios.post(`${apiUrl}/users/enable-face-id`, { image }, {
+                    headers: { 'x-access-token': localStorage.getItem('token') }
+                });
+
+                this.isFaceIdEnabled = true;
+                this.closeFaceIdModal();
+            } catch (error) {
+                console.error('Error enabling Face ID:', error);
+                alert('Failed to enable Face ID');
+            }
+        },
+        async disableFaceId() {
+            try {
+                const token = localStorage.getItem('token');
+                await axios.post(`${process.env.VUE_APP_API_URL}/users/disable-face-id`, {}, {
+                    headers: { 'x-access-token': token }
+                });
+
+                this.isFaceIdEnabled = false;
+            } catch (error) {
+                console.error('Error disabling Face ID:', error);
+                alert('Failed to disable Face ID');
+            }
+        },
         closeModal() {
             this.qrCodeURL = '';
             this.verificationToken = '';
@@ -292,6 +378,7 @@ export default {
             });
             this.formData = { ...this.formData, ...response.data };
             this.is2FAEnabled = response.data.is_2fa_enabled;
+            this.isFaceIdEnabled = response.data.is_face_id_enabled;
         } catch (error) {
             console.error('Error fetching user data:', error);
         }
@@ -306,5 +393,21 @@ button {
 
 button:hover {
     transform: scale(1.05);
+}
+
+.relative.inline-block video {
+    width: 100%;
+    height: auto;
+    border-radius: 10px;
+}
+
+.relative.inline-block .absolute {
+    top: 50%;
+    left: 50%;
+    width: 60%;
+    height: 60%;
+    transform: translate(-50%, -50%);
+    border: 4px solid blue;
+    border-radius: 10px;
 }
 </style>

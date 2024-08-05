@@ -16,6 +16,9 @@
                         </div>
                         <button type="submit"
                             class="w-full bg-green-500 text-white p-3 rounded hover:bg-green-600 transition duration-300 ease-in-out">Login</button>
+                        <button @click="openFaceIdModal" type="button"
+                            class="w-full mt-4 bg-blue-500 text-white p-3 rounded hover:bg-blue-600 transition duration-300 ease-in-out">Login
+                            with Face ID</button>
                         <div class="mt-6 text-center">
                             <p class="text-gray-600">Don't have an account?</p>
                             <router-link to="/register" class="text-blue-500 hover:underline">Register</router-link>
@@ -40,6 +43,20 @@
                 </div>
             </div>
         </div>
+
+        <!-- Face ID Modal -->
+        <Modal v-if="showFaceIdModal" @close="closeFaceIdModal" title="Login with Face ID">
+            <div class="text-center">
+                <p class="mb-4">Please position your face within the frame.</p>
+                <div class="relative inline-block">
+                    <video ref="video" class="w-full h-auto rounded-md" autoplay muted></video>
+                    <div class="absolute inset-0 border-4 border-blue-500"></div> <!-- Zone de cadrage -->
+                </div>
+                <button @click="captureFaceId"
+                    class="mt-4 bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors duration-300">Capture
+                    and Login</button>
+            </div>
+        </Modal>
     </div>
 </template>
 
@@ -47,16 +64,21 @@
 import axios from 'axios';
 import crypto from 'crypto-browserify';
 import backgroundImage from '@/assets/images/skeleton/bg.webp';
+import Modal from '../components/AppModal.vue';
 
 export default {
     name: 'UserLogin',
+    components: {
+        Modal
+    },
     data() {
         return {
             username: '',
             password: '',
             token2fa: '',
             is2FAEnabled: false,
-            errorMessage: ''
+            errorMessage: '',
+            showFaceIdModal: false
         };
     },
     computed: {
@@ -84,8 +106,58 @@ export default {
                 if (error.response && error.response.status === 403 && error.response.data === 'User is banned') {
                     this.errorMessage = 'Your account has been banned.';
                 } else {
-                    this.errorMessage = error.response ? error.response.data : 'Login failed';
+                    this.errorMessage = error.response ? error.response.data.message : 'Login failed';
                 }
+            }
+        },
+        openFaceIdModal() {
+            this.showFaceIdModal = true;
+            this.startVideo();
+        },
+        async captureFaceId() {
+            try {
+                const canvas = document.createElement('canvas');
+                const video = this.$refs.video;
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                const image = canvas.toDataURL('image/jpeg');
+
+                console.log('Image Base64 length:', image.length);
+                console.log('Image Base64:', image.slice(0, 100)); // Log initial part of the image data for debugging
+
+                const apiUrl = process.env.VUE_APP_API_URL || 'http://localhost:3000';
+                const response = await axios.post(`${apiUrl}/auth/login-face`, { image });
+
+                localStorage.setItem('token', response.data.token);
+                this.$router.push('/dashboard');
+            } catch (error) {
+                console.error('Error logging in with Face ID:', error); // Log the error for more details
+                this.errorMessage = error.response ? error.response.data.message : 'Face ID login failed';
+            } finally {
+                this.closeFaceIdModal();
+            }
+        },
+        closeFaceIdModal() {
+            this.showFaceIdModal = false;
+            this.stopVideo();
+        },
+        async startVideo() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                this.$refs.video.srcObject = stream;
+                this.$refs.video.play();
+            } catch (error) {
+                console.error('Error accessing camera:', error);
+                alert('Failed to access camera');
+            }
+        },
+        stopVideo() {
+            const stream = this.$refs.video.srcObject;
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+                this.$refs.video.srcObject = null;
             }
         },
         async check2FA() {
@@ -161,5 +233,21 @@ export default {
 
 .w-full.h-full.object-cover.md\:rounded-r-lg {
     cursor: pointer;
+}
+
+.relative.inline-block video {
+    width: 100%;
+    height: auto;
+    border-radius: 10px;
+}
+
+.relative.inline-block .absolute {
+    top: 50%;
+    left: 50%;
+    width: 60%;
+    height: 60%;
+    transform: translate(-50%, -50%);
+    border: 4px solid blue;
+    border-radius: 10px;
 }
 </style>

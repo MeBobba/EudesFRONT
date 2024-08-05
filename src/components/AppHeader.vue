@@ -34,9 +34,8 @@
                             :placeholder="$t('searchPlaceholder')" class="p-2 sm:px-3 md:px-4 border rounded-lg">
                         <div v-if="searchResults.length"
                             class="absolute top-full left-0 mt-1 w-full bg-white shadow-lg rounded-lg z-10">
-                            <ul>
-                                <li v-for="result in searchResults" :key="result.id"
-                                    class="p-2 border-b hover:bg-gray-200">
+                            <ul class="search-results">
+                                <li v-for="result in searchResults" :key="result.id" class="search-result-item">
                                     <router-link :to="`/dashboard/${result.id}`" @click="clearSearch">{{ result.username
                                         }}</router-link>
                                 </li>
@@ -416,5 +415,28 @@ export default {
 .floating-card i {
     font-size: 24px;
     color: #333;
+}
+
+.search-results {
+    max-height: 300px;
+    overflow-y: auto;
+    border: 1px solid #e5e7eb;
+    /* Ajouter une bordure pour l'ensemble de la liste */
+    border-radius: 0.375rem;
+    /* Ajouter un arrondi aux coins */
+}
+
+.search-result-item {
+    padding: 8px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.search-result-item:last-child {
+    border-bottom: none;
+    /* Supprimer la bordure inférieure du dernier élément */
+}
+
+.search-result-item:hover {
+    background-color: #f3f4f6;
 }
 </style>
