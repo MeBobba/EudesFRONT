@@ -140,7 +140,7 @@
                   </div>
                 </div>
                 <textarea v-model="post.newComment" :placeholder="$t('addcomment')"
-                  class="w-full p-2 border border-gray-300 rounded-lg"></textarea>
+                  class="w-full mt-5 p-2 border border-gray-300 rounded-lg"></textarea>
                 <button @click="addComment(post)" class="mt-2 bg-blue-500 text-white p-2 rounded-lg">{{
                   $t('comment')
                   }}</button>
