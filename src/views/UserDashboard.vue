@@ -143,7 +143,7 @@
                   class="w-full mt-5 p-2 border border-gray-300 rounded-lg"></textarea>
                 <button @click="addComment(post)" class="mt-2 bg-blue-500 text-white p-2 rounded-lg">{{
                   $t('comment')
-                  }}</button>
+                }}</button>
               </div>
             </transition>
           </div>
@@ -337,6 +337,13 @@ export default {
           headers: { 'x-access-token': token }
         });
         this.user = response.data;
+        // Assurez-vous que profileImage et coverImage sont correctement mappés
+        if (this.user.profile_image) {
+          this.user.profileImage = this.user.profile_image;
+        }
+        if (this.user.cover_image) {
+          this.user.coverImage = this.user.cover_image;
+        }
         this.isCurrentUser = userId === 'me' || userId == localStorage.getItem('userId');
         this.isLoading = false;
       } catch (error) {
