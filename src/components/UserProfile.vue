@@ -1,9 +1,11 @@
 <template>
+    <!-- Cover Image -->
     <div :class="{ 'bg-gray-800 text-white': isDarkMode, 'bg-white text-black': !isDarkMode }"
         class="w-full p-4 bg-cover bg-center rounded-lg shadow-md relative transition-all cover-image-container"
-        :style="{ backgroundImage: `url(${user.coverImage || backgroundImage})` }" @mouseover="isCoverHovered = true"
-        @mouseleave="isCoverHovered = false">
-        <div class="absolute inset-0 bg-black opacity-50 rounded-lg transition-opacity duration-300"></div>
+        :style="{ backgroundImage: `url(${user.coverImage || backgroundImage})`, filter: user.coverImageBlurred ? 'blur(10px)' : 'none' }"
+        @mouseover="isCoverHovered = true" @mouseleave="isCoverHovered = false">
+        <div v-if="user.coverImageBlurred"
+            class="absolute inset-0 bg-black opacity-50 rounded-lg transition-opacity duration-300"></div>
         <div v-if="isCurrentUser && isCoverHovered"
             class="absolute inset-0 flex rounded-lg overflow-hidden cover-hover-overlay">
             <div v-if="!user.coverImage" @click="triggerCoverImageUpload"
@@ -30,7 +32,9 @@
             </div>
         </div>
         <div class="relative flex flex-col sm:flex-row items-center justify-between">
-            <div class="relative w-24 h-24 sm:w-32 sm:h-32 bg-yellow-500 rounded-full overflow-hidden border-2 border-gray-300 flex items-center justify-center z-10 transition-transform hover:scale-105 profile-image-container"
+            <!-- Profile Image -->
+            <div :class="{ 'blur-sm': user.profileImageBlurred }"
+                class="relative w-24 h-24 sm:w-32 sm:h-32 bg-yellow-500 rounded-full overflow-hidden border-2 border-gray-300 flex items-center justify-center z-10 transition-transform hover:scale-105 profile-image-container"
                 @mouseover="isProfileHovered = true" @mouseleave="isProfileHovered = false">
                 <img v-if="user.profileImage" :src="user.profileImage" :alt="user.username"
                     class="object-cover w-full h-full" />
@@ -151,6 +155,8 @@ export default {
                 this.user = response.data;
                 this.user.profileImage = this.user.profile_image || null;
                 this.user.coverImage = this.user.cover_image || null;
+                this.user.profileImageBlurred = this.user.profile_image_blurred || false;
+                this.user.coverImageBlurred = this.user.cover_image_blurred || false;
             } catch (error) {
                 console.error('Error fetching user profile:', error);
             }
@@ -172,6 +178,7 @@ export default {
                 });
                 console.log('Cover image response:', response.data);
                 this.user.coverImage = response.data.coverImage;
+                this.user.coverImageBlurred = response.data.coverImageBlurred;
                 this.uploadInProgressCover = false;
             } catch (error) {
                 console.error('Error uploading cover image:', error);
@@ -195,6 +202,7 @@ export default {
                 });
                 console.log('Profile image response:', response.data);
                 this.user.profileImage = response.data.profileImage;
+                this.user.profileImageBlurred = response.data.profileImageBlurred;
                 this.uploadInProgressProfile = false;
             } catch (error) {
                 console.error('Error uploading profile image:', error);
@@ -210,6 +218,7 @@ export default {
                 });
                 console.log('Delete cover image response:', response.data);
                 this.user.coverImage = null;
+                this.user.coverImageBlurred = false;
             } catch (error) {
                 console.error('Error deleting cover image:', error);
             }
@@ -223,6 +232,7 @@ export default {
                 });
                 console.log('Delete profile image response:', response.data);
                 this.user.profileImage = null;
+                this.user.profileImageBlurred = false;
             } catch (error) {
                 console.error('Error deleting profile image:', error);
             }
@@ -347,11 +357,7 @@ export default {
 .cover-image-container {
     position: relative;
     border-radius: 0.75rem;
-}
-
-.cover-hover-overlay,
-.profile-hover-overlay {
-    display: none;
+    filter: blur(0);
 }
 
 .cover-image-container:hover .cover-hover-overlay {
@@ -375,5 +381,9 @@ export default {
     height: 100%;
     background-color: #3b82f6;
     border-radius: 0.375rem;
+}
+
+.blur-sm {
+    filter: blur(10px);
 }
 </style>
