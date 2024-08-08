@@ -2,10 +2,16 @@
     <!-- Cover Image -->
     <div :class="{ 'bg-gray-800 text-white': isDarkMode, 'bg-white text-black': !isDarkMode }"
         class="w-full p-4 bg-cover bg-center rounded-lg shadow-md relative transition-all cover-image-container"
-        :style="{ backgroundImage: `url(${user.coverImage || backgroundImage})`, filter: user.coverImageBlurred ? 'blur(10px)' : 'none' }"
         @mouseover="isCoverHovered = true" @mouseleave="isCoverHovered = false">
-        <div v-if="user.coverImageBlurred"
-            class="absolute inset-0 bg-black opacity-50 rounded-lg transition-opacity duration-300"></div>
+        <div class="absolute inset-0">
+            <img :src="user.coverImage || backgroundImage" :alt="user.username"
+                :class="{ 'blur-sm': user.coverImageBlurred }"
+                class="w-full h-full object-cover rounded-lg transition-opacity duration-300" />
+            <div v-if="user.coverImageBlurred"
+                class="absolute inset-0 bg-black opacity-50 rounded-lg transition-opacity duration-300"></div>
+            <!-- Ajout du fond noir transparent par défaut -->
+            <div v-if="!user.coverImage" class="absolute inset-0 bg-black opacity-50 rounded-lg"></div>
+        </div>
         <div v-if="isCurrentUser && isCoverHovered"
             class="absolute inset-0 flex rounded-lg overflow-hidden cover-hover-overlay">
             <div v-if="!user.coverImage" @click="triggerCoverImageUpload"
@@ -33,11 +39,10 @@
         </div>
         <div class="relative flex flex-col sm:flex-row items-center justify-between">
             <!-- Profile Image -->
-            <div :class="{ 'blur-sm': user.profileImageBlurred }"
-                class="relative w-24 h-24 sm:w-32 sm:h-32 bg-yellow-500 rounded-full overflow-hidden border-2 border-gray-300 flex items-center justify-center z-10 transition-transform hover:scale-105 profile-image-container"
+            <div class="relative w-24 h-24 sm:w-32 sm:h-32 bg-yellow-500 rounded-full overflow-hidden border-2 border-gray-300 flex items-center justify-center z-10 transition-transform hover:scale-105 profile-image-container"
                 @mouseover="isProfileHovered = true" @mouseleave="isProfileHovered = false">
                 <img v-if="user.profileImage" :src="user.profileImage" :alt="user.username"
-                    class="object-cover w-full h-full" />
+                    :class="{ 'blur-sm': user.profileImageBlurred }" class="object-cover w-full h-full" />
                 <img v-else-if="user.look"
                     :src="`http://www.habbo.com/habbo-imaging/avatarimage?figure=${user.look}&direction=3&head_direction=3&gesture=nor&action=null&size=l&headonly=0&img_format=gif`"
                     :alt="user.username" class="object-cover w-full h-full" />
@@ -157,32 +162,9 @@ export default {
                 this.user.coverImage = this.user.cover_image || null;
                 this.user.profileImageBlurred = this.user.profile_image_blurred || false;
                 this.user.coverImageBlurred = this.user.cover_image_blurred || false;
+                console.log('User profile fetched:', this.user);  // Ajoutez cette ligne
             } catch (error) {
                 console.error('Error fetching user profile:', error);
-            }
-        },
-        async uploadCoverImage(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            const formData = new FormData();
-            formData.append('coverImage', file);
-            try {
-                this.uploadInProgressCover = true;
-                const token = localStorage.getItem('token');
-                const apiUrl = process.env.VUE_APP_API_URL || 'http://localhost:3000';
-                const response = await axios.put(`${apiUrl}/users/profile/me/cover`, formData, {
-                    headers: { 'x-access-token': token, 'Content-Type': 'multipart/form-data' },
-                    onUploadProgress: progressEvent => {
-                        this.uploadProgressCover = Math.round((progressEvent.loaded / progressEvent.total) * 100);
-                    }
-                });
-                console.log('Cover image response:', response.data);
-                this.user.coverImage = response.data.coverImage;
-                this.user.coverImageBlurred = response.data.coverImageBlurred;
-                this.uploadInProgressCover = false;
-            } catch (error) {
-                console.error('Error uploading cover image:', error);
-                this.uploadInProgressCover = false;
             }
         },
         async uploadProfileImage(event) {
@@ -200,13 +182,37 @@ export default {
                         this.uploadProgressProfile = Math.round((progressEvent.loaded / progressEvent.total) * 100);
                     }
                 });
-                console.log('Profile image response:', response.data);
+                console.log('Profile image response:', response.data);  // Ajoutez cette ligne
                 this.user.profileImage = response.data.profileImage;
                 this.user.profileImageBlurred = response.data.profileImageBlurred;
                 this.uploadInProgressProfile = false;
             } catch (error) {
                 console.error('Error uploading profile image:', error);
                 this.uploadInProgressProfile = false;
+            }
+        },
+        async uploadCoverImage(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const formData = new FormData();
+            formData.append('coverImage', file);
+            try {
+                this.uploadInProgressCover = true;
+                const token = localStorage.getItem('token');
+                const apiUrl = process.env.VUE_APP_API_URL || 'http://localhost:3000';
+                const response = await axios.put(`${apiUrl}/users/profile/me/cover`, formData, {
+                    headers: { 'x-access-token': token, 'Content-Type': 'multipart/form-data' },
+                    onUploadProgress: progressEvent => {
+                        this.uploadProgressCover = Math.round((progressEvent.loaded / progressEvent.total) * 100);
+                    }
+                });
+                console.log('Cover image response:', response.data);  // Ajoutez cette ligne
+                this.user.coverImage = response.data.coverImage;
+                this.user.coverImageBlurred = response.data.coverImageBlurred;
+                this.uploadInProgressCover = false;
+            } catch (error) {
+                console.error('Error uploading cover image:', error);
+                this.uploadInProgressCover = false;
             }
         },
         async deleteCoverImage() {
