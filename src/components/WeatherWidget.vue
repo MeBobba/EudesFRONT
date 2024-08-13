@@ -58,8 +58,14 @@ export default {
             }
         }
     },
-    created() {
-        this.getLocationAndWeather();
+    watch: {
+        '$i18n.locale': {
+            handler() {
+                // Recharger les données météo avec la nouvelle langue
+                this.getLocationAndWeather();
+            },
+            immediate: true
+        }
     },
     methods: {
         getLocationAndWeather() {
@@ -90,6 +96,7 @@ export default {
     }
 };
 </script>
+
 
 <style scoped>
 .weather-widget {
