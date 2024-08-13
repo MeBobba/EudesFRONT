@@ -91,7 +91,6 @@
     </div>
 </template>
 
-
 <script>
 import axios from 'axios';
 import cheerio from 'cheerio';
@@ -130,7 +129,8 @@ export default {
             noMorePosts: false,
             lyricsTimer: null,
             seekUpdate: false,
-            similarTracks: []
+            similarTracks: [],
+            minimized: false // Ajout de cette ligne
         };
     },
     computed: {
@@ -140,6 +140,7 @@ export default {
             return 'fas fa-volume-up';
         }
     },
+
     methods: {
         async fetchSpotifyToken() {
             const clientId = process.env.VUE_APP_SPOTIFY_CLIENT_ID;
@@ -160,6 +161,7 @@ export default {
                 console.error('Error fetching Spotify token:', error);
             }
         },
+
         async fetchLatestTracks() {
             const cacheKey = 'latestTracks';
             if (this.cache[cacheKey]) {
@@ -189,6 +191,7 @@ export default {
                 this.latestTracks = [];
             }
         },
+
         async searchMusic(page = 1) {
             if (!this.searchQuery.trim()) {
                 this.searchResults = { tracks: [], artists: [] };
@@ -216,6 +219,7 @@ export default {
                 if (page === 1) this.searchResults = { tracks: [], artists: [] };
             }
         },
+
         updateSearchResults(data, page) {
             if (page === 1) {
                 this.searchResults = { tracks: this.filterUnique(data.tracks.items), artists: data.artists.items };
@@ -226,57 +230,61 @@ export default {
             this.noMorePosts = data.tracks.items.length === 0 && data.artists.items.length === 0;
             this.nextPage = page + 1;
         },
+
         filterUnique(tracks) {
             const trackIds = new Set(this.searchResults.tracks.map(track => track.id));
             return tracks.filter(track => !trackIds.has(track.id));
         },
-        async playTrack(track, fromMounted = false) {
-            this.currentTrack = track;
-            this.resetPlayer();
-            const query = `${track.name} ${track.artists[0].name}`;
-            try {
-                const response = await axios.get('https://www.googleapis.com/youtube/v3/search', {
-                    params: {
-                        part: 'snippet',
-                        q: query,
-                        key: process.env.VUE_APP_YOUTUBE_API_KEY,
-                        type: 'video'
-                    }
-                });
-                if (response.data && response.data.items.length > 0) {
-                    this.youtubeVideoId = response.data.items[0].id.videoId;
-                    await this.initializePlayer(fromMounted);
-                    localStorage.setItem('currentTrack', JSON.stringify(track));
-                    if (!fromMounted) localStorage.setItem('currentTime', 0);
+
+        async loadYouTubeApi() {
+            return new Promise((resolve, reject) => {
+                if (window.YT && window.YT.Player) {
+                    resolve();
                 } else {
-                    console.error('No YouTube video found for the track:', track);
-                    this.youtubeVideoId = null;
+                    const tag = document.createElement('script');
+                    tag.src = "https://www.youtube.com/iframe_api";
+                    tag.id = 'youtube-iframe-api';
+                    document.head.appendChild(tag);
+                    window.onYouTubeIframeAPIReady = () => {
+                        if (window.YT && window.YT.Player) {
+                            resolve();
+                        } else {
+                            reject(new Error('YouTube API failed to load.'));
+                        }
+                    };
+                    tag.onerror = () => reject(new Error('YouTube API failed to load.'));
+                }
+            });
+        },
+
+        async initializePlayer(fromMounted = false) {
+            try {
+                await this.loadYouTubeApi();
+                if (window.YT && window.YT.Player) {
+                    if (!this.player) {
+                        this.player = new window.YT.Player(this.$refs.youtubePlayer, {
+                            videoId: this.youtubeVideoId,
+                            events: {
+                                onReady: (event) => this.onPlayerReady(event, fromMounted),
+                                onStateChange: this.onPlayerStateChange
+                            }
+                        });
+                    } else {
+                        if (this.player.loadVideoById) {
+                            this.player.loadVideoById(this.youtubeVideoId);
+                        }
+                        if (fromMounted && this.player.cueVideoById) {
+                            this.player.cueVideoById(this.youtubeVideoId);
+                        }
+                    }
+                } else {
+                    console.error('YouTube API is not properly initialized.');
                 }
             } catch (error) {
-                console.error('Error fetching YouTube video:', error);
-                this.youtubeVideoId = null;
+                console.error('YouTube API is not properly initialized.', error);
             }
         },
-        async initializePlayer(fromMounted = false) {
-            await this.loadYouTubeApi();
-            if (!this.player) {
-                this.player = new window.YT.Player(this.$refs.youtubePlayer, {
-                    videoId: this.youtubeVideoId,
-                    events: {
-                        onReady: (event) => this.onPlayerReady(event, fromMounted),
-                        onStateChange: this.onPlayerStateChange
-                    }
-                });
-            } else {
-                // Vérifiez si loadVideoById existe avant de l'appeler
-                if (this.player.loadVideoById) {
-                    this.player.loadVideoById(this.youtubeVideoId);
-                }
-                if (fromMounted && this.player.cueVideoById) {
-                    this.player.cueVideoById(this.youtubeVideoId);
-                }
-            }
-        },
+
         togglePlayerSize() {
             this.minimized = !this.minimized;
             const playerElement = document.querySelector('.music-player');
@@ -286,23 +294,7 @@ export default {
                 playerElement.classList.remove('minimized');
             }
         },
-        loadYouTubeApi() {
-            return new Promise((resolve) => {
-                if (window.YT && window.YT.Player) {
-                    resolve();
-                    return;
-                }
-                if (!document.getElementById('youtube-iframe-api')) {
-                    window.onYouTubeIframeAPIReady = () => resolve();
-                    const tag = document.createElement('script');
-                    tag.src = "https://www.youtube.com/iframe_api";
-                    tag.id = 'youtube-iframe-api';
-                    document.head.appendChild(tag);
-                } else {
-                    resolve();
-                }
-            });
-        },
+
         onPlayerReady(event, fromMounted = false) {
             const savedTime = parseFloat(localStorage.getItem('currentTime')) || 0;
             if (savedTime && fromMounted) event.target.seekTo(savedTime, true);
@@ -427,40 +419,40 @@ export default {
                 this.syncLyrics();
             });
         },
+
         async fetchLyrics(track) {
             if (!track || !track.name || !track.artists || !track.artists[0].name) return;
             const trackName = track.name;
             const artistName = track.artists[0].name;
-            const apiKey = process.env.VUE_APP_GENIUS_API_KEY; // Remplacez par votre clé API Genius
+            const apiKey = process.env.VUE_APP_GENIUS_API_KEY;
             const searchUrl = `https://api.genius.com/search?q=${encodeURIComponent(trackName + ' ' + artistName)}&access_token=${apiKey}`;
 
             try {
-                // Rechercher le track sur Genius
-                const searchResponse = await axios.get(searchUrl);
+                const searchResponse = await axios.get(`/api/proxy?url=${encodeURIComponent(searchUrl)}`);
                 const hits = searchResponse.data.response.hits;
                 if (hits.length > 0) {
                     const songId = hits[0].result.id;
                     const lyricsUrl = `https://api.genius.com/songs/${songId}?access_token=${apiKey}`;
-
-                    // Obtenir les détails du track, y compris les paroles
-                    const lyricsResponse = await axios.get(lyricsUrl);
+                    const lyricsResponse = await axios.get(`/api/proxy?url=${encodeURIComponent(lyricsUrl)}`);
                     const lyricsPath = lyricsResponse.data.response.song.url;
-
-                    // Scraper les paroles de la page Genius (nécessite d'utiliser une bibliothèque de scraping côté serveur)
                     const lyrics = await this.scrapeLyrics(lyricsPath);
                     this.lyrics = lyrics || 'Lyrics not available.';
                 } else {
                     this.lyrics = 'Lyrics not available.';
                 }
             } catch (error) {
+                if (error.response && error.response.status === 403) {
+                    this.lyrics = 'Access forbidden. Please check your API key.';
+                } else {
+                    this.lyrics = 'Network error. Please try again later.';
+                }
                 console.error('Error fetching lyrics:', error);
-                this.lyrics = 'Network error. Please try again later.';
             }
         },
 
         async scrapeLyrics(url) {
             try {
-                const response = await axios.get(url);
+                const response = await axios.get(`/api/proxy?url=${encodeURIComponent(url)}`);
                 const html = response.data;
                 const $ = cheerio.load(html);
                 const lyrics = $('.lyrics').text().trim();
@@ -470,6 +462,35 @@ export default {
                 return 'Error fetching lyrics.';
             }
         },
+
+        async playTrack(track, fromMounted = false) {
+            this.currentTrack = track;
+            this.resetPlayer();
+            const query = `${track.name} ${track.artists[0].name}`;
+            try {
+                const response = await axios.get('https://www.googleapis.com/youtube/v3/search', {
+                    params: {
+                        part: 'snippet',
+                        q: query,
+                        key: process.env.VUE_APP_YOUTUBE_API_KEY,
+                        type: 'video'
+                    }
+                });
+                if (response.data && response.data.items.length > 0) {
+                    this.youtubeVideoId = response.data.items[0].id.videoId;
+                    await this.initializePlayer(fromMounted);
+                    localStorage.setItem('currentTrack', JSON.stringify(track));
+                    if (!fromMounted) localStorage.setItem('currentTime', 0);
+                } else {
+                    console.error('No YouTube video found for the track:', track);
+                    this.youtubeVideoId = null;
+                }
+            } catch (error) {
+                console.error('Error fetching YouTube video:', error);
+                this.youtubeVideoId = null;
+            }
+        },
+
         formatLyrics(lyrics) {
             return lyrics.split('\n').map((line, index) =>
                 `<span class="lyric-line" data-index="${index}" data-time="${index * 5}">${line}</span>`).join('<br>');
@@ -502,6 +523,7 @@ export default {
                 this.artistBio = 'Error fetching biography.';
             }
         },
+
         async retryRequest(url, options, retries = 3, delay = 1000) {
             for (let i = 0; i < retries; i++) {
                 try {
@@ -519,6 +541,7 @@ export default {
             }
             throw new Error('Max retries reached');
         },
+
         toggleDarkMode() {
             this.isDarkMode = !this.isDarkMode;
             document.documentElement.classList.toggle('dark', this.isDarkMode);
@@ -569,7 +592,7 @@ export default {
         if (savedTime) this.currentTime = parseFloat(savedTime);
     },
     mounted() {
-        window.addEventListener('scroll', this.handleScroll);
+        window.addEventListener('scroll', this.handleScroll, { passive: true });
         if (this.currentTrack) this.playTrack(this.currentTrack, true).then(() => this.playVideo());
     },
     beforeUnmount() {

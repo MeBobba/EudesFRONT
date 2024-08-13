@@ -38,4 +38,13 @@ module.exports = {
       swDest: 'service-worker.js',
     },
   },
+  devServer: {
+    proxy: {
+      '/api/genius': {
+        target: 'https://api.genius.com',
+        changeOrigin: true,
+        pathRewrite: { '^/api/genius': '' }
+      }
+    }
+  }
 };
