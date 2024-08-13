@@ -68,8 +68,8 @@
                                         <div
                                             :class="{ 'comment-bubble self-comment': comment.user_id === user.id, 'comment-bubble other-comment': comment.user_id !== user.id }">
                                             <button v-if="canDeleteComment(comment)" @click="deleteComment(comment.id)"
-                                                class="delete-button">
-                                                <fa-icon icon="times" />
+                                                class="delete-button text-white">
+                                                <fa-icon :icon="['fas', 'times']" />
                                             </button>
                                             <div class="flex items-center justify-between w-full">
                                                 <div>
@@ -197,12 +197,12 @@ import AppFooter from '../components/AppFooter.vue';
 import WeatherWidget from '../components/WeatherWidget.vue';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { library } from '@fortawesome/fontawesome-svg-core';
-import { faHeart, faComment, faTrashAlt, faSmile, faImage, faPencilAlt, faVideo, faEllipsisV } from '@fortawesome/free-solid-svg-icons';
+import { faHeart, faComment, faTrashAlt, faTimes, faSmile, faImage, faPencilAlt, faVideo, faEllipsisV } from '@fortawesome/free-solid-svg-icons';
 import 'emoji-picker-element';
 import AppModal from '../components/AppModal.vue';
 import DOMPurify from "dompurify";
 
-library.add(faHeart, faComment, faTrashAlt, faSmile, faImage, faPencilAlt, faVideo, faEllipsisV);
+library.add(faHeart, faComment, faTimes, faTrashAlt, faSmile, faImage, faPencilAlt, faVideo, faEllipsisV);
 
 export default {
     name: 'AppCommunity',
@@ -237,7 +237,6 @@ export default {
             giphyResults: [],
             exampleCards: [
                 { id: 1, title: 'Example Card 1', content: 'Content goes here...' },
-                { id: 2, title: 'Example Card 2', content: 'Content goes here...' }
             ],
             currentTab: 'text',
             isValidVideoUrl: true,

@@ -30,38 +30,31 @@ export default {
     },
     computed: {
         weatherIcon() {
-            if (!this.weatherData || !this.weatherData.weather || !this.weatherData.weather.length) {
-                return ''; // S'assurer que weatherData et weather sont définis et non vides
+            const icons = {
+                clear: require('@/assets/icons/sun.svg'),
+                clouds: require('@/assets/icons/cloud.svg'),
+                rain: require('@/assets/icons/rain.svg'),
+                drizzle: require('@/assets/icons/drizzle.svg'),
+                thunderstorm: require('@/assets/icons/thunderstorm.svg'),
+                snow: require('@/assets/icons/snow.svg'),
+                mist: require('@/assets/icons/fog.svg'),
+                smoke: require('@/assets/icons/fog.svg'),
+                haze: require('@/assets/icons/fog.svg'),
+                fog: require('@/assets/icons/fog.svg'),
+                default: require('@/assets/icons/unknown.svg')
+            };
+
+            if (this.weatherData && this.weatherData.weather && this.weatherData.weather.length) {
+                const weatherCondition = this.weatherData.weather[0].main.toLowerCase();
+                return icons[weatherCondition] || icons.default;
             }
 
-            const weatherCondition = this.weatherData.weather[0].main.toLowerCase();
-            switch (weatherCondition) {
-                case 'clear':
-                    return require('@/assets/icons/sun.svg');
-                case 'clouds':
-                    return require('@/assets/icons/cloud.svg');
-                case 'rain':
-                    return require('@/assets/icons/rain.svg');
-                case 'drizzle':
-                    return require('@/assets/icons/drizzle.svg');
-                case 'thunderstorm':
-                    return require('@/assets/icons/thunderstorm.svg');
-                case 'snow':
-                    return require('@/assets/icons/snow.svg');
-                case 'mist':
-                case 'smoke':
-                case 'haze':
-                case 'fog':
-                    return require('@/assets/icons/fog.svg');
-                default:
-                    return require('@/assets/icons/unknown.svg'); // Pour les conditions inconnues
-            }
+            return '';
         }
     },
     watch: {
         '$i18n.locale': {
             handler() {
-                // Recharger les données météo avec la nouvelle langue
                 this.getLocationAndWeather();
             },
             immediate: true
@@ -81,14 +74,19 @@ export default {
 
             try {
                 const response = await fetch(apiUrl);
+                if (!response.ok) throw new Error('Failed to fetch weather data');
                 this.weatherData = await response.json();
             } catch (error) {
-                console.error("Error fetching weather data:", error);
+                this.handleApiError(error);
             }
         },
         handleLocationError(error) {
             console.error("Error getting location:", error);
             alert("Unable to retrieve your location for weather information.");
+        },
+        handleApiError(error) {
+            console.error("Error fetching weather data:", error);
+            alert("An error occurred while fetching weather data.");
         },
         capitalizeFirstLetter(string) {
             return string.charAt(0).toUpperCase() + string.slice(1);
@@ -96,7 +94,6 @@ export default {
     }
 };
 </script>
-
 
 <style scoped>
 .weather-widget {

@@ -212,12 +212,13 @@ import {
   faImage,
   faPencilAlt,
   faVideo,
-  faEllipsisV
+  faEllipsisV,
+  faTimes,
 } from '@fortawesome/free-solid-svg-icons';
 import 'emoji-picker-element';
 import DOMPurify from 'dompurify';
 
-library.add(faHeart, faComment, faTrashAlt, faSmile, faImage, faPencilAlt, faVideo, faEllipsisV);
+library.add(faHeart, faComment, faTimes, faTrashAlt, faSmile, faImage, faPencilAlt, faVideo, faEllipsisV);
 
 export default {
   name: 'UserDashboard',
