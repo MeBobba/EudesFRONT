@@ -3,7 +3,7 @@ import { createI18n } from 'vue-i18n';
 
 const messages = {
     "fr": {
-        "gotohome" : "Retourner à l'accueil",
+        "gotohome": "Retourner à l'accueil",
         "home": "Accueil",
         "dashboard": "Accueil",
         "downloadapp": "Télécharger l'app",
@@ -70,7 +70,7 @@ const messages = {
             "enoughcredits": "Vous avez suffisamment de crédits.",
             "tenkcredits": "10k crédits ont été ajoutés à votre compte."
         },
-        "errors" : {
+        "errors": {
             "four": "L'URL richiesto non è stato trovato su questo server.",
         },
         "gamespage": {
@@ -84,9 +84,14 @@ const messages = {
             "warning": "Attention, le verrouillage de ta session se fera dans :",
             "seconds": "secondes"
         },
+        "weather": {
+            "loading": "Chargement...",
+            "title": "Météo dans votre ville",
+            "location": "Localisation"
+        },
     },
     "it": {
-        "gotohome" : "Torna alla home page",
+        "gotohome": "Torna alla home page",
         "home": "Home",
         "dashboard": "Home",
         "downloadapp": "Scarica l'app",
@@ -153,7 +158,7 @@ const messages = {
             "enoughcredits": "Hai abbastanza crediti.",
             "tenkcredits": "10k crediti sono stati aggiunti al tuo account."
         },
-        "errors" : {
+        "errors": {
             "four": "L'URL demandée n'a pas été trouvée sur ce serveur.",
         },
         "gamespage": {
@@ -166,10 +171,15 @@ const messages = {
             "unlock": "Sblocca",
             "warning": "Si noti che la sessione verrà bloccata in :",
             "seconds": "secondi"
-        }
+        },
+        "weather": {
+            "loading": "Caricamento...",
+            "title": "Tempo nella vostra città",
+            "location": "Posizione"
+        },
     },
     "en": {
-        "gotohome" : "Back to home page",
+        "gotohome": "Back to home page",
         "errorfour": "The requested URL was not found on this server.",
         "home": "Home",
         "dashboard": "Home",
@@ -237,7 +247,7 @@ const messages = {
             "enoughcredits": "You have enough credits.",
             "tenkcredits": "10k credits have been added to your account."
         },
-        "errors" : {
+        "errors": {
             "four": "The requested URL was not found on this server.",
         },
         "gamespage": {
@@ -250,7 +260,12 @@ const messages = {
             "unlock": "Unlock",
             "warning": "Please note that your session will be locked in :",
             "seconds": "seconds"
-        }
+        },
+        "weather": {
+            "loading": "Loading...",
+            "title": "Weather in your city",
+            "location": "Location"
+        },
     }
 };
 

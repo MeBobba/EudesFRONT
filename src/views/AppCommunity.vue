@@ -89,7 +89,7 @@
                                     class="w-full mt-5 p-2 border border-gray-300 rounded-lg"></textarea>
                                 <button @click="addComment(post)" class="mt-2 bg-blue-500 text-white p-2 rounded-lg">{{
                                     $t('comment')
-                                }}</button>
+                                    }}</button>
                             </div>
                         </transition>
                     </div>
@@ -165,6 +165,11 @@
                         </div>
                     </div>
                 </div>
+                <div :class="{ 'bg-gray-800 text-white': isDarkMode, 'bg-white text-black': !isDarkMode }"
+                    class="p-4 rounded-lg shadow-md mb-8">
+                    <!-- Widget Météo -->
+                    <WeatherWidget />
+                </div>
                 <div v-for="card in exampleCards" :key="card.id"
                     :class="{ 'bg-gray-800 text-white': isDarkMode, 'bg-white text-black': !isDarkMode }"
                     class="p-4 rounded-lg shadow-md mb-8">
@@ -189,6 +194,7 @@
 import axios from 'axios';
 import AppHeader from '../components/AppHeader.vue';
 import AppFooter from '../components/AppFooter.vue';
+import WeatherWidget from '../components/WeatherWidget.vue';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { faHeart, faComment, faTrashAlt, faSmile, faImage, faPencilAlt, faVideo, faEllipsisV } from '@fortawesome/free-solid-svg-icons';
@@ -204,6 +210,7 @@ export default {
         AppHeader,
         AppFooter,
         AppModal,
+        WeatherWidget,
         'fa-icon': FontAwesomeIcon,
         EmojiPicker: 'emoji-picker'
     },
