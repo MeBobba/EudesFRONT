@@ -26,28 +26,41 @@
                         </div>
                         <transition name="slide-fade">
                             <div v-show="article.showComments" class="mt-4">
-                                <h4 class="font-semibold mb-2">Comments</h4>
-                                <div v-for="comment in article.comments" :key="comment.id"
-                                    class="mb-2 flex justify-between">
-                                    <div class="flex items-center">
-                                        <img :src="getAvatarUrl(comment.look)"
-                                            class="rounded-full border-2 border-blue-500 p-1 bg-white"
-                                            alt="User Profile">
-                                        <div class="ml-2">
-                                            <p class="font-semibold">{{ comment.username }}</p>
-                                            <p>{{ comment.content }}</p>
+                                <h4 class="font-semibold mb-2">{{ $t('comments') }}</h4>
+                                <div v-for="comment in article.comments.slice().sort((a, b) => new Date(a.created_at) - new Date(b.created_at))"
+                                    :key="comment.id"
+                                    :class="{ 'flex justify-end': comment.user_id === user.id, 'flex justify-start': comment.user_id !== user.id }">
+                                    <div class="flex items-center relative">
+                                        <div v-if="comment.user_id !== user.id" class="mr-2">
+                                            <img :src="getAvatarUrl(comment.look, 's')"
+                                                class="rounded-full border-2 border-blue-500 p-1 bg-white"
+                                                alt="User Profile" loading="lazy">
+                                        </div>
+                                        <div
+                                            :class="{ 'comment-bubble self-comment': comment.user_id === user.id, 'comment-bubble other-comment': comment.user_id !== user.id }">
+                                            <button v-if="comment.user_id === user.id"
+                                                @click="deleteComment(article.id, comment.id)"
+                                                class="delete-button text-white">
+                                                <font-awesome-icon :icon="['fas', 'times']" />
+                                            </button>
+                                            <div class="flex items-center justify-between w-full">
+                                                <div>
+                                                    <p class="font-semibold text-sm">{{ comment.username }}</p>
+                                                    <p class="text-sm">{{ comment.content }}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div v-if="comment.user_id === user.id" class="ml-2">
+                                            <img :src="getAvatarUrl(comment.look, 's')"
+                                                class="rounded-full border-2 border-blue-500 p-1 bg-white"
+                                                alt="User Profile" loading="lazy">
                                         </div>
                                     </div>
-                                    <button v-if="comment.user_id === user.id"
-                                        @click="deleteComment(article.id, comment.id)" class="text-red-500">
-                                        <font-awesome-icon icon="trash-alt" />
-                                    </button>
                                 </div>
                                 <textarea v-model="article.newComment" placeholder="Add a comment..."
-                                    class="w-full p-2 border border-gray-300 rounded-lg"></textarea>
+                                    class="w-full mt-5 p-2 border border-gray-300 rounded-lg"></textarea>
                                 <button @click="addComment(article)"
                                     class="mt-2 bg-blue-500 text-white p-2 rounded-lg">Comment</button>
-                                <p v-if="error" class="text-red-500 mt-2">{{ error }}</p>
                             </div>
                         </transition>
                         <div v-if="user.rank >= 5" class="flex space-x-2 mt-4">
@@ -118,10 +131,10 @@ import AppFooter from '../components/AppFooter.vue';
 import AppModal from '../components/AppModal.vue';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { library } from '@fortawesome/fontawesome-svg-core';
-import { faHeart, faComment, faTrashAlt } from '@fortawesome/free-solid-svg-icons';
+import { faHeart, faComment, faTrashAlt, faTimes } from '@fortawesome/free-solid-svg-icons';
 const moment = require('moment-timezone');
 
-library.add(faHeart, faComment, faTrashAlt);
+library.add(faHeart, faComment, faTrashAlt, faTimes);
 
 export default {
     name: 'ArticleDetail',
@@ -474,5 +487,104 @@ img {
 
 .transition-all {
     transition: all 0.3s ease;
+}
+
+.comment-bubble {
+    padding: 8px 12px;
+    border-radius: 18px;
+    max-width: 75%;
+    word-wrap: break-word;
+    word-break: break-word;
+    overflow-wrap: break-word;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    margin-bottom: 5px;
+    display: block;
+    position: relative;
+    white-space: normal;
+}
+
+.self-comment {
+    background-color: #007AFF;
+    color: white;
+    align-self: flex-end;
+    text-align: right;
+    margin-left: auto;
+}
+
+.other-comment {
+    background-color: #E5E5EA;
+    color: black;
+    align-self: flex-start;
+    text-align: left;
+    margin-right: auto;
+}
+
+.dark .self-comment {
+    background-color: #007AFF;
+    color: white;
+}
+
+.dark .other-comment {
+    background-color: #3A3A3C;
+    color: white;
+}
+
+.comment-bubble p {
+    margin: 0;
+    line-height: 1.25;
+    word-wrap: break-word;
+    word-break: break-word;
+    overflow-wrap: break-word;
+    white-space: normal;
+}
+
+.delete-button {
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    background-color: #FF3B30;
+    border: none;
+    color: white;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    padding: 0;
+}
+
+.delete-button:hover {
+    background-color: #D32F2F;
+}
+
+.dark .delete-button {
+    background-color: #FF3B30;
+}
+
+.dark .delete-button:hover {
+    background-color: #D32F2F;
+}
+
+/* Adaptabilité responsive */
+@media (max-width: 600px) {
+    .comment-bubble {
+        width: 100%;
+        border-radius: 12px;
+    }
+
+    .delete-button {
+        width: 16px;
+        height: 16px;
+        top: -8px;
+        right: -8px;
+    }
+
+    .comment-bubble p {
+        font-size: 0.75rem;
+    }
 }
 </style>
