@@ -81,7 +81,7 @@ Want to add more features or customize existing ones? EudesFront is built to be 
 
 ## 🤝 Contributing
 
-At this time, we are not looking for contributors as the project is currently maintained by **notaryz** and **yourself**. However, feel free to follow the project for future updates.
+At this time, we are not looking for contributors as the project is currently maintained by **notaryz** and **Swayn**. However, feel free to follow the project for future updates.
 
 ## 📄 License
 
