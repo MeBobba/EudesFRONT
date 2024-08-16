@@ -1,7 +1,7 @@
 
 # 🌐 EudesFront
 
-![EudesFront Banner](https://via.placeholder.com/800x200.png?text=EudesFront+-+Habbo+Retros+CMS)
+![EudesFront Banner](https://i.imgur.com/jrQDE2F.gif)
 
 Welcome to **EudesFront**! This is the frontend of the **EudesCMS**, a platform developed with Vue.js and Tailwind CSS that brings the functionality of a social network to a CMS tailored specifically for Habbo retros.
 
