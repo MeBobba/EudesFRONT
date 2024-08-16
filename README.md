@@ -76,8 +76,10 @@ Want to add more features or customize existing ones? EudesFront is built to be 
 
 ## 📸 Screenshots
 
-![Screenshot 1](https://via.placeholder.com/400x200.png?text=Dashboard)
-![Screenshot 2](https://via.placeholder.com/400x200.png?text=Profile+Page)
+![Screenshot 1](https://i.imgur.com/BjpS5Dd.png)
+![Screenshot 2](https://i.imgur.com/fdWbysa.png)
+![Screenshot 3](https://i.imgur.com/59ICmaz.png)
+![Screenshot 4](https://i.imgur.com/tVrhFMo.png)
 
 ## 🤝 Contributing
 
